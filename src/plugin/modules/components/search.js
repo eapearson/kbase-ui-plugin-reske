@@ -1424,7 +1424,7 @@ define([
                 param.match_filter = filter.match_filter;
 
                 var client = new GenericClient({
-                    url: runtime.config('services.search2.url'),
+                    url: runtime.config('services.reske.url'),
                     module: 'KBaseRelationEngine',
                     token: runtime.service('session').getAuthToken()
                 });

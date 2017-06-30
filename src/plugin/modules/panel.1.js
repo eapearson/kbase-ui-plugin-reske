@@ -3,7 +3,7 @@ define([
     'kb_common/html',
     'kb_common/bootstrapUtils',
     'kb_common/jsonRpc/genericClient'
-], function(
+], function (
     ko,
     html,
     BS,
@@ -54,7 +54,7 @@ define([
         // but: we need to tie to display objects.
 
         var header = {
-            small: function() {
+            small: function () {
                 return div({
                     style: {
                         fontWeight: 'bold'
@@ -86,14 +86,14 @@ define([
                     }, 'Timestamp'),
                 ]);
             },
-            medium: function(value) {
+            medium: function (value) {
                 div([
                     value.object_name,
                     ', type: ',
                     value.type
                 ]);
             },
-            large: function(value) {
+            large: function (value) {
                 div([
                     value.object_name,
                     ', type: ',
@@ -102,7 +102,7 @@ define([
             }
         }
         var defaultRender = {
-            small: function(value) {
+            small: function (value) {
                 return div([
                     div({
                         style: {
@@ -138,14 +138,14 @@ define([
                     }, new Date(value.timestamp).toISOString()),
                 ]);
             },
-            medium: function(value) {
+            medium: function (value) {
                 div([
                     value.object_name,
                     ', type: ',
                     value.type
                 ]);
             },
-            large: function(value) {
+            large: function (value) {
                 div([
                     value.object_name,
                     ', type: ',
@@ -158,7 +158,7 @@ define([
             id: 'narrative',
             label: 'Narrative',
             render: {
-                small: function(value) {
+                small: function (value) {
                     // used for a single row of results.
                     return div([
                         div({
@@ -195,10 +195,10 @@ define([
                         }, new Date(value.timestamp).toISOString()),
                     ]);
                 },
-                medium: function(value) {
+                medium: function (value) {
 
                 },
-                large: function(value) {
+                large: function (value) {
 
                 }
             }
@@ -222,7 +222,7 @@ define([
             label: 'Single End Library'
         }];
         var objectTypeMap = {};
-        objectTypes.forEach(function(type) {
+        objectTypes.forEach(function (type) {
             objectTypeMap[type.id] = type;
         });
 
@@ -260,7 +260,7 @@ define([
             }
 
             function resolve() {
-                deferred.forEach(function(defer) {
+                deferred.forEach(function (defer) {
                     var node = document.getElementById(defer.id);
                     try {
                         defer.fun(node);
@@ -330,7 +330,7 @@ define([
                                         option({
                                             value: '',
                                         }, '- any -')
-                                    ].concat(objectTypes.map(function(type) {
+                                    ].concat(objectTypes.map(function (type) {
                                         return option({
                                             value: type.id
                                         }, type.label);
@@ -346,7 +346,7 @@ define([
                                     select({
                                         name: 'pageSize',
                                         class: 'form-control'
-                                    }, pageSizes.map(function(type) {
+                                    }, pageSizes.map(function (type) {
                                         var selected = (pageSize === parseInt(type.value));
                                         return option({
                                             value: type.value,
@@ -362,8 +362,8 @@ define([
                                 }, button({
                                     type: 'button',
                                     class: 'btn btn-primary',
-                                    id: defer.defer(function(node) {
-                                        node.addEventListener('click', function() {
+                                    id: defer.defer(function (node) {
+                                        node.addEventListener('click', function () {
                                             doSearch();
                                         });
                                     })
@@ -455,7 +455,7 @@ define([
 
         function searchTypes() {
             var client = new GenericClient({
-                url: runtime.config('services.search2.url'),
+                url: runtime.config('services.reske.url'),
                 module: 'KBaseRelationEngine',
                 token: runtime.service('session').getAuthToken()
             });
@@ -521,7 +521,7 @@ define([
                         margin: '6px auto'
                     }
                 }),
-                result.objects.map(function(object) {
+                result.objects.map(function (object) {
                     // var renderer = objectTypes
                     var renderer = objectTypeMap[object.type].render || defaultRender;
                     try {
@@ -549,7 +549,7 @@ define([
                 var type = types[i];
                 // loop through each key and see if in the current values data property.
                 var keys = typeKeys[type];
-                if (keys.every(function(key) {
+                if (keys.every(function (key) {
                         var optional = false;
                         if (key.substr(-1) === '?') {
                             optional = true;
@@ -570,7 +570,7 @@ define([
 
         function doSearchObjects() {
             var client = new GenericClient({
-                url: runtime.config('services.search2.url'),
+                url: runtime.config('services.reske.url'),
                 module: 'KBaseRelationEngine',
                 token: runtime.service('session').getAuthToken()
             });
@@ -596,9 +596,9 @@ define([
             };
             setContent('results', 'status', 'Searching...');
             return client.callFunc('search_objects', [param])
-                .then(function(result) {
+                .then(function (result) {
                     var searchResults = result[0];
-                    searchResults.objects.forEach(function(object) {
+                    searchResults.objects.forEach(function (object) {
                         var type = typeIt(object);
                         object.type = type;
                     });
@@ -642,7 +642,7 @@ define([
     }
 
     return {
-        make: function(config) {
+        make: function (config) {
             return factory(config);
         }
     };
