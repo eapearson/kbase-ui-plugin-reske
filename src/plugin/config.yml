@@ -2,7 +2,7 @@
 ---
 package:
     author: Erik Pearson
-    name: reske
+    name: reske-search
     description: The search panel and associated widgets
     date: June 26, 2017
     version: 0.1.0
@@ -21,7 +21,7 @@ install:
             type: factory
     routes:
         -
-            path: ['search2']
+            path: ['search']
             queryParams:
                 search: {}
             widget: kb_search_panel
@@ -36,8 +36,8 @@ install:
         #     authorization: true
     menu:
         -
-            name: reske
+            name: reske-search
             definition:
-                path: search2
-                label: Search 2
+                path: search
+                label: Search
                 icon: search
