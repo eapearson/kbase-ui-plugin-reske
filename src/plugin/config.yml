@@ -1,0 +1,43 @@
+## YAML Template.
+---
+package:
+    author: Erik Pearson
+    name: reske
+    description: The search panel and associated widgets
+    date: June 26, 2017
+    version: 0.1.0
+source:
+    ## sources are relative to build/plugins/PACKAGE/source/javascript
+    ## NB: need to quote file names, otherwise 
+    modules:
+    styles:
+        -
+            file: styles.css
+install:
+    widgets:
+        -
+            module: panel
+            id: kb_search_panel
+            type: factory
+    routes:
+        -
+            path: ['search2']
+            queryParams:
+                search: {}
+            widget: kb_search_panel
+            authorization: true
+        # -
+        #     path:
+        #         - search2
+        #         - 
+        #             type: param
+        #             name: search
+        #     widget: kb_search_panel
+        #     authorization: true
+    menu:
+        -
+            name: reske
+            definition:
+                path: search2
+                label: Search 2
+                icon: search
