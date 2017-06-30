@@ -19,7 +19,7 @@
     "dependencies": {
         "bluebird": "^3.0.0",
         "bootstrap": "^3.3.0",
-        "kb_common": "^2.9.1"
+        "kbase-common-js": "^2.9.1"
     },
     "devDependencies": {},
     "license": "SEE LICENSE IN LICENSE.md"
