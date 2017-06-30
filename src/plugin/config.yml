@@ -5,7 +5,6 @@ package:
     name: reske-search
     description: The search panel and associated widgets
     date: June 26, 2017
-    version: 0.1.0
 source:
     ## sources are relative to build/plugins/PACKAGE/source/javascript
     ## NB: need to quote file names, otherwise 
@@ -17,14 +16,14 @@ install:
     widgets:
         -
             module: panel
-            id: kb_search_panel
+            id: kb_reskeSearch_panel
             type: factory
     routes:
         -
-            path: ['search']
+            path: ['reske', 'search']
             queryParams:
                 search: {}
-            widget: kb_search_panel
+            widget: kb_reskeSearch_panel
             authorization: true
         # -
         #     path:
@@ -38,6 +37,6 @@ install:
         -
             name: reske-search
             definition:
-                path: search
-                label: Search
-                icon: search
+                path: reske/search
+                label: RESKE Search
+                icon: search-plus
