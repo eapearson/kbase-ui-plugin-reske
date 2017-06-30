@@ -3,7 +3,7 @@ define([
     'kb_common/html',
 
     './components/search'
-], function(
+], function (
     ko,
     html
 ) {
@@ -36,6 +36,7 @@ define([
         }
 
         function start(params) {
+            runtime.send('ui', 'setTitle', 'RESKE Search Prototype');
             render({
                 runtime: runtime,
                 search: params.search || null
@@ -57,7 +58,7 @@ define([
     }
 
     return {
-        make: function(config) {
+        make: function (config) {
             return factory(config);
         }
     };

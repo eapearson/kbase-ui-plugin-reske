@@ -2095,7 +2095,7 @@ define([
                 }, [
                     div({
                         class: 'col-md-12'
-                    }, h1('Search Two'))
+                    }, h1('RESKE Search'))
                 ]),
                 div({
                     class: 'row'
