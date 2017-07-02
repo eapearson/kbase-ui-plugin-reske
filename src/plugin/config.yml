@@ -15,15 +15,26 @@ source:
 install:
     widgets:
         -
-            module: panel
-            id: kb_reskeSearch_panel
+            module: objectSearchPanel
+            id: kb_reskeSearch_objectSearchPanel
+            type: factory
+        -
+            module: typeSearchPanel
+            id: kb_reskeSearch_typeSearchPanel
             type: factory
     routes:
         -
-            path: ['reske', 'search']
+            path: ['reske', 'object-search']
             queryParams:
                 search: {}
-            widget: kb_reskeSearch_panel
+                type: {}
+            widget: kb_reskeSearch_objectSearchPanel
+            authorization: true
+        -
+            path: ['reske', 'type-search']
+            queryParams:
+                search: {}
+            widget: kb_reskeSearch_typeSearchPanel
             authorization: true
         # -
         #     path:
@@ -37,6 +48,12 @@ install:
         -
             name: reske-search
             definition:
-                path: reske/search
+                path: reske/object-search
+                label: RESKE Object Search
+                icon: search-plus
+        -
+            name: reske-type-search
+            definition:
+                path: reske/type-search
                 label: RESKE Search
                 icon: search-plus

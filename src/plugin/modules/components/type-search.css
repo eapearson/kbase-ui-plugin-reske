@@ -1,0 +1,23 @@
+.component-type-search table {
+    border-collapse: separate;
+    border-spacing: 0 4px;
+}
+
+.component-type-search table td,
+.component-type-search table th {
+    padding: 6px;
+}
+
+.component-type-search table tr {
+    margin: 6px 0;
+}
+
+.component-type-search table tr.has-hits {
+    background-color: #DDD;
+    color: #000;
+}
+
+.component-type-search table tr {
+    background-color: #FFF;
+    /*color: #CCC;*/
+}

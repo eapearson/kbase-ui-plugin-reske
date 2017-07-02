@@ -659,7 +659,7 @@ define([
     function component() {
         function viewModel(params) {
             var runtime = params.runtime;
-            var searchInput = ko.observable(params.searchInput)
+            var searchInput = ko.observable()
                 .extend({
                     throttle: 100
                 });
@@ -692,7 +692,7 @@ define([
             var objectTypes = [{
                 id: 'narrative',
                 label: 'Narrative',
-                typeKeys: ['cells', 'metadata'],
+                typeKeys: ['cells?', 'metadata'],
                 searchKeys: [{
                         key: 'title',
                         label: 'Title',
@@ -933,6 +933,7 @@ define([
             }, {
                 id: 'singleendlibrary',
                 label: 'Single End Library',
+                typeKeys: ['xxx'],
                 searchKeys: [{
                         key: 'technology',
                         label: 'Sequencing Technology',
@@ -1362,10 +1363,16 @@ define([
 
                 // Free text search
                 var freeTextTerm = searchInput();
+                var allowMatchAll = false;
                 if (freeTextTerm && freeTextTerm.length > 0) {
                     if (freeTextTerm.length < 3) {
-                        // todo this message should be beneath the free text search input
-                        message('Sorry, the search term must be > 2 characters');
+                        if (freeTextTerm === '*') {
+                            newFilter.match_filter.full_text_in_all = null;
+                            allowMatchAll = true;
+                        } else {
+                            // todo this message should be beneath the free text search input
+                            message('Sorry, the search term must be > 2 characters');
+                        }
                     } else {
                         newFilter.match_filter.full_text_in_all = freeTextTerm;
                     }
@@ -1404,11 +1411,17 @@ define([
 
                 // If there are no search terms at all, we just reset
                 // the search.
-                if (!newFilter.match_filter.full_text_in_all && Object.keys(newFilter.match_filter.lookupInKeys).length === 0) {
-                    totalCount(0);
-                    status('needinput');
-                    message('No input');
-                    return;
+                if (!newFilter.match_filter.full_text_in_all &&
+                    Object.keys(newFilter.match_filter.lookupInKeys).length === 0) {
+                    if (newFilter.match_filter.full_text_in_all === null &&
+                        allowMatchAll) {
+                        // let it pass
+                    } else {
+                        totalCount(0);
+                        status('needinput');
+                        message('No input');
+                        return;
+                    }
                 }
 
 
@@ -1511,8 +1524,11 @@ define([
                 return 'default-row';
             }
 
+            // INIT
 
             status('needinput');
+            searchInput(params.search);
+            objectType(params.type);
 
             return {
                 // Search input and controls
@@ -2119,5 +2135,5 @@ define([
             template: template()
         };
     }
-    ko.components.register('search2', component());
+    ko.components.register('reske-object-search', component());
 });

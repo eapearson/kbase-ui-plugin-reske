@@ -2,7 +2,7 @@ define([
     'knockout-plus',
     'kb_common/html',
 
-    './components/search'
+    './components/object-search'
 ], function (
     ko,
     html
@@ -17,10 +17,11 @@ define([
             container.innerHTML = div({
                 dataBind: {
                     component: {
-                        name: '"search2"',
+                        name: '"reske-object-search"',
                         params: {
                             runtime: 'runtime',
-                            search: 'search'
+                            search: 'search',
+                            type: 'type'
                         }
                     }
                 }
@@ -39,7 +40,8 @@ define([
             runtime.send('ui', 'setTitle', 'RESKE Search Prototype');
             render({
                 runtime: runtime,
-                search: params.search || null
+                search: params.search || null,
+                type: params.type || null
             });
         }
 
