@@ -22,6 +22,10 @@ install:
             module: typeSearchPanel
             id: kb_reskeSearch_typeSearchPanel
             type: factory
+        -
+            module: tabtest
+            id: kb_reskeSearch_tabtest
+            type: factory
     routes:
         -
             path: ['reske', 'object-search']
@@ -31,10 +35,14 @@ install:
             widget: kb_reskeSearch_objectSearchPanel
             authorization: true
         -
-            path: ['reske', 'type-search']
+            path: ['reske', 'search']
             queryParams:
                 search: {}
             widget: kb_reskeSearch_typeSearchPanel
+            authorization: true
+        -
+            path: ['reske', 'tabtest']
+            widget: kb_reskeSearch_tabtest
             authorization: true
         # -
         #     path:
@@ -54,6 +62,6 @@ install:
         -
             name: reske-type-search
             definition:
-                path: reske/type-search
+                path: reske/search
                 label: RESKE Search
                 icon: search-plus

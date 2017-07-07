@@ -46,7 +46,9 @@ define([
         function stop() {}
 
         function detach() {
-
+            if (hostNode && container) {
+                hostNode.removeChild(container);
+            }
         }
 
         return {

@@ -6,9 +6,7 @@ define([
     'kb_common/bootstrapUtils',
     'kb_common/jsonRpc/genericClient',
     '../types',
-
     './tabset',
-    './type-search-summary',
     'css!./type-search.css'
 ], function (
     Promise,
@@ -17,13 +15,24 @@ define([
     html,
     bs,
     GenericClient,
-    Types
+    Types,
+    Tabs
 ) {
     'use strict';
     var t = html.tag,
         div = t('div'),
         span = t('span'),
+        table = t('table'),
+        colgroup = t('colgroup'),
+        col = t('col'),
+        thead = t('thead'),
+        tbody = t('tbody'),
+        tr = t('tr'),
+        th = t('th'),
+        td = t('td'),
         h2 = t('h2'),
+        a = t('a'),
+        button = t('button'),
         label = t('label'),
         form = t('form'),
         input = t('input');
@@ -311,8 +320,35 @@ define([
             a component's vm may need to set up timers, non-dom listeners, etc.
         */
 
+        function searchTab() {
+            return {
+                name: 'searchresults',
+                label: span({
+                    dataBind: {
+                        text: 'searchResultsTabLabel'
+                    }
+                }),
+                body: buildSearchResultsTable()
+            };
+        }
+
+
+        var tabset = {
+            selectedTab: ko.observable(),
+            tabs: ko.observableArray()
+        };
+
+        tabset.selectedTab.subscribe(function (newValue) {
+
+        });
+
+        tabset.tabs.push(searchTab);
+        tabset.selectedTab(0);
+
+
+
+
         return {
-            runtime: runtime,
             searchInput: searchInput,
             searchPublicData: searchPublicData,
             searchPrivateData: searchPrivateData,
@@ -326,8 +362,136 @@ define([
         };
     }
 
+    function buildSearchResultsTable() {
+        return table({}, [
+            colgroup([
+                col({
+                    style: {
+                        width: '80%',
+                        textAlign: 'left'
+                    }
+                }),
+                col({
+                    style: {
+                        width: '10%',
+                    }
+                }),
+                col({
+                    style: {
+                        width: '10%',
+                    }
+                })
+            ]),
+            thead([
+                tr([
+                    th('Type'),
+                    th(div({
+                        style: {
+                            width: '10em',
+                            textAlign: 'right'
+                        },
+                        dataBind: {
+                            text: 'resultsColumnLabel'
+                        }
+                    }, 'Found')),
+                    th(div({
+                        style: {
+                            width: '10em',
+                            textAlign: 'right'
+                        }
+                    }, 'Available'))
+                ])
+            ]),
+            tbody([
+                '<!-- ko foreach: searchResults -->',
+                tr({
+                    dataBind: {
+                        css: {
+                            'has-hits': '$data.hitCount() > 0'
+                        }
+                    }
+                }, [
+                    td({
+                        dataBind: {
+                            text: 'title'
+                        }
+                    }),
+                    td(div({
+                        style: {
+                            width: '10em',
+                            textAlign: 'right'
+                        }
+                    }, [
+                        '<!-- ko if: hitCount() === null -->',
+                        span({
+                            dataBind: {
+                                text: 'count'
+                            },
+                            style: {
+                                fontFamily: 'monospace'
+                            }
+                        }),
+                        '<!-- /ko -->',
+                        '<!-- ko if: hitCount() > 0 -->',
+                        a({
+                            dataBind: {
+                                click: '$component.doSearchDetails'
+                            }
+                        }, span({
+                            dataBind: {
+                                text: 'count'
+                            },
+                            style: {
+                                fontFamily: 'monospace',
+                                fontWeight: 'bold'
+                            }
+                        })),
+                        '<!-- /ko -->',
+                        '<!-- ko if: hitCount() === 0 -->',
+                        span({
+                            dataBind: {
+                                text: 'count'
+                            },
+                            style: {
+                                fontFamily: 'monospace'
+                            }
+                        }),
+                        '<!-- /ko -->'
+                    ])),
+                    td([
+                        div({
+                            style: {
+                                width: '10em',
+                                textAlign: 'right'
+                            }
+                        }, span({
+                            dataBind: {
+                                html: 'available'
+                            },
+                            style: {
+                                fontFamily: 'monospace'
+                            }
+                        }))
+                    ])
+                ]),
+                '<!-- /ko -->'
+            ])
+        ]);
+    }
+
 
     function template() {
+        var tabs = bs.buildTabs({
+            tabs: [{
+                name: 'searchresults',
+                label: span({
+                    dataBind: {
+                        text: 'searchResultsTabLabel'
+                    }
+                }),
+                body: buildSearchResultsTable()
+            }]
+        });
         return div({
             class: 'container-fluid component-type-search'
         }, [
@@ -405,8 +569,7 @@ define([
                         }, label({
                             style: {
                                 fontWeight: 'normal',
-                                marginRight: '4px',
-                                marginLeft: '6px'
+                                marginRight: '4px'
                             }
                         }, [
                             input({
@@ -422,8 +585,7 @@ define([
                         }, label({
                             style: {
                                 fontWeight: 'normal',
-                                marginRight: '4px',
-                                marginLeft: '6px'
+                                marginRight: '4px'
                             }
                         }, [
                             input({
@@ -451,39 +613,7 @@ define([
                 ]),
                 div({
                     class: 'col-md-8 col-md-offset-2'
-                }, div({
-                    dataBind: {
-                        component: {
-                            name: '"tabset"',
-                            params: {
-                                vm: {
-                                    searchResults: 'searchResults',
-                                    searching: 'searching',
-                                    searchInput: 'searchInput',
-                                    withPublicData: 'searchPublicData',
-                                    withPrivateData: 'searchPrivateData',
-                                    runtime: 'runtime',
-                                    ima: '"hostedvm"'
-                                },
-                                tabs: [{
-                                    label: '"Results"',
-                                    component: {
-                                        name: '"reske/type-search/summary"',
-                                        // NB these params are bound here, not in the tabset.
-                                        params: {
-                                            searchResults: 'searchResults',
-                                            searching: 'searching',
-                                            searchInput: 'searchInput',
-                                            withPublicData: 'searchPublicData',
-                                            withPrivateData: 'searchPrivateData',
-                                            runtime: 'runtime'
-                                        }
-                                    }
-                                }]
-                            }
-                        }
-                    }
-                }))
+                }, tabs.content),
             ])
         ]);
     }

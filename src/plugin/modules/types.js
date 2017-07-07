@@ -252,7 +252,7 @@ define([
         ]
     }, {
         id: 'singleendlibrary',
-        resultId: 'SingleEndlibrary',
+        resultId: 'SingleEndLibrary',
         label: 'Single End Library',
         searchKeys: [{
                 key: 'technology',

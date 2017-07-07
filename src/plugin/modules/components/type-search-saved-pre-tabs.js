@@ -6,9 +6,6 @@ define([
     'kb_common/bootstrapUtils',
     'kb_common/jsonRpc/genericClient',
     '../types',
-
-    './tabset',
-    './type-search-summary',
     'css!./type-search.css'
 ], function (
     Promise,
@@ -23,7 +20,17 @@ define([
     var t = html.tag,
         div = t('div'),
         span = t('span'),
+        table = t('table'),
+        colgroup = t('colgroup'),
+        col = t('col'),
+        thead = t('thead'),
+        tbody = t('tbody'),
+        tr = t('tr'),
+        th = t('th'),
+        td = t('td'),
         h2 = t('h2'),
+        a = t('a'),
+        button = t('button'),
         label = t('label'),
         form = t('form'),
         input = t('input');
@@ -170,6 +177,9 @@ define([
             return searchResult;
         }));
 
+
+
+
         // Flags for selecting public and private data
         // Each will also trigger a new search for all objects and for the 
         // current search (if any).
@@ -230,16 +240,6 @@ define([
             return 'Found';
         });
 
-        var searchResultsTabLabel = ko.pureComputed(function () {
-            if (searching()) {
-                return 'Searching...';
-            }
-            if (!searchInput() || searchInput().length === 0) {
-                return 'No Active Search';
-            }
-            return 'Search Results';
-        });
-
         function doSearch() {
             searching(true);
             if (currentSearch) {
@@ -296,28 +296,11 @@ define([
             window.location = url;
         }
 
-
-        // Tabs and higher level ui.
-        /*
-            Tabs are ko-centric.
-            Each tab is configured with a label and a component. The 
-            component populates the body.
-            And a vm function, which maps from the current vm to the vm
-            for the body component. 
-            Best to prove the body components in separate files to keep the filesize
-            here down, and also to decrease the chance of coupling the body
-            components to this module.
-            TODO: everything, but figure out how to call a disposer on a component;
-            a component's vm may need to set up timers, non-dom listeners, etc.
-        */
-
         return {
-            runtime: runtime,
             searchInput: searchInput,
             searchPublicData: searchPublicData,
             searchPrivateData: searchPrivateData,
             searchResults: searchResults,
-            searchResultsTabLabel: searchResultsTabLabel,
             resultsColumnLabel: resultsColumnLabel,
             searchError: searchError,
             searching: searching,
@@ -405,8 +388,7 @@ define([
                         }, label({
                             style: {
                                 fontWeight: 'normal',
-                                marginRight: '4px',
-                                marginLeft: '6px'
+                                marginRight: '4px'
                             }
                         }, [
                             input({
@@ -422,8 +404,7 @@ define([
                         }, label({
                             style: {
                                 fontWeight: 'normal',
-                                marginRight: '4px',
-                                marginLeft: '6px'
+                                marginRight: '4px'
                             }
                         }, [
                             input({
@@ -440,6 +421,7 @@ define([
             div({
                 class: 'row'
             }, [
+
                 div({
                     class: 'col-md-8 col-md-offset-2'
                 }, [
@@ -451,39 +433,129 @@ define([
                 ]),
                 div({
                     class: 'col-md-8 col-md-offset-2'
-                }, div({
-                    dataBind: {
-                        component: {
-                            name: '"tabset"',
-                            params: {
-                                vm: {
-                                    searchResults: 'searchResults',
-                                    searching: 'searching',
-                                    searchInput: 'searchInput',
-                                    withPublicData: 'searchPublicData',
-                                    withPrivateData: 'searchPrivateData',
-                                    runtime: 'runtime',
-                                    ima: '"hostedvm"'
-                                },
-                                tabs: [{
-                                    label: '"Results"',
-                                    component: {
-                                        name: '"reske/type-search/summary"',
-                                        // NB these params are bound here, not in the tabset.
-                                        params: {
-                                            searchResults: 'searchResults',
-                                            searching: 'searching',
-                                            searchInput: 'searchInput',
-                                            withPublicData: 'searchPublicData',
-                                            withPrivateData: 'searchPrivateData',
-                                            runtime: 'runtime'
-                                        }
+                }, [
+                    table({}, [
+                        colgroup([
+                            col({
+                                style: {
+                                    width: '80%',
+                                    textAlign: 'left'
+                                }
+                            }),
+                            col({
+                                style: {
+                                    width: '10%',
+                                }
+                            }),
+                            col({
+                                style: {
+                                    width: '10%',
+                                }
+                            })
+                        ]),
+                        thead([
+                            tr([
+                                th('Type'),
+                                th(div({
+                                    style: {
+                                        width: '10em',
+                                        textAlign: 'right'
+                                    },
+                                    dataBind: {
+                                        text: 'resultsColumnLabel'
                                     }
-                                }]
-                            }
-                        }
-                    }
-                }))
+                                }, 'Found')),
+                                th(div({
+                                    style: {
+                                        width: '10em',
+                                        textAlign: 'right'
+                                    }
+                                }, 'Available'))
+                            ])
+                        ]),
+                        tbody([
+                            '<!-- ko foreach: searchResults -->',
+                            //'<!-- ko if: $data.hitCount() > 0 -->',
+                            tr({
+                                dataBind: {
+                                    // style: {
+                                    //     // fontWeight: '$data.hitCount > 0 ? "bold" : "normal"',
+                                    //     color: '$data.hitCount > 0 ? "#000" : "#CCC"',
+                                    //     backgroundColor: '$data.hitCount > 0 ? "#DDD" : "#FFF"'
+                                    // },
+                                    css: {
+                                        'has-hits': '$data.hitCount() > 0'
+                                    }
+                                }
+                            }, [
+                                td({
+                                    dataBind: {
+                                        text: 'title'
+                                    }
+                                }),
+                                td(div({
+                                    style: {
+                                        width: '10em',
+                                        textAlign: 'right'
+                                    }
+                                }, [
+                                    '<!-- ko if: hitCount() === null -->',
+                                    span({
+                                        dataBind: {
+                                            text: 'count'
+                                        },
+                                        style: {
+                                            fontFamily: 'monospace'
+                                        }
+                                    }),
+                                    '<!-- /ko -->',
+                                    '<!-- ko if: hitCount() > 0 -->',
+                                    a({
+                                        dataBind: {
+                                            click: '$component.doSearchDetails'
+                                        }
+                                    }, span({
+                                        dataBind: {
+                                            text: 'count'
+                                        },
+                                        style: {
+                                            fontFamily: 'monospace',
+                                            fontWeight: 'bold'
+                                        }
+                                    })),
+                                    '<!-- /ko -->',
+                                    '<!-- ko if: hitCount() === 0 -->',
+                                    span({
+                                        dataBind: {
+                                            text: 'count'
+                                        },
+                                        style: {
+                                            fontFamily: 'monospace'
+                                        }
+                                    }),
+                                    '<!-- /ko -->'
+                                ])),
+                                td([
+                                    div({
+                                        style: {
+                                            width: '10em',
+                                            textAlign: 'right'
+                                        }
+                                    }, span({
+                                        dataBind: {
+                                            html: 'available'
+                                        },
+                                        style: {
+                                            fontFamily: 'monospace'
+                                        }
+                                    }))
+                                ])
+                            ]),
+                            // '<!-- /ko -->',
+                            '<!-- /ko -->'
+                        ])
+                    ])
+                ]),
             ])
         ]);
     }
