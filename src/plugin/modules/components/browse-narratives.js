@@ -66,6 +66,32 @@ define([
         // return date.toLocaleString();
     }
 
+    function renderMarkdown(source) {
+        try {
+            var html = marked(source);
+            // just in case this is a "code cell" we need to escape out any script tags 
+            // (but regular tags need to be there -- this is markdown after all)
+            var scripty = /<script/;
+            if (scripty.test(html)) {
+                html = 'markdown blocked due to script';
+            }
+            return html;
+        } catch (ex) {
+            return 'Error rendering markdown: ' + ex.message;
+        }
+    }
+
+    // TODO prepare it for prettifyig??
+    function renderCode(source) {
+        try {
+            var html = source.replace(/</, '&lt;').replace(/>/, '&gt;');
+            return html;
+        } catch (ex) {
+            return 'Error rendering code: ' + ex.message;
+        }
+    }
+
+
     // Simplifed over the generic object search.
     // TODO: may add back in features after the basic display and paging is sorted out.
     function searchObjects(runtime, type, searchTerm, withPublicData, withPrivateData, pageStart, pageSize) {
@@ -137,7 +163,6 @@ define([
         return reske.callFunc('search_objects', [param])
             .then(function (result) {
                 // We have the results, now we munge it around to make it more readily displayable.
-                console.log('search objects result', result);
                 var hits = result[0];
                 if (hits.objects.length === 0) {
                     return [hits, filter];
@@ -187,18 +212,34 @@ define([
                     var cells = object.data.cells.map(function (cell) {
                         if (Object.keys(cell.metadata).length > 0) {
                             if (cell.metadata.kbase.appCell) {
+                                var appCell = cell.metadata.kbase.appCell;
+                                // console.log('app', appCell);
+                                var app = {
+                                    name: null,
+                                    method: null,
+                                    module: null,
+                                    description: null
+                                };
+                                if (appCell.app.spec && 'info' in appCell.app.spec) {
+                                    app.name = appCell.app.spec.info.name;
+                                    app.method = appCell.app.spec.info.id.split('/')[1];
+                                    app.module = appCell.app.spec.info.module_name;
+                                    app.description = appCell.app.spec.info.subtitle;
+                                }
                                 return {
                                     type: 'app',
                                     params: cell.metadata.kbase.appCell.params,
-                                    spec: cell.metadata.kbase.appCell.app.spec
+                                    spec: cell.metadata.kbase.appCell.app.spec,
+                                    app: app
                                 };
                             } else if (cell.metadata.kbase.outputCell) {
                                 return {
-                                    type: 'output',
+                                    type: 'output'
+
                                 };
                             } else if (cell.metadata.kbase.dataCell) {
                                 return {
-                                    type: 'data',
+                                    type: 'data'
                                 };
                             } else {
                                 if (Object.keys(cell.metadata.kbase).length === 0) {
@@ -207,7 +248,8 @@ define([
                                         // a code cell not run?
                                         return {
                                             type: 'code',
-                                            code: cell.source
+                                            source: cell.source,
+                                            code: renderCode(cell.source)
                                         };
                                     } else if (cell.source.match(/kb-cell-out/)) {
                                         var m = cell.source.match(/kbaseNarrativeOutputCell\((.*)\)/);
@@ -232,16 +274,11 @@ define([
                                     } else {
                                         // this is a plain Jupyter cell.
                                         // any way to differentiate between code and markdown???
-                                        var html;
-                                        try {
-                                            html = marked(cell.source);
-                                        } catch (ex) {
-                                            html = 'Error rendering markdown: ' + ex.message;
-                                        }
+
                                         return {
                                             type: 'markdown',
                                             markdown: cell.source,
-                                            html: html
+                                            html: renderMarkdown(cell.source)
                                         };
                                     }
                                 } else {
@@ -252,9 +289,20 @@ define([
                                 }
                             }
                         } else {
+                            // Empty metadata - jupyter native
+                            if (cell.outputs) {
+                                // is a code cell that has been run. 
+                                // a code cell not run?
+                                return {
+                                    type: 'code',
+                                    source: cell.source,
+                                    code: renderCode(cell.source)
+                                };
+                            }
                             return {
-                                type: 'raw',
-                                text: 'raw cell - contents not shown'
+                                type: 'markdown',
+                                markdown: cell.source,
+                                html: renderMarkdown(cell.source)
                             };
                         }
 
@@ -265,7 +313,13 @@ define([
                         resultNumber: index + hits.pagination.start + 1,
                         title: object.data.metadata.name,
                         description: 'narrative description here...',
-                        cells: cells,
+                        cells: {
+                            show: ko.observable(false),
+                            doToggleShow: function (data) {
+                                data.show(!data.show());
+                            },
+                            cells: cells
+                        },
                         markdownCells: {
                             show: ko.observable(false),
                             doToggleShow: function (data) {
@@ -281,6 +335,7 @@ define([
                 return [hits, filter];
             });
     }
+
 
     // NB: hmm, it looks like the params are those active in the tab which spawned
     // this component...
