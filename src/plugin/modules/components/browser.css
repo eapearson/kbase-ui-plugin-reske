@@ -1,0 +1,19 @@
+.component-reske-browser .-toolbar {
+    border-bottom: 1px silver solid;
+}
+
+.mini-button {
+    padding: 2px;
+    border: 2px transparent solid;
+    cursor: pointer;
+}
+
+.mini-button:hover {
+    border: 2px silver solid;
+}
+
+.mini-button:active {
+    border: 2px silver solid;
+    background-color: #555;
+    color: #FFF;
+}

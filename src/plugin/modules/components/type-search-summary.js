@@ -6,8 +6,8 @@ define([
     'kb_common/bootstrapUtils',
     'kb_common/jsonRpc/genericClient',
     '../types',
-    'css!./type-search-summary.css',
-    './browse-narratives'
+    './browser',
+    'css!./type-search-summary.css'
 ], function (
     Promise,
     ko,
@@ -15,7 +15,8 @@ define([
     html,
     bs,
     GenericClient,
-    Types
+    Types,
+    Browser
 ) {
     'use strict';
     var t = html.tag,
@@ -31,10 +32,13 @@ define([
         td = t('td'),
         a = t('a');
 
-    function viewModel(params) {
+    function viewModel(params1) {
         // var runtime = params.runtime;
 
         // var searchResultsMap = params.searchResultsMap;
+
+        var params = params1.searchVM;
+
         var searchResults = params.searchResults;
         var searching = params.searching;
         var searchInput = params.searchInput;
@@ -59,12 +63,32 @@ define([
                     closable: true,
                     active: true,
                     component: {
-                        name: 'reske/browse-narratives',
+                        name: 'reske/browser',
                         params: {
-                            hostedVM: 'hostedVM'
+                            hostedVM: 'hostedVM',
+                            tabVM: {
+                                type: 'narrative'
+                            }
                         }
                     }
                 });
+                break;
+            case 'genome':
+                context.addTab({
+                    label: 'Genomes',
+                    closable: true,
+                    active: true,
+                    component: {
+                        name: 'reske/browser',
+                        params: {
+                            hostedVM: 'hostedVM',
+                            tabVM: {
+                                type: 'genome'
+                            }
+                        }
+                    }
+                });
+                break;
             }
         }
 
