@@ -166,7 +166,10 @@ define([
                     dataBind: {
                         component: {
                             name: 'component.name',
-                            params: '$component.hostedVM'
+                            params: {
+                                searchVM: '$component.hostedVM',
+                                tabVM: 'component.params.tabVM'
+                            }
                         }
                     }
                 }),

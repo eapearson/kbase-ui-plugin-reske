@@ -2,28 +2,18 @@
     /*background-color: #DDD;*/
     padding: 6px;
     /*border: 1px transparent solid;*/
-    /*border-bottom: 1px silver solid;*/
-    margin-bottom: 12px;
+    border-bottom: 1px silver solid;
 }
 
 .component-reske-narrative-browse.-row:hover {
     /*border: 1px #CCC solid;*/
-    background-color: rgba(220, 220, 220, 0.5);
+    background-color: rgba(208, 253, 251, 1);
 }
 
 .component-reske-narrative-browse.-row .-field.-resultNumber {
     text-align: center;
     font-style: italic;
     color: #666;
-}
-
-.component-reske-narrative-browse.-row .-markdown {
-    color: #888;
-}
-
-.component-reske-narrative-browse.-row .-markdown.-active,
-.component-reske-narrative-browse.-row:hover .-markdown {
-    color: #000;
 }
 
 .component-reske-narrative-browse.-row .-markdown .-toggler {
@@ -36,38 +26,13 @@
 }
 
 .component-reske-narrative-browse.-row .-markdown .-content .-item {
-    border-bottom: 1px #DDD solid;
-    padding: 4px 4px 4px 4px;
+    border-bottom: 1px silver solid;
+    padding: 4px;
 }
 
 .component-reske-narrative-browse.-row .-markdown .-content .-item:last-child {
     /*background-color: #DDD;*/
     border-bottom: none;
-}
-
-.component-reske-narrative-browse.-row .-title {
-    font-weight: bold;
-}
-
-.component-reske-narrative-browse.-row .-owner {}
-
-.component-reske-narrative-browse.-row .-created-at {
-    font-style: italic;
-}
-
-.component-reske-narrative-browse.-row .-updated-at {
-    font-style: italic;
-}
-
-
-/* right hand features column */
-
-.component-reske-narrative-browse.-row .-features {
-    display: none;
-}
-
-.component-reske-narrative-browse.-row:hover .-features {
-    display: block;
 }
 
 
