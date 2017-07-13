@@ -1,53 +1,85 @@
 define([
-
-], function () {
+    './interfaces/type/narrative',
+    './interfaces/type/genome',
+    './interfaces/type/genomeFeature',
+    './interfaces/type/assembly',
+    './interfaces/type/assemblyContig',
+    './interfaces/type/pairedEndLibrary',
+    './interfaces/type/singleEndLibrary'
+], function (
+    narrative,
+    genome,
+    genomeFeature,
+    assembly,
+    assemblyContig,
+    pairedEndLibrary,
+    singleEndLibrary
+) {
     'use strict';
 
     var objectTypes = [{
         id: 'narrative',
+        uiId: 'narrative',
         resultId: 'Narrative',
         label: 'Narrative',
+        methods: narrative,
         typeKeys: ['cells', 'metadata'],
         searchKeys: [{
-                key: 'title',
-                label: 'Title',
-                type: 'string'
-            },
-            {
-                key: 'source',
-                label: 'Source',
-                type: 'string'
-            },
-            {
-                key: 'code_output',
-                label: 'Code Output',
-                type: 'string'
-            },
-            {
-                key: 'app_output',
-                label: 'App Output',
-                type: 'string'
-            },
-            {
-                key: 'app_info',
-                label: 'App Info',
-                type: 'string'
-            },
-            {
-                key: 'app_input',
-                label: 'App Input',
-                type: 'string'
-            },
-            {
-                key: 'job_ids',
-                label: 'Job Ids',
-                type: 'string'
-            },
-        ]
+            key: 'title',
+            label: 'Title',
+            type: 'string'
+        }, {
+            key: 'source',
+            label: 'Source',
+            type: 'string'
+        }, {
+            key: 'code_output',
+            label: 'Code Output',
+            type: 'string'
+        }, {
+            key: 'app_output',
+            label: 'App Output',
+            type: 'string'
+        }, {
+            key: 'app_info',
+            label: 'App Info',
+            type: 'string'
+        }, {
+            key: 'app_input',
+            label: 'App Input',
+            type: 'string'
+        }, {
+            key: 'job_ids',
+            label: 'Job Ids',
+            type: 'string'
+        }],
+        sortFields: [{
+            key: 'title',
+            label: 'Title',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'created',
+            label: 'Created (fake)',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'updated',
+            label: 'Updated (fake)',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            value: 'owner',
+            label: 'Owner (fake)',
+            isTimestamp: false,
+            isObjectName: false
+        }]
     }, {
         id: 'genome',
+        uiId: 'genome',
         resultId: 'Genome',
         label: 'Genome',
+        methods: genome,
         typeKeys: ['domain', 'features', 'id', 'scientific_name', 'taxonomy?'],
         searchKeys: [{
                 key: 'id',
@@ -81,11 +113,29 @@ define([
                 label: 'Assembly GUID',
                 type: 'string'
             },
-        ]
+        ],
+        sortFields: [{
+            key: 'id',
+            label: 'ID',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'domain',
+            label: 'Domain',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'scientific_name',
+            label: 'Scientific name',
+            isTimestamp: false,
+            isObjectName: false
+        }]
     }, {
         id: 'genomefeature',
+        uiId: 'genomeFeature',
         resultId: 'GenomeFeature',
         label: 'Genome Feature',
+        methods: genomeFeature,
         typeKeys: ['aliases?', 'function?', 'id', 'location', 'protein_translation?', 'type'],
         searchKeys: [{
                 key: 'id',
@@ -151,11 +201,29 @@ define([
                 type: 'string'
             }
             // assembly_guid hidden
-        ]
+        ],
+        sortFields: [{
+            key: 'id',
+            label: 'ID',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'function',
+            label: 'Function',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'start',
+            label: 'Start',
+            isTimestamp: false,
+            isObjectName: false
+        }]
     }, {
         id: 'assembly',
+        uiId: 'assembly',
         resultId: 'Assembly',
         label: 'Assembly',
+        methods: assembly,
         typeKeys: ['contigs', 'dna_size', 'external_source_id', 'gc_content', 'name'],
         searchKeys: [{
             key: 'contigs',
@@ -177,11 +245,29 @@ define([
             key: 'name',
             label: 'Name',
             type: 'string'
+        }],
+        sortFields: [{
+            key: 'name',
+            label: 'Name',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'dna_size',
+            label: 'DNA Size',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'gc_content',
+            label: 'GC Content',
+            isTimestamp: false,
+            isObjectName: false
         }]
     }, {
         id: 'assemblycontig',
+        uiId: 'assemblyContig',
         resultId: 'AssemblyContig',
         label: 'Assembly Contig',
+        methods: assemblyContig,
         typeKeys: ['contig_id', 'description', 'gc_content', 'length'],
         searchKeys: [{
                 key: 'contig_id',
@@ -203,11 +289,29 @@ define([
                 label: 'Length',
                 type: 'integer'
             }
-        ]
+        ],
+        sortFields: [{
+            key: 'contig_id',
+            label: 'Contig ID',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'gc_content',
+            label: 'GC Content',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'length',
+            label: 'Length',
+            isTimestamp: false,
+            isObjectName: false
+        }]
     }, {
         id: 'pairedendlibrary',
+        uiId: 'pairedEndLibrary',
         resultId: 'PairedEndLibrary',
         label: 'Paired End Library',
+        methods: pairedEndLibrary,
         typeKeys: ['insert_size_mean', 'lib1', 'sequencing_tech'],
         searchKeys: [{
                 key: 'technology',
@@ -249,11 +353,29 @@ define([
                 label: 'GC Content',
                 type: 'float'
             }
-        ]
+        ],
+        sortFields: [{
+            key: 'technology',
+            label: 'Sequencing Technology',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'read_count',
+            label: 'Read Count',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'read_length',
+            label: 'Mean Read Length',
+            isTimestamp: false,
+            isObjectName: false
+        }]
     }, {
         id: 'singleendlibrary',
+        uiId: 'singleEndLibrary',
         resultId: 'SingleEndLibrary',
         label: 'Single End Library',
+        methods: singleEndLibrary,
         searchKeys: [{
                 key: 'technology',
                 label: 'Sequencing Technology',
@@ -289,7 +411,23 @@ define([
                 label: 'GC Content',
                 type: 'float'
             }
-        ]
+        ],
+        sortFields: [{
+            key: 'technology',
+            label: 'Sequencing Technology',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'read_count',
+            label: 'Read Count',
+            isTimestamp: false,
+            isObjectName: false
+        }, {
+            key: 'read_length',
+            label: 'Mean Read Length',
+            isTimestamp: false,
+            isObjectName: false
+        }]
     }];
     var objectTypeMap = {};
     objectTypes.forEach(function (type) {
@@ -302,6 +440,7 @@ define([
 
         objectTypeMap[type.id] = type;
     });
+
 
     return {
         types: objectTypes,

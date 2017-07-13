@@ -1121,33 +1121,33 @@ define([
 
             function makeKeySearchField(type) {
                 switch (type) {
-                    case 'string':
-                        return {
-                            string_value: fieldObservable()
-                        };
-                    case 'integer':
-                        return {
-                            int_value: fieldObservable(),
-                            max_int: fieldObservable(),
-                            min_int: fieldObservable()
-                        };
-                    case 'float':
-                        return {
-                            double_value: fieldObservable(),
-                            min_double: fieldObservable(),
-                            max_double: fieldObservable()
-                        };
-                    case 'date':
-                        return {
-                            min_date: fieldObservable(),
-                            max_date: fieldObservable()
-                        };
-                    case 'boolean':
-                        return {
-                            bool_value: fieldObservable()
-                        };
-                    default:
-                        throw new Error('Field type not recognized: ' + type);
+                case 'string':
+                    return {
+                        string_value: fieldObservable()
+                    };
+                case 'integer':
+                    return {
+                        int_value: fieldObservable(),
+                        max_int: fieldObservable(),
+                        min_int: fieldObservable()
+                    };
+                case 'float':
+                    return {
+                        double_value: fieldObservable(),
+                        min_double: fieldObservable(),
+                        max_double: fieldObservable()
+                    };
+                case 'date':
+                    return {
+                        min_date: fieldObservable(),
+                        max_date: fieldObservable()
+                    };
+                case 'boolean':
+                    return {
+                        bool_value: fieldObservable()
+                    };
+                default:
+                    throw new Error('Field type not recognized: ' + type);
                 }
             }
 
@@ -1201,12 +1201,12 @@ define([
 
             var searchMessage = ko.pureComputed(function () {
                 switch (status()) {
-                    case 'needinput':
-                        return 'Provide either free text search, or type-based key-searches above';
-                    case 'searching':
-                        return 'Searching...';
-                    case 'noresults':
-                        return 'No search results for this query';
+                case 'needinput':
+                    return 'Provide either free text search, or type-based key-searches above';
+                case 'searching':
+                    return 'Searching...';
+                case 'noresults':
+                    return 'No search results for this query';
                 }
             });
 
@@ -1270,7 +1270,6 @@ define([
                 var value = keySearch.fields.int_value();
                 var minValue = keySearch.fields.min_int();
                 var maxValue = keySearch.fields.max_int();
-                console.log('int values?', value, minValue, maxValue);
                 if (isEmpty(value) && isEmpty(minValue) && isEmpty(maxValue)) {
                     return;
                 }
@@ -1313,19 +1312,17 @@ define([
 
 
             function doSearch(source) {
-                console.log('doSearch', source);
-
                 // Make sure we have all the right conditions for a search, and if 
                 // not, reset the search results.
                 var originalStatus = status();
                 switch (originalStatus) {
-                    case 'needinput':
-                    case 'haveresults':
-                    case 'noresults':
-                        // continue;
-                        break;
-                    default:
-                        return;
+                case 'needinput':
+                case 'haveresults':
+                case 'noresults':
+                    // continue;
+                    break;
+                default:
+                    return;
                 }
 
                 status('setup');
@@ -1390,19 +1387,19 @@ define([
                         keySearches().forEach(function (keySearch, index) {
                             // Need to inspect each one based on the type... wow.
                             switch (keySearch.type) {
-                                case 'string':
-                                    var error = addStringSearch(keySearch, keySearchTerm);
-                                    if (error) {
-                                        message(error);
-                                    }
-                                    break;
-                                case 'integer':
-                                    error = addIntegerSearch(keySearch, keySearchTerm);
-                                    if (error) {
-                                        message(error);
-                                    }
-                                    break;
-                                    // TODO: implement the other types!
+                            case 'string':
+                                var error = addStringSearch(keySearch, keySearchTerm);
+                                if (error) {
+                                    message(error);
+                                }
+                                break;
+                            case 'integer':
+                                error = addIntegerSearch(keySearch, keySearchTerm);
+                                if (error) {
+                                    message(error);
+                                }
+                                break;
+                                // TODO: implement the other types!
                             }
                         });
                         newFilter.match_filter.lookupInKeys = keySearchTerm;
@@ -1428,7 +1425,6 @@ define([
                 // Compare old and new filter.
                 // If we have a filter change, we need to reset the page start.
                 if (JSON.stringify(filter) !== JSON.stringify(newFilter)) {
-                    console.log('not the same?');
                     pageStart(0);
                 }
 
@@ -1444,7 +1440,6 @@ define([
 
                 status('searching');
                 message('Searching...');
-                console.log('search objects', param);
 
                 return client.callFunc('search_objects', [param])
                     .then(function (result) {
@@ -1509,18 +1504,16 @@ define([
                             //     return err.error;
                             // }
                         });
-                        console.log('GOT IT!!', result);
                         status('haveresults');
                         return null;
                     })
                     .catch(function (err) {
-                        console.log('error', err);
+                        console.error('error', err);
                         message(err.message);
                     });
             }
 
             function calcRow(data) {
-                console.log('data', data);
                 return 'default-row';
             }
 

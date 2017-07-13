@@ -56,40 +56,22 @@ define([
         });
 
         function doShowDetail(data, event, context) {
-            switch (data.type) {
-            case 'narrative':
-                context.addTab({
-                    label: 'Narratives',
-                    closable: true,
-                    active: true,
-                    component: {
-                        name: 'reske/browser',
-                        params: {
-                            hostedVM: 'hostedVM',
-                            tabVM: {
-                                type: 'narrative'
-                            }
+            var typeDef = Types.typesMap[data.type];
+            var tabDef = {
+                label: typeDef.label,
+                closable: true,
+                active: true,
+                component: {
+                    name: 'reske/browser',
+                    params: {
+                        hostedVM: 'hostedVM',
+                        tabVM: {
+                            type: data.type
                         }
                     }
-                });
-                break;
-            case 'genome':
-                context.addTab({
-                    label: 'Genomes',
-                    closable: true,
-                    active: true,
-                    component: {
-                        name: 'reske/browser',
-                        params: {
-                            hostedVM: 'hostedVM',
-                            tabVM: {
-                                type: 'genome'
-                            }
-                        }
-                    }
-                });
-                break;
-            }
+                }
+            };
+            context.addTab(tabDef);
         }
 
         return {

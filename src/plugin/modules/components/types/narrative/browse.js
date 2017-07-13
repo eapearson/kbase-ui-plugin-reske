@@ -2,30 +2,38 @@ define([
     'knockout-plus',
     'highlight',
     'kb_common/html',
+    '../common',
 
     'css!./browse.css'
 ], function (
     ko,
     highlight,
-    html
+    html,
+    common
 ) {
     'use strict';
 
     var t = html.tag,
         a = t('a'),
-        button = t('button'),
         span = t('span'),
         pre = t('pre'),
         code = t('code'),
         div = t('div'),
-        table = t('table'),
-        tr = t('tr'),
-        th = t('th'),
-        td = t('td');
+        img = t('img');
 
     function viewModel(params) {
+        function doOpenNarrative(data) {
+            var url = '/narrative/' + data.item.meta.narrativeId;
+            window.open(url, '_blank');
+        }
+
+        function doKeep(data) {
+            console.log('keeping...', data);
+        }
         return {
-            item: params.item
+            item: params.item,
+            doOpenNarrative: doOpenNarrative,
+            doKeep: doKeep
         };
     }
 
@@ -212,23 +220,38 @@ define([
                             div({
                                 class: '-item'
                             }, [
-                                div({}, div({
+                                div({
                                     dataBind: {
-                                        text: 'type'
+                                        click: 'doToggleShow'
                                     },
-                                    style: {
-                                        // backgroundColor: '#EEE',
-                                        display: 'inline-block',
-                                        width: 'auto',
-                                        color: '#AAA',
-                                        padding: '3px 3px 3px 3px',
-                                        marginLeft: '-4px',
-                                        marginBottom: '6px',
-                                        border: '1px #CCC solid',
-                                        // borderTop: 'none',
-                                        backgroundColor: 'rgb(253, 253, 240)'
-                                    }
-                                })),
+                                    class: '-type'
+                                }, [
+                                    span({
+                                        dataBind: {
+                                            text: 'type'
+                                        }
+                                    }),
+                                    '<!-- ko if: show() -->',
+                                    span({
+                                        class: 'fa fa-chevron-down',
+                                        style: {
+                                            fontSize: '80%',
+                                            marginLeft: '3px'
+                                        }
+                                    }),
+                                    '<!-- /ko -->',
+                                    '<!-- ko if: !show() -->',
+                                    span({
+                                        class: 'fa fa-chevron-right',
+                                        style: {
+                                            fontSize: '80%',
+                                            marginLeft: '3px'
+                                        }
+                                    }),
+                                    '<!-- /ko -->'
+                                ]),
+                                '<!-- ko if: show() -->',
+
                                 '<!-- ko if: type === "markdown" -->',
                                 div({
                                     dataBind: {
@@ -243,48 +266,99 @@ define([
                                 }),
                                 '<!-- /ko -->',
                                 '<!-- ko if: type === "code" -->',
-                                pre(code({
-                                    dataBind: {
-                                        text: 'source'
-                                    }
-                                })),
+                                div({}, [
+                                    pre(code({
+                                        dataBind: {
+                                            text: 'source'
+                                        }
+                                    }))
+                                ]),
                                 '<!-- /ko -->',
                                 '<!-- ko if: type === "app" -->',
                                 '<!-- ko if: $data.app && $data.app.name -->',
-                                table({
-                                    class: 'table table-bordered'
-                                }, [
-                                    tr([
-                                        th('name'),
-                                        td({
-                                            dataBind: {
-                                                text: '$data.app.name'
+                                div([
+                                    div({
+                                        style: {
+                                            display: 'inline-block',
+                                            verticalAlign: 'top'
+                                        }
+                                    }, [
+                                        '<!-- ko if: $data.iconUrl -->',
+                                        span({
+                                            class: 'fa-stack',
+                                            style: {
+                                                textAlign: 'center',
+                                                verticalAlign: 'top'
                                             }
-                                        })
+                                        }, [
+                                            img({
+                                                dataBind: {
+                                                    attr: {
+                                                        src: '$data.iconUrl'
+                                                    }
+                                                },
+                                                style: {
+                                                    width: '20px',
+                                                    height: '20px'
+                                                }
+                                            })
+                                        ]),
+                                        '<!-- /ko -->',
+                                        '<!-- ko if: !$data.iconUrl -->',
+                                        span({
+                                            class: 'fa-stack',
+                                            style: {
+                                                verticalAlign: 'top'
+                                            }
+                                        }, [
+                                            span({
+                                                class: 'fa fa-square fa-stack-2x',
+                                                style: {
+                                                    color: 'rgb(103,58,103)'
+                                                }
+                                            }),
+                                            span({
+                                                class: 'fa fa-inverse fa-stack-1x fa-cube'
+                                            })
+                                        ]),
+                                        '<!-- /ko -->'
                                     ]),
-                                    tr([
-                                        th('module'),
-                                        td({
-                                            dataBind: {
-                                                text: '$data.app.module'
+                                    div({
+                                        style: {
+                                            display: 'inline-block',
+                                            style: {
+                                                verticalAlign: 'top'
                                             }
-                                        })
-                                    ]),
-                                    tr([
-                                        th('method'),
-                                        td({
-                                            dataBind: {
-                                                text: '$data.app.method'
-                                            }
-                                        })
-                                    ]),
-                                    tr([
-                                        th('description'),
-                                        td({
-                                            dataBind: {
-                                                text: '$data.app.description'
-                                            }
-                                        })
+                                        }
+                                    }, [
+                                        div({}, [
+                                            a({
+                                                dataBind: {
+                                                    text: '$data.app.name',
+                                                    attr: {
+                                                        href: '"#catalog/apps/" + $data.app.id'
+                                                    }
+                                                },
+                                                target: '_blank'
+                                            })
+                                        ]),
+                                        div([
+                                            a({
+                                                dataBind: {
+                                                    text: '$data.app.module',
+                                                    attr: {
+                                                        href: '"#catalog/modules/" + $data.app.module'
+                                                    }
+                                                },
+                                                target: '_blank'
+                                            }),
+                                            '/',
+                                            span({
+                                                dataBind: {
+                                                    text: '$data.app.method'
+                                                }
+                                            })
+                                        ])
                                     ])
                                 ]),
 
@@ -303,6 +377,7 @@ define([
                                 '<!-- /ko -->',
                                 '<!-- ko if: type === "unknown" -->',
                                 div('no preview for unknown cell type'),
+                                '<!-- /ko -->',
                                 '<!-- /ko -->'
                             ]),
                             '<!-- /ko -->'
@@ -346,41 +421,24 @@ define([
                     div({
                         class: '-title'
                     }, [
+                        common.buildTypeIcon(),
                         a({
                             dataBind: {
                                 attr: {
-                                    href: '"/narrative/" + item.meta.workspace.narrid'
+                                    href: '"/narrative/" + item.meta.narrativeId'
                                 },
                                 text: 'item.narrative.title'
+                            },
+                            style: {
+                                verticalAlign: 'middle',
+                                marginLeft: '4px'
                             },
                             target: '_blank'
                         })
                     ]),
-                    div({}, [
-                        span({
-                            dataBind: {
-                                text: 'item.meta.owner'
-                            },
-                            class: '-owner'
-                        }),
-                        ' - ',
-                        span({
-                            dataBind: {
-                                text: 'item.meta.created.at'
-                            },
-                            class: '-created-at'
-                        }),
-                        '<!-- ko if: item.meta.created.at !== item.meta.updated.at -->',
-                        ' (last updated ',
-                        span({
-                            dataBind: {
-                                text: 'item.meta.updated.at'
-                            },
-                            class: '-updated-at'
-                        }),
-                        ')',
-                        '<!-- /ko -->'
-                    ])
+                    common.buildMetaInfo({
+                        showNarrative: false
+                    })
                 ]),
                 div({
                     style: {
@@ -391,26 +449,13 @@ define([
                 }, div({
                     class: '-features'
                 }, [
-                    span({
-                        type: 'button',
-                        class: 'btn btn-default'
-                    }, 'keep +'),
+                    common.buildSharingInfo(),
+                    common.buildActions({
+                        dataview: false
+                    })
                 ]))
             ]),
             buildCellsPreview()
-            // div([
-            //     div({
-            //         dataBind: {
-            //             text: 'item.narrative.description'
-            //         },
-            //         style: {
-            //             display: 'inline-block',
-            //             width: '100%'
-            //         }
-            //     })
-            // ]),
-
-            //buildMarkdown()
         ]);
     }
 

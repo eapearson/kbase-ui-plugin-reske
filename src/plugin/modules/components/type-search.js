@@ -160,6 +160,7 @@ define([
             });
             var searchResult = {
                 type: type.id,
+                uiId: type.uiId,
                 title: type.label,
                 hitCount: hitCount,
                 count: count,
@@ -240,11 +241,31 @@ define([
             return 'Search Results';
         });
 
+        function event(action, value) {
+            runtime.service('analytics').sendEvent({
+                category: 'search',
+                action: action,
+                label: 'by-type',
+                value: value
+            });
+        }
+
+        function timing(variable, value) {
+            runtime.service('analytics').sendTiming({
+                category: 'search',
+                label: 'by-type',
+                variable: variable,
+                time: value
+            });
+        }
+
         function doSearch() {
             searching(true);
+            // event('search-begin', 1);
             if (currentSearch) {
                 currentSearch.cancelled = true;
                 currentSearch.search.cancel();
+                // event('auto-cancel', searchInput()); // TODO old input is what was cancelled
             }
             currentSearch = {
                 cancelled: false,
@@ -253,9 +274,11 @@ define([
             var thisSearch = currentSearch;
 
             // Do not run a search with an empty input?
-
+            // event('search-starting', 1);
+            // var start = new Date().getTime();
             currentSearch.search = searchTypes(runtime, searchInput(), searchPublicData(), searchPrivateData())
                 .then(function (result) {
+                    // timing('search-over-types', new Date().getTime() - start);
                     if (thisSearch.cancelled) {
                         console.warn('ignoring cancelled request');
                         return null;
@@ -351,7 +374,7 @@ define([
                 div({
                     class: 'col-md-8 col-md-offset-2'
                 }, [
-                    form({
+                    div({
                         class: 'form'
                     }, [
                         div({
@@ -359,7 +382,8 @@ define([
                         }, [
                             input({
                                 dataBind: {
-                                    textInput: 'searchInput'
+                                    textInput: 'searchInput',
+                                    hasFocus: true
                                 },
                                 placeholder: 'Search KBase Data with RESKE Search!',
                                 class: 'form-control'

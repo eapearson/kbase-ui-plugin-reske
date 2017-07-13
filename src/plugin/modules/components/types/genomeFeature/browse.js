@@ -1,11 +1,13 @@
 define([
     'knockout-plus',
+    'highlight',
     'kb_common/html',
     '../common',
-    'bootstrap',
-    'css!font_awesome'
+
+    'css!./browse.css'
 ], function (
     ko,
+    highlight,
     html,
     common
 ) {
@@ -25,7 +27,7 @@ define([
             var url = '/narrative/' + data.item.meta.narrativeId;
             window.open(url, '_blank');
         }
-
+        // ?sub=Feature&subid=kb|g.220339.CDS.1139
         function doOpenDataview(data) {
             var url = '#dataview/' + data.item.meta.ids.dataviewId;
             window.open(url, '_blank');
@@ -45,14 +47,14 @@ define([
 
     function template() {
         return div({
-            class: 'component-reske-genome-browse -row'
+            class: 'component-reske-genomefeature-browse -row'
         }, [
             div([
                 div({
                     style: {
                         display: 'inline-block',
                         verticalAlign: 'top',
-                        width: '5%',
+                        width: '5%'
                     },
                     class: '-field -resultNumber'
                 }, span({
@@ -76,7 +78,7 @@ define([
                                 attr: {
                                     href: '"#dataview/" + item.meta.ids.dataviewId'
                                 },
-                                text: 'item.genome.title'
+                                text: 'item.genomeFeature.title'
                             },
                             target: '_blank',
                             style: {
@@ -86,49 +88,89 @@ define([
                         })
                     ]),
                     common.buildMetaInfo(),
+
                     table({
                         class: '-table '
                     }, [
                         tr([
-                            th('Scientific name'),
+                            th('Type'),
                             td({
                                 dataBind: {
-                                    text: 'item.genome.scientificName'
+                                    text: 'item.genomeFeature.featureType'
                                 },
-                                class: '-scientific-name'
+                                class: '-feature-type'
                             })
                         ]),
                         tr([
-                            th('Taxonomy'),
-                            td(div({
-                                class: '-taxonomy',
+                            th('Function'),
+                            td({
                                 dataBind: {
-                                    foreach: 'item.genome.taxonomy'
-                                }
-                            }, span([
-                                span({
-                                    dataBind: {
-                                        text: '$data'
-                                    }
-                                }),
-                                '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
-                                span({
-                                    class: 'fa fa-angle-right',
-                                    style: {
-                                        margin: '0 4px'
-                                    }
-                                }),
-                                '<!-- /ko -->'
-                            ])))
-                        ]),
-                        tr([
-                            th('Features '),
-                            td(div({
-                                dataBind: {
-                                    html: 'item.genome.featureCount.formatted'
+                                    text: 'item.genomeFeature.function'
                                 },
-                                class: '-feature-count'
-                            }))
+                                class: '-function'
+                            })
+                        ]),
+
+                        tr([
+                            th('Location '),
+                            td({
+                                class: '-location'
+                            }, div({
+                                style: {
+                                    display: 'inline-block'
+                                },
+                                dataBind: {
+                                    foreach: 'item.genomeFeature.location'
+                                }
+                            }, [
+                                // span({
+                                //     class: '-genome',
+                                //     dataBind: {
+                                //         text: 'item.genomeFeature.location.genome'
+                                //     }
+                                // }),
+                                // ' : ',
+                                span({
+                                    class: '-start',
+                                    dataBind: {
+                                        text: 'start'
+                                    }
+                                }),
+                                ' - ',
+                                span({
+                                    class: '-end',
+                                    dataBind: {
+                                        text: 'end'
+                                    }
+                                }),
+                                ' ',
+                                '<!-- ko if: direction === "+" -->',
+                                span({
+                                    class: 'fa fa-plus-circle',
+                                    style: {
+                                        color: '#AAA'
+                                    }
+                                }),
+                                '<!-- /ko -->',
+                                '<!-- ko if: direction === "-" -->',
+                                span({
+                                    class: 'fa fa-minus-circle',
+                                    style: {
+                                        color: '#AAA'
+                                    }
+                                }),
+                                '<!-- /ko -->',
+                            ]))
+                        ]),
+
+                        tr([
+                            th('Scientific name'),
+                            td({
+                                dataBind: {
+                                    text: 'item.genomeFeature.genome.scientificName'
+                                },
+                                class: '-scientific-name'
+                            })
                         ])
                     ])
                 ]),
@@ -156,5 +198,5 @@ define([
         };
     }
 
-    ko.components.register('reske/genome/browse', component());
+    ko.components.register('reske/genomeFeature/browse', component());
 });

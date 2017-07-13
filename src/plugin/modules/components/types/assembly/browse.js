@@ -1,11 +1,13 @@
 define([
     'knockout-plus',
+    'highlight',
     'kb_common/html',
     '../common',
-    'bootstrap',
-    'css!font_awesome'
+
+    'css!./browse.css'
 ], function (
     ko,
+    highlight,
     html,
     common
 ) {
@@ -52,7 +54,7 @@ define([
                     style: {
                         display: 'inline-block',
                         verticalAlign: 'top',
-                        width: '5%',
+                        width: '5%'
                     },
                     class: '-field -resultNumber'
                 }, span({
@@ -76,7 +78,7 @@ define([
                                 attr: {
                                     href: '"#dataview/" + item.meta.ids.dataviewId'
                                 },
-                                text: 'item.genome.title'
+                                text: 'item.assembly.title'
                             },
                             target: '_blank',
                             style: {
@@ -86,51 +88,47 @@ define([
                         })
                     ]),
                     common.buildMetaInfo(),
+
                     table({
                         class: '-table '
                     }, [
                         tr([
-                            th('Scientific name'),
+                            th('Source'),
                             td({
                                 dataBind: {
-                                    text: 'item.genome.scientificName'
+                                    html: 'item.assembly.externalSourceId'
                                 },
-                                class: '-scientific-name'
+                                class: '-source'
                             })
                         ]),
                         tr([
-                            th('Taxonomy'),
+                            th('GC content (%)'),
                             td(div({
-                                class: '-taxonomy',
                                 dataBind: {
-                                    foreach: 'item.genome.taxonomy'
-                                }
-                            }, span([
-                                span({
-                                    dataBind: {
-                                        text: '$data'
-                                    }
-                                }),
-                                '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
-                                span({
-                                    class: 'fa fa-angle-right',
-                                    style: {
-                                        margin: '0 4px'
-                                    }
-                                }),
-                                '<!-- /ko -->'
-                            ])))
+                                    html: 'item.assembly.gcContent.formatted'
+                                },
+                                class: '-gc-content -number'
+                            }))
                         ]),
                         tr([
-                            th('Features '),
+                            th('DNA size (bp)'),
                             td(div({
                                 dataBind: {
-                                    html: 'item.genome.featureCount.formatted'
+                                    html: 'item.assembly.dnaSize.formatted'
                                 },
-                                class: '-feature-count'
+                                class: '-dna-size -number'
+                            }))
+                        ]),
+                        tr([
+                            th('# contigs'),
+                            td(div({
+                                dataBind: {
+                                    html: 'item.assembly.contigCount.formatted'
+                                },
+                                class: '-contig-count -number'
                             }))
                         ])
-                    ])
+                    ]),
                 ]),
                 div({
                     style: {
@@ -156,5 +154,5 @@ define([
         };
     }
 
-    ko.components.register('reske/genome/browse', component());
+    ko.components.register('reske/assembly/browse', component());
 });
