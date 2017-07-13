@@ -17,6 +17,22 @@
     color: #666;
 }
 
+.component-reske-narrative-browse.-row .-content .-item .-type {
+    display: inline-block;
+    width: auto;
+    color: #AAA;
+    padding: 3px 3px 3px 3px;
+    margin-left: -4px;
+    margin-bottom: 6px;
+    border: 1px #CCC solid;
+    background-color: rgb(253, 253, 240);
+    cursor: pointer;
+}
+
+.component-reske-narrative-browse.-row .-content .-item .-type:hover {
+    color: #000;
+}
+
 .component-reske-narrative-browse.-row .-markdown {
     color: #888;
 }

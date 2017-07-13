@@ -45,6 +45,9 @@
     border-bottom: none;
 }
 
+
+/* FIELDS */
+
 .component-reske-genome-browse.-row .-title {
     font-weight: bold;
 }
@@ -59,15 +62,19 @@
     font-style: italic;
 }
 
-.component-reske-genome-browse.-row .-taxonomy {
-    /* text-indent: -1em;
-    margin-left: 1em; */
-    /* overflow: auto;
-    white-space: nowrap; */
+.component-reske-genome-browse.-row .-dna-size {
+    font-family: monospace;
+    text-align: right;
 }
 
-.component-reske-genome-browse.-row .-feature-count {
+.component-reske-genome-browse.-row .-gc-content {
     font-family: monospace;
+    text-align: right;
+}
+
+.component-reske-genome-browse.-row .-contig-count {
+    font-family: monospace;
+    text-align: right;
 }
 
 
@@ -79,6 +86,42 @@
 
 .component-reske-genome-browse.-row:hover .-features {
     visibility: visible;
+}
+
+
+/*markdown styles */
+
+.component-reske-genome-browse .-html>h1,
+.component-reske-genome-browse .-html>h2,
+.component-reske-genome-browse .-html>h3,
+.component-reske-genome-browse .-html>h4,
+.component-reske-genome-browse .-html>h5 {
+    margin-top: 0;
+}
+
+.component-reske-genome-browse h1 {
+    font-size: 150%;
+    font-family: Arial, monospace;
+}
+
+.component-reske-genome-browse h2 {
+    font-size: 140%;
+    font-family: Arial, monospace;
+}
+
+.component-reske-genome-browse h3 {
+    font-size: 130%;
+    font-family: Arial, monospace;
+}
+
+.component-reske-genome-browse h4 {
+    font-size: 120%;
+    font-family: Arial, monospace;
+}
+
+.component-reske-genome-browse h5 {
+    font-size: 110%;
+    font-family: Arial, monospace;
 }
 
 

@@ -1,0 +1,100 @@
+.component-reske-paired-end-library-browse.-row {
+    /*background-color: #DDD;*/
+    padding: 6px;
+    /*border: 1px transparent solid;*/
+    /*border-bottom: 1px silver solid;*/
+    padding-bottom: 12px;
+}
+
+.component-reske-paired-end-library-browse.-row:hover {
+    /*border: 1px #CCC solid;*/
+    background-color: rgba(220, 220, 220, 0.5);
+}
+
+.component-reske-paired-end-library-browse.-row .-field.-resultNumber {
+    text-align: center;
+    font-style: italic;
+    color: #666;
+}
+
+
+/* FIELDS */
+
+.component-reske-paired-end-library-browse.-row .-title {
+    font-weight: bold;
+}
+
+.component-reske-paired-end-library-browse.-row .-owner {}
+
+.component-reske-paired-end-library-browse.-row .-created-at {
+    font-style: italic;
+}
+
+.component-reske-paired-end-library-browse.-row .-updated-at {
+    font-style: italic;
+}
+
+.component-reske-paired-end-library-browse.-row .-dna-size {
+    font-family: monospace;
+    text-align: right;
+}
+
+.component-reske-paired-end-library-browse.-row .-gc-content {
+    font-family: monospace;
+    text-align: right;
+}
+
+.component-reske-paired-end-library-browse.-row .-read-count {
+    font-family: monospace;
+    text-align: right;
+}
+
+.component-reske-paired-end-library-browse.-row .-mean-read-length {}
+
+
+/* right hand features column */
+
+.component-reske-paired-end-library-browse.-row .-features {
+    visibility: hidden;
+}
+
+.component-reske-paired-end-library-browse.-row:hover .-features {
+    visibility: visible;
+}
+
+
+/* toolbar */
+
+.component-reske-paired-end-library-browse.-row .-toolbar {
+    /*color: #DDD;*/
+    color: transparent;
+}
+
+.component-reske-paired-end-library-browse.-row:hover .-toolbar {
+    color: #000;
+}
+
+.component-reske-paired-end-library-browse.-row .-toolbar .-button {
+    cursor: pointer;
+    padding: 3px;
+    border: 1px transparent solid;
+    border-radius: 4px;
+}
+
+.component-reske-paired-end-library-browse.-row:hover .-toolbar .-button:hover {
+    /*background-color: #CCC;*/
+    border: 1px gray solid;
+}
+
+.component-reske-paired-end-library-browse.-row .-toolbar .-button .-icon {
+    margin: 0 8px 0 4px;
+}
+
+
+/* TABLE - to share */
+
+.component-reske-paired-end-library-browse.-row .-table {
+    width: 100%;
+    max-width: 24em;
+    border: 1px silver solid;
+}

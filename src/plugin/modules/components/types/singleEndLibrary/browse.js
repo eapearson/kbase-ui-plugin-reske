@@ -1,11 +1,13 @@
 define([
     'knockout-plus',
+    'highlight',
     'kb_common/html',
     '../common',
-    'bootstrap',
-    'css!font_awesome'
+
+    'css!./browse.css'
 ], function (
     ko,
+    highlight,
     html,
     common
 ) {
@@ -45,7 +47,7 @@ define([
 
     function template() {
         return div({
-            class: 'component-reske-genome-browse -row'
+            class: 'component-reske-single-end-library-browse -row'
         }, [
             div([
                 div({
@@ -76,7 +78,7 @@ define([
                                 attr: {
                                     href: '"#dataview/" + item.meta.ids.dataviewId'
                                 },
-                                text: 'item.genome.title'
+                                text: 'item.singleEndLibrary.title'
                             },
                             target: '_blank',
                             style: {
@@ -86,48 +88,58 @@ define([
                         })
                     ]),
                     common.buildMetaInfo(),
+                    div({
+                        class: '-sequencing-technology'
+                    }, [
+                        span({
+                            style: {
+                                fontStyle: 'italic'
+                            }
+                        }, 'sequenced with: '),
+                        span({
+                            class: '-contig-id',
+                            dataBind: {
+                                text: 'item.singleEndLibrary.sequencingTechnology'
+                            }
+                        })
+                    ]),
                     table({
-                        class: '-table '
+                        class: '-table'
                     }, [
                         tr([
-                            th('Scientific name'),
+                            th('Sequenced with'),
                             td({
                                 dataBind: {
-                                    text: 'item.genome.scientificName'
+                                    html: 'item.singleEndLibrary.sequencingTechnology'
                                 },
-                                class: '-scientific-name'
+                                class: '-sequence-tehcnology'
                             })
                         ]),
                         tr([
-                            th('Taxonomy'),
+                            th('GC content (%)'),
                             td(div({
-                                class: '-taxonomy',
                                 dataBind: {
-                                    foreach: 'item.genome.taxonomy'
-                                }
-                            }, span([
-                                span({
-                                    dataBind: {
-                                        text: '$data'
-                                    }
-                                }),
-                                '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
-                                span({
-                                    class: 'fa fa-angle-right',
-                                    style: {
-                                        margin: '0 4px'
-                                    }
-                                }),
-                                '<!-- /ko -->'
-                            ])))
+                                    html: 'item.singleEndLibrary.gcContent.formatted'
+                                },
+                                class: '-gc-content -number'
+                            }))
                         ]),
                         tr([
-                            th('Features '),
+                            th('Read count'),
                             td(div({
                                 dataBind: {
-                                    html: 'item.genome.featureCount.formatted'
+                                    html: 'item.singleEndLibrary.readCount.formatted'
                                 },
-                                class: '-feature-count'
+                                class: '-read-count -number'
+                            }))
+                        ]),
+                        tr([
+                            th('Mean read length'),
+                            td(div({
+                                dataBind: {
+                                    html: 'item.singleEndLibrary.meanReadLength.formatted'
+                                },
+                                class: '-mean-read-length -number'
                             }))
                         ])
                     ])
@@ -156,5 +168,5 @@ define([
         };
     }
 
-    ko.components.register('reske/genome/browse', component());
+    ko.components.register('reske/singleEndLibrary/browse', component());
 });

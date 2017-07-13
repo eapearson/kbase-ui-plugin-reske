@@ -1,0 +1,117 @@
+.component-reske-genomefeature-browse.-row {
+    /*background-color: #DDD;*/
+    padding: 6px;
+    /*border: 1px transparent solid;*/
+    /*border-bottom: 1px silver solid;*/
+    padding-bottom: 12px;
+}
+
+.component-reske-genomefeature-browse.-row:hover {
+    /*border: 1px #CCC solid;*/
+    background-color: rgba(220, 220, 220, 0.5);
+}
+
+.component-reske-genomefeature-browse.-row .-field.-resultNumber {
+    text-align: center;
+    font-style: italic;
+    color: #666;
+}
+
+.component-reske-genomefeature-browse.-row .-markdown {
+    color: #888;
+}
+
+.component-reske-genomefeature-browse.-row .-markdown.-active,
+.component-reske-genomefeature-browse.-row:hover .-markdown {
+    color: #000;
+}
+
+.component-reske-genomefeature-browse.-row .-markdown .-toggler {
+    cursor: pointer;
+    display: inline-block;
+}
+
+.component-reske-genomefeature-browse.-row .-markdown .-toggler:hover {
+    background-color: #DDD;
+}
+
+.component-reske-genomefeature-browse.-row .-markdown .-content .-item {
+    border-bottom: 1px #DDD solid;
+    padding: 4px 4px 4px 4px;
+}
+
+.component-reske-genomefeature-browse.-row .-markdown .-content .-item:last-child {
+    /*background-color: #DDD;*/
+    border-bottom: none;
+}
+
+.component-reske-genomefeature-browse.-row .-title {
+    font-weight: bold;
+}
+
+.component-reske-genomefeature-browse.-row .-owner {}
+
+.component-reske-genomefeature-browse.-row .-created-at {
+    font-style: italic;
+}
+
+.component-reske-genomefeature-browse.-row .-updated-at {
+    font-style: italic;
+}
+
+.component-reske-genomefeature-browse.-row .-taxonomy {
+    text-indent: -1em;
+    margin-left: 1em;
+}
+
+.component-reske-genomefeature-browse.-row .-feature-type {
+    font-style: italic;
+}
+
+.component-reske-genomefeature-browse.-row .-start,
+.component-reske-genomefeature-browse.-row .-end {
+    font-family: monospace;
+}
+
+
+/* right hand features column */
+
+.component-reske-genomefeature-browse.-row .-features {
+    visibility: hidden;
+}
+
+.component-reske-genomefeature-browse.-row:hover .-features {
+    visibility: visible;
+}
+
+
+/* toolbar */
+
+.component-reske-genomefeature-browse.-row .-toolbar {
+    /*color: #DDD;*/
+    color: transparent;
+}
+
+.component-reske-genomefeature-browse.-row:hover .-toolbar {
+    color: #000;
+}
+
+.component-reske-genomefeature-browse.-row .-toolbar .-button {
+    cursor: pointer;
+    padding: 3px;
+    border: 1px transparent solid;
+    border-radius: 4px;
+}
+
+.component-reske-genomefeature-browse.-row:hover .-toolbar .-button:hover {
+    /*background-color: #CCC;*/
+    border: 1px gray solid;
+}
+
+.component-reske-genomefeature-browse.-row .-toolbar .-button .-icon {
+    margin: 0 8px 0 4px;
+}
+
+.fa.-deg45 {
+    transform: rotate(45deg);
+}

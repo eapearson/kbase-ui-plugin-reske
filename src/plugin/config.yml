@@ -26,6 +26,35 @@ install:
             module: tabtest
             id: kb_reskeSearch_tabtest
             type: factory
+    ko-components:
+        -
+            name: reske/narrative/browse
+            module: components/types/narrative/browse
+            css: true   
+        -
+            name: reske/genome/browse
+            module: components/types/genome/browse
+            css: true
+        -
+            name: reske/genomeFeature/browse
+            module: components/types/genomeFeature/browse
+            css: true
+        -
+            name: reske/assembly/browse
+            module: components/types/assembly/browse
+            css: true    
+        -
+            name: reske/assemblyContig/browse
+            module: components/types/assemblyContig/browse
+            css: true
+        -
+            name: reske/pariedEndLibrary/browse
+            module: components/types/pairedEndLibrary/browse
+            css: true 
+        -
+            name: reske/singleEndLibrary/browse
+            module: components/types/singleEndLibrary/browse
+            css: true              
     routes:
         -
             path: ['reske', 'object-search']

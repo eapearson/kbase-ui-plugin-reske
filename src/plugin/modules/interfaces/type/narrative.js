@@ -1,7 +1,6 @@
 define([
     'knockout-plus',
-    'marked',
-    './browse'
+    'marked'
 ], function (
     ko,
     marked
@@ -33,7 +32,7 @@ define([
         }
     }
 
-    function normalizeToNarrative(object) {
+    function normalizeToNarrative(object, options) {
         // try to suss out interesting narrative bits.
         var cells = object.data.cells.map(function (cell) {
             if (Object.keys(cell.metadata).length > 0) {
@@ -46,26 +45,42 @@ define([
                         module: null,
                         description: null
                     };
+                    var iconUrl;
+                    // Surface some key attributes of an app, but only if the 
+                    // metadata is well structured.
+                    // Hopefully most of the issues with incompletely structured app 
+                    // cells is due to the presence of early development narratives.
                     if (appCell.app.spec && 'info' in appCell.app.spec) {
                         app.name = appCell.app.spec.info.name;
+                        app.id = appCell.app.spec.info.id;
                         app.method = appCell.app.spec.info.id.split('/')[1];
                         app.module = appCell.app.spec.info.module_name;
                         app.description = appCell.app.spec.info.subtitle;
+                        if (appCell.app.spec.info.icon) {
+                            var url = appCell.app.spec.info.icon.url;
+                            if (url) {
+                                iconUrl = options.runtime.config('services.narrative_method_store.image_url') + url;
+                            }
+                        }
                     }
+
                     return {
                         type: 'app',
                         params: cell.metadata.kbase.appCell.params,
                         spec: cell.metadata.kbase.appCell.app.spec,
+                        iconUrl: iconUrl,
                         app: app
                     };
                 } else if (cell.metadata.kbase.outputCell) {
                     return {
-                        type: 'output'
+                        type: 'output',
+                        show: ko.observable(false)
 
                     };
                 } else if (cell.metadata.kbase.dataCell) {
                     return {
-                        type: 'data'
+                        type: 'data',
+                        show: ko.observable(false)
                     };
                 } else {
                     if (Object.keys(cell.metadata.kbase).length === 0) {
@@ -75,7 +90,8 @@ define([
                             return {
                                 type: 'code',
                                 source: cell.source,
-                                code: renderCode(cell.source)
+                                code: renderCode(cell.source),
+                                show: ko.observable(false)
                             };
                         } else if (cell.source.match(/kb-cell-out/)) {
                             var m = cell.source.match(/kbaseNarrativeOutputCell\((.*)\)/);
@@ -83,18 +99,21 @@ define([
                                 try {
                                     return {
                                         type: 'output-widget',
-                                        param: JSON.parse([m[1]])
+                                        param: JSON.parse([m[1]]),
+                                        show: ko.observable(false)
                                     };
                                 } catch (ex) {
                                     return {
                                         type: 'output-widget',
-                                        error: 'Error parsing output widget param: ' + ex.error
+                                        error: 'Error parsing output widget param: ' + ex.error,
+                                        show: ko.observable(false)
                                     };
                                 }
                             } else {
                                 return {
                                     type: 'output-widget',
-                                    error: 'Cannot find widget in output cell source'
+                                    error: 'Cannot find widget in output cell source',
+                                    show: ko.observable(false)
                                 };
                             }
                         } else {
@@ -110,7 +129,8 @@ define([
                     } else {
                         return {
                             type: 'kbase-unknown',
-                            text: 'Unknown kbase cell type: '
+                            text: 'Unknown kbase cell type: ',
+                            show: ko.observable(false)
                         };
                     }
                 }
@@ -122,7 +142,8 @@ define([
                     return {
                         type: 'code',
                         source: cell.source,
-                        code: renderCode(cell.source)
+                        code: renderCode(cell.source),
+                        show: ko.observable(false)
                     };
                 }
                 return {
@@ -132,6 +153,16 @@ define([
                 };
             }
 
+        });
+
+        // add toggling.
+        cells.forEach(function (cell) {
+            if (!cell.show) {
+                cell.show = ko.observable(true);
+            }
+            cell.doToggleShow = function () {
+                cell.show(!cell.show());
+            };
         });
 
         object['narrative'] = {
@@ -156,11 +187,22 @@ define([
         };
     }
 
-    function normalize(object) {
-        normalizeToNarrative(object);
+    function guidToReference(guid) {
+        var m = guid.match(/^WS:(\d+)\/(\d+)\/(\d+)$/);
+        return {
+            workspaceId: m[1],
+            objectId: m[2],
+            objectVersion: m[3],
+            ref: m.slice(1, 4).join('/'),
+        };
+    }
+
+    function normalize(object, options) {
+        normalizeToNarrative(object, options);
     }
 
     return {
-        normalize: normalize
+        normalize: normalize,
+        guidToReference: guidToReference
     };
 });

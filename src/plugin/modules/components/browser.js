@@ -5,8 +5,7 @@ define([
     'kb_common/html',
     'kb_common/jsonRpc/genericClient',
     'kb_service/utils',
-    './types/genome/main',
-    './types/narrative/main',
+    '../types',
     'css!./browser.css'
 ], function (
     Promise,
@@ -15,8 +14,7 @@ define([
     html,
     GenericClient,
     serviceUtils,
-    genome,
-    narrative
+    Types
 ) {
     'use strict';
 
@@ -26,6 +24,186 @@ define([
         button = t('button'),
         label = t('label'),
         select = t('select');
+
+
+
+    function Cacher() {
+        var cache = {};
+        var cacheSize = 0;
+        var maxSize = 200;
+        var trimSize = 20;
+        var maxAge = 60000;
+
+        function add(key, value) {
+            if (has(key)) {
+                throw new Error('Cache entry already exists for ' + key);
+            }
+            if (cacheSize >= maxSize) {
+                trim();
+            }
+            cache[key] = {
+                key: key,
+                value: value,
+                addedAt: new Date().getTime()
+            };
+            cacheSize += 1;
+        }
+
+        function has(key) {
+            var item = cache[key];
+            if (item === undefined) {
+                return false;
+            }
+            var now = new Date().getTime();
+            if ((now - item.addedAt) > maxAge) {
+                delete cache[key];
+                cacheSize -= 1;
+                return false;
+            }
+            return true;
+        }
+
+        function get(key, defaultValue) {
+            var item = cache[key];
+            if (!item) {
+                return defaultValue;
+            }
+            var now = new Date().getTime();
+            if ((now - item.addedAt) > maxAge) {
+                delete cache[key];
+                cacheSize -= 1;
+                return defaultValue;
+            }
+            return item.value;
+        }
+
+        function remove(key) {
+            delete cache[key];
+            cacheSize -= 1;
+        }
+
+        function trim() {
+            // make list of all items
+            var items = Object.keys(cache).map(function (key) {
+                return cache[key];
+            }).sort(function (a, b) {
+                return (a.addedAt - b.addedAt);
+            });
+
+            if (items.length < trimSize) {
+                return;
+            }
+            var toRemove = items.slice(0, trimSize);
+
+            toRemove.forEach(function (item) {
+                remove(item.key);
+            });
+        }
+
+        function check() {
+            var toRecache = [];
+            var newCache = {};
+            var now = new Date().getTime();
+            Object.keys(cache).forEach(function (key) {
+                var item = cache[key];
+                if ((now - item.addedAt) > maxAge) {
+                    return;
+                }
+                toRecache.push(item);
+            });
+            toRecache.forEach(function (item) {
+                newCache[item.key] = item;
+            });
+            cacheSize = toRecache.length;
+            cache = newCache;
+        }
+
+        function size() {
+            return cacheSize;
+        }
+
+        return {
+            add: add,
+            get: get,
+            has: has,
+            remove: remove,
+            check: check,
+            size: size,
+            trim: trim
+        };
+    }
+
+    var objectCache = Cacher();
+
+    function objectQuery(workspace, refSpecs) {
+        var resultsMap = {};
+        var objectsNeeded = [];
+        refSpecs.forEach(function (refSpec) {
+            if (objectCache.has(refSpec.ref)) {
+                resultsMap[refSpec.ref] = objectCache.get(refSpec.ref);
+            } else {
+                objectsNeeded.push(refSpec);
+            }
+        });
+        // Everything is cached?
+        if (objectsNeeded.length === 0) {
+            return refSpecs.map(function (refSpec) {
+                return resultsMap[refSpec.ref];
+            });
+        }
+
+
+        // Otherwise bundle up the object id specs for one request.
+        return workspace.callFunc('get_object_info3', [{
+            objects: objectsNeeded.map(function (obj) { return obj.spec; }),
+            includeMetadata: 1
+        }]).spread(function (result) {
+            result.infos.forEach(function (info, index) {
+                var object = serviceUtils.objectInfoToObject(info);
+                var ref = objectsNeeded[index].ref;
+                // TODO: resolve this - duplicates appearing.
+                if (objectCache.has(ref)) {
+                    console.warn('Duplicate object detected: ' + ref);
+                } else {
+                    objectCache.add(ref, object);
+                }
+                resultsMap[ref] = object;
+            });
+            // unpack the results back into an array with the same shape.
+            // TODO: just accept a map, since we don't want duplicate refs anyway.
+            return refSpecs.map(function (refSpec) {
+                return resultsMap[refSpec.ref];
+            });
+        });
+    }
+
+    var workspaceCache = Cacher();
+
+    function workspaceQuery(workspace, ids) {
+        var resultsMap = {};
+
+        var needed = [];
+        ids.forEach(function (id) {
+            var sid = String(id);
+            if (workspaceCache.has(sid)) {
+                resultsMap[sid] = workspaceCache.get(sid);
+            } else {
+                needed.push(id);
+            }
+        });
+
+        return Promise.all(needed.map(function (id) {
+            return workspace.callFunc('get_workspace_info', [{
+                id: id
+            }]).spread(function (info) {
+                var workspaceInfo = serviceUtils.workspaceInfoToObject(info);
+                workspaceCache.add(String(id), workspaceInfo);
+                resultsMap[String(id)] = workspaceInfo;
+            });
+        })).then(function () {
+            return resultsMap;
+        });
+    }
 
     ko.extenders.parsed = function (target, parseFun) {
         function parseit(newValue) {
@@ -41,17 +219,6 @@ define([
         parseit(target());
         return target;
     };
-
-    function guidToWorkspaceId(guid) {
-        var m = guid.match(/^WS:(\d+)\/(\d+)\/(\d+)$/);
-        return {
-            workspaceId: m[1],
-            objectId: m[2],
-            objectVersion: m[3],
-            ref: m.slice(1).join('/'),
-            narrid: 'ws.' + m[1] + '.obj.' + m[2]
-        };
-    }
 
     /*
         Compact date is: MM/DD/YY HH:MMpm (local time)
@@ -85,20 +252,41 @@ define([
         return (perm === 'a');
     }
 
-    function normalizeToType(object) {
-        switch (object.type) {
-        case 'genome':
-            genome.normalize(object);
-            break;
-        case 'narrative':
-            narrative.normalize(object);
-            break;
+    function getTypeIcon(object, options) {
+        var typeId = object.currentObjectInfo.type;
+        var type = options.runtime.service('type').parseTypeId(typeId);
+        return options.runtime.service('type').getIcon({ type: type });
+    }
+
+    function normalizeToType(object, runtime) {
+        var typeDef = Types.typesMap[object.type];
+        if (typeDef.methods && typeDef.methods.normalize) {
+            return typeDef.methods.normalize(object, { runtime: runtime });
         }
     }
 
     // Simplifed over the generic object search.
     // TODO: may add back in features after the basic display and paging is sorted out.
-    function searchObjects(runtime, type, searchTerm, withPublicData, withPrivateData, pageStart, pageSize) {
+    function searchObjects(runtime, type, searchTerm, withPublicData, withPrivateData, sortField, sortDescending, pageStart, pageSize) {
+        var typeDef = Types.typesMap[type];
+
+        var perf = {
+            prepare: {
+                start: new Date().getTime(),
+                elapsed: null
+            },
+            search: {
+                start: null,
+                elapsed: null
+            },
+            results: {
+                start: null,
+                elapsed: null
+            },
+            finished: {
+                start: null
+            }
+        };
 
         // With an empty search term, we simply reset the current search results.
         // The default behaviour would be to return all available items.
@@ -124,12 +312,16 @@ define([
             }
         };
 
-        var sortingRules = [{
-            is_timestamp: 0,
-            is_object_name: 0,
-            key_name: 'title',
-            descending: 0
-        }];
+        // for now just apply one at a time.
+        var sortingRules = [];
+        if (sortField !== null) {
+            sortingRules = [{
+                is_timestamp: sortField.isTimestamp ? 1 : 0,
+                is_object_name: sortField.isObjectName ? 1 : 0,
+                key_name: sortField.key,
+                descending: sortDescending ? 1 : 0
+            }];
+        }
 
         var param = {
             object_type: type,
@@ -137,7 +329,7 @@ define([
                 start: pageStart || 0,
                 count: pageSize
             },
-            // sorting_rules: sortingRules,
+            sorting_rules: sortingRules,
             post_processing: {
                 ids_only: 0,
                 skip_info: 0,
@@ -164,8 +356,11 @@ define([
             token: runtime.service('session').getAuthToken()
         });
 
+        perf.search.start = new Date().getTime();
         return reske.callFunc('search_objects', [param])
             .then(function (result) {
+                perf.results.start = new Date().getTime();
+
                 // We have the results, now we munge it around to make it more readily displayable.
                 var hits = result[0];
                 if (hits.objects.length === 0) {
@@ -173,14 +368,15 @@ define([
                 }
 
                 hits.objects.forEach(function (object, index) {
-
                     // get the narrative id.
-                    var workspaceId = guidToWorkspaceId(object.guid);
+                    var reference = typeDef.methods.guidToReference(object.guid);
+                    // var workspaceId = guidToWorkspaceId(object.guid);
 
                     // keep the object typing for now
                     object.type = type;
 
                     // to allow for template switching - browse/detail.
+                    // TODO: not used ?? !!
                     object.template = 'reske/' + type + '/browse-row';
 
                     object.datestring = dateString(new Date(object.timestamp));
@@ -214,13 +410,18 @@ define([
 
                     // TODO: get this from the type-specific object / vm creator
 
-                    normalizeToType(object);
-
+                    normalizeToType(object, runtime);
                     object.meta = {
-                        workspace: workspaceId,
+                        workspace: reference,
+                        ids: reference,
                         resultNumber: index + hits.pagination.start + 1
                     };
                 });
+                perf.finished.start = new Date().getTime();
+                perf.prepare.elapsed = perf.search.start - perf.prepare.start;
+                perf.search.elapsed = perf.results.start - perf.search.start;
+                perf.results.elapsed = perf.finished.start - perf.results.start;
+                console.log('search_objects perf: prepare: ' + perf.prepare.elapsed + ', search: ' + perf.search.elapsed + ', process results: ' + perf.results.elapsed);
                 return [hits, filter];
             });
     }
@@ -236,6 +437,9 @@ define([
 
         var type = tabVM.type;
 
+        // get the whole type definition.
+        var typeDef = Types.typesMap[type];
+
         var runtime = searchVM.runtime;
 
         var searchInput = searchVM.searchInput;
@@ -248,19 +452,23 @@ define([
         var sortBy = ko.observable();
 
         // TODO: these need to come from the type
-        var sortFields = [{
-            value: 'title',
-            label: 'Title'
-        }, {
-            value: 'created',
-            label: 'Created'
-        }, {
-            value: 'updated',
-            label: 'Updated'
-        }, {
-            value: 'owner',
-            label: 'Owner'
-        }];
+        var sortFields = typeDef.searchKeys;
+        var sortFieldsMap = {};
+        sortFields.forEach(function (sortField) {
+            sortFieldsMap[sortField.key] = sortField;
+        });
+        var currentSortField = ko.pureComputed(function () {
+            // The "natural" sort order is simply an empty string which we translate
+            // into a null.
+            var sortKey = sortBy();
+            if (!sortKey || sortKey.length === 0) {
+                return null;
+            }
+            return sortFieldsMap[sortBy()];
+        });
+        currentSortField.subscribe(function () {
+            doSearch();
+        });
 
         var sortDirection = ko.observable('ascending');
         var sortDirections = [{
@@ -270,6 +478,12 @@ define([
             value: 'descending',
             label: 'Descending'
         }];
+        var sortDescending = ko.pureComputed(function () {
+            return (sortDirection() === 'descending');
+        });
+        sortDescending.subscribe(function () {
+            doSearch();
+        });
 
         // PAGING
         var totalCount = ko.observable();
@@ -314,9 +528,6 @@ define([
             };
         });
 
-        searchInput.subscribe(function () {
-            doSearch();
-        });
         pageSize.subscribe(function () {
             if (searchResults().length > 0) {
                 doSearch();
@@ -344,28 +555,71 @@ define([
                 currentSearch.search.cancel();
             }
 
-            currentSearch.search = searchObjects(runtime, type, searchInput(), withPublicData(), withPrivateData(), pageStart(), pageSize())
+            var perf = {
+                search: {
+                    start: new Date().getTime(),
+                    elapsed: null
+                },
+                prepare: {
+                    start: null,
+                    elapsed: null
+                },
+                workspace: {
+                    start: null,
+                    elapsed: null
+                },
+                results: {
+                    start: null,
+                    elapsed: null
+                },
+                finished: {
+                    start: null,
+                    elapsed: null
+                }
+            };
+            currentSearch.search = searchObjects(runtime, type, searchInput(), withPublicData(), withPrivateData(), currentSortField(), sortDescending(), pageStart(), pageSize())
                 .spread(function (result, filter) {
+                    perf.prepare.start = new Date().getTime();
                     if (result.objects.length === 0) {
                         return [result, filter];
                     }
 
                     // wrap in a workspace call to get workspace and object info for each narrative.                   
+
                     var originalObjectSpecs = result.objects.map(function (object) {
-                        return {
+                        var spec = {
                             wsid: object.meta.workspace.workspaceId,
                             objid: object.meta.workspace.objectId,
                             ver: 1
                         };
+                        var ref = [spec.wsid, spec.objid, spec.ver].join('/');
+                        return {
+                            spec: spec,
+                            ref: ref
+                        };
                     });
 
                     var currentObjectSpecs = result.objects.map(function (object) {
-                        return {
+                        var spec = {
                             wsid: object.meta.workspace.workspaceId,
                             objid: object.meta.workspace.objectId,
                             ver: object.meta.workspace.objectVersion
                         };
+                        var ref = [spec.wsid, spec.objid, spec.ver].join('/');
+                        return {
+                            spec: spec,
+                            ref: ref
+                        };
                     });
+
+                    var allObjectSpecs = {};
+                    originalObjectSpecs.forEach(function (spec) {
+                        allObjectSpecs[spec.ref] = spec;
+                    });
+                    currentObjectSpecs.forEach(function (spec) {
+                        allObjectSpecs[spec.ref] = spec;
+                    });
+
 
                     var workspace = new GenericClient({
                         url: runtime.config('services.workspace.url'),
@@ -373,38 +627,43 @@ define([
                         token: runtime.service('session').getAuthToken()
                     });
 
+                    var uniqueWorkspaces = Object.keys(result.objects.reduce(function (acc, object) {
+                        var workspaceId = object.meta.workspace.workspaceId;
+                        acc[String(workspaceId)] = true;
+                        return acc;
+                    }, {})).map(function (id) {
+                        return parseInt(id);
+                    });
+
+                    // TODO: combine original and current objec specs -- for some objects they will
+                    // be the same. This is not just for efficiency, but because the object queries
+                    // with otherwise trip over each other. After the objectquery, the results can 
+                    // be distributed back to the original and current object groups.
+
+                    perf.workspace.start = new Date().getTime();
                     return Promise.all([
-                        // array of object info, converted to object form.
-                        workspace.callFunc('get_object_info3', [{
-                            objects: originalObjectSpecs,
-                            includeMetadata: 1
-                        }]).spread(function (result) {
-                            return result.infos.map(function (info) {
-                                return serviceUtils.objectInfoToObject(info);
-                            });
-                        }),
-                        workspace.callFunc('get_object_info3', [{
-                            objects: currentObjectSpecs,
-                            includeMetadata: 1
-                        }]).spread(function (result) {
-                            return result.infos.map(function (info) {
-                                return serviceUtils.objectInfoToObject(info);
-                            });
-                        }),
-                        // array of workspace info, converted to object form.
-                        Promise.all(result.objects.map(function (object) {
-                            return workspace.callFunc('get_workspace_info', [{
-                                id: object.meta.workspace.workspaceId
-                            }]).spread(function (result) {
-                                return serviceUtils.workspaceInfoToObject(result);
-                            });
-                        }))
-                    ]).spread(function (originalObjectsInfo, currentObjectsInfo, workspacesInfo) {
+                        objectQuery(workspace, Object.keys(allObjectSpecs).map(function (key) { return allObjectSpecs[key]; })),
+                        // objectQuery(workspace, originalObjectSpecs),
+                        // objectQuery(workspace, currentObjectSpecs),
+                        workspaceQuery(workspace, uniqueWorkspaces)
+                    ]).spread(function (allObjectsInfo, workspacesInfo) {
+                        perf.results.start = new Date().getTime();
                         for (var i = 0; i < result.objects.length; i += 1) {
                             var object = result.objects[i];
-                            object.originalObjectInfo = originalObjectsInfo[i];
-                            object.currentObjectInfo = currentObjectsInfo[i];
-                            object.workspaceInfo = workspacesInfo[i];
+
+                            // back to a map!
+                            var allObjectsInfoMap = {};
+                            allObjectsInfo.forEach(function (objectInfo) {
+                                allObjectsInfoMap[objectInfo.ref] = objectInfo;
+                            });
+
+                            object.originalObjectInfo = allObjectsInfoMap[originalObjectSpecs[i].ref];
+                            object.currentObjectInfo = allObjectsInfoMap[currentObjectSpecs[i].ref];
+
+                            // object.originalObjectInfo = originalObjectsInfo[i];
+                            // object.currentObjectInfo = currentObjectsInfo[i];
+
+                            object.workspaceInfo = workspacesInfo[String(object.meta.workspace.workspaceId)];
 
                             // also patch up the narrative object...
                             object.meta.owner = object.workspaceInfo.owner;
@@ -419,6 +678,8 @@ define([
                             object.meta.public = object.workspaceInfo.globalread === 'y';
                             object.meta.isOwner = (object.meta.owner === runtime.service('session').getUsername());
 
+                            object.meta.narrativeTitle = object.workspaceInfo.metadata.narrative_nice_name;
+
                             object.meta.narrativeId = 'ws.' + object.workspaceInfo.id +
                                 '.obj.' + object.workspaceInfo.metadata.narrative;
 
@@ -429,6 +690,8 @@ define([
                             object.meta.canRead = canRead(object.workspaceInfo.user_permission);
                             object.meta.canWrite = canWrite(object.workspaceInfo.user_permission);
                             object.meta.canShare = canShare(object.workspaceInfo.user_permission);
+
+                            object.typeIcon = getTypeIcon(object, { runtime: runtime });
                         }
                     }).then(function () {
                         return [result, filter];
@@ -453,16 +716,31 @@ define([
                     console.error('ERROR', err);
                 })
                 .finally(function () {
+                    perf.finished.start = new Date().getTime();
+                    perf.search.elapsed = perf.prepare.start - perf.search.start;
+                    perf.prepare.elapsed = perf.workspace.start - perf.prepare.start;
+                    perf.workspace.elapsed = perf.results.start - perf.workspace.start;
+                    perf.results.elapsed = perf.finished.start - perf.results.start;
+                    console.log('search perf: object search: ' + perf.search.elapsed + ', prepare for ws calls: ' + perf.prepare.elapsed + ', workspace calls: ' + perf.workspace.elapsed + ', process results: ' + perf.results.elapsed);
+                    console.log('cache: ', objectCache.size(), workspaceCache.size());
                     searching(false);
                 });
         }
         doSearch();
-        searchInput.subscribe(function () {
+        var subscriptions = [];
+        subscriptions.push(searchInput.subscribe(function () {
             doSearch();
-        });
+        }));
+
+        function dispose() {
+            subscriptions.forEach(function (subscription) {
+                subscription.dispose();
+            });
+        }
 
         return {
             type: type,
+            typeDef: typeDef,
 
             searchInput: searchInput,
             searchResults: searchResults,
@@ -485,7 +763,9 @@ define([
             sortDirections: sortDirections,
 
             doSearch: doSearch,
-            searching: searching
+            searching: searching,
+
+            dispose: dispose
         };
     }
 
@@ -643,7 +923,8 @@ define([
                             value: 'sortBy',
                             options: 'sortFields',
                             optionsText: '"label"',
-                            optionsValue: '"value"'
+                            optionsValue: '"key"',
+                            optionsCaption: '"Natural"'
                         },
                         class: 'form-control'
                     }),
@@ -652,7 +933,8 @@ define([
                             value: 'sortDirection',
                             options: 'sortDirections',
                             optionsText: '"label"',
-                            optionsValue: '"value"'
+                            optionsValue: '"value"',
+                            disable: '!sortBy()'
                         },
                         class: 'form-control'
                     }),
@@ -678,7 +960,10 @@ define([
             }, div({
                 dataBind: {
                     component: {
-                        name: '"reske/" + $component.type + "/browse"',
+                        // NB we use the "uiId" here rather than type. This lets us
+                        // a. abstract away from the type name requirements to ui name requirements 
+
+                        name: '"reske/" + $component.typeDef.uiId + "/browse"',
                         params: {
                             item: '$data'
                         }
