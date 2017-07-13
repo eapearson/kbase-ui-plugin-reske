@@ -731,6 +731,12 @@ define([
         subscriptions.push(searchInput.subscribe(function () {
             doSearch();
         }));
+        subscriptions.push(withPrivateData.subscribe(function () {
+            doSearch();
+        }));
+        subscriptions.push(withPublicData.subscribe(function () {
+            doSearch();
+        }));
 
         function dispose() {
             subscriptions.forEach(function (subscription) {
