@@ -782,7 +782,7 @@ define([
             div({
                 style: {
                     display: 'inline-block',
-                    width: '40%',
+                    width: '25%',
                     verticalAlign: 'top'
                 }
             }, [
@@ -897,13 +897,13 @@ define([
                         },
                         class: 'form-control'
                     }),
-                    ' per page'
+                    ' items per page'
                 ])
             ]),
             div({
                 class: 'btn-group form-inline',
                 style: {
-                    width: '40%',
+                    width: '55%',
                     margin: '0',
                     textAlign: 'right',
                     float: 'none',

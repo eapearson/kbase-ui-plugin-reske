@@ -149,7 +149,11 @@ define([
 
     function buildMetaInfo(_options) {
         var options = _options || {};
-        return div({}, [
+        return div({
+            style: {
+                marginLeft: '5px'
+            }
+        }, [
             (function () {
                 if (options.showNarrative === false) {
                     return;
@@ -162,7 +166,10 @@ define([
                                 href: '"/narrative/" + item.meta.narrativeId'
                             }
                         },
-                        target: '_blank'
+                        target: '_blank',
+                        dataToggle: 'tooltip',
+                        dataPlacement: 'left',
+                        title: 'Open the Narrative this object is embedded in'
                     }, [
                         span({
                             class: 'fa fa-file-o'
@@ -180,37 +187,66 @@ define([
                 ]);
             }()),
             // Owner and creation/modification dates
-            div([
-                a({
-                    dataBind: {
-                        attr: {
-                            href: '"#people/" + item.meta.owner'
-                        }
-                    },
-                    target: '_blank'
-                }, span({
-                    dataBind: {
-                        text: 'item.meta.owner'
-                    },
-                    class: '-owner'
-                })),
-                ' - ',
-                span({
-                    dataBind: {
-                        text: 'item.meta.created.at'
-                    },
-                    class: '-created-at'
-                }),
-                '<!-- ko if: item.meta.created.at !== item.meta.updated.at -->',
-                ' (last updated ',
-                span({
-                    dataBind: {
-                        text: 'item.meta.updated.at'
-                    },
-                    class: '-updated-at'
-                }),
-                ')',
-                '<!-- /ko -->'
+            div({
+                style: {
+                    maxWidth: '40em'
+                }
+            }, [
+                div({
+                    style: {
+                        display: 'inline-block',
+                        width: '50%'
+                    }
+                }, [
+                    a({
+                        dataBind: {
+                            attr: {
+                                href: '"#people/" + item.meta.owner'
+                            }
+                        },
+                        target: '_blank',
+                        dataToggle: 'tooltip',
+                        dataPlacement: 'left',
+                        title: 'This is the owner of the Narrative this object is embedded in; click here to view their profile.'
+                    }, [
+                        span({
+                            class: 'fa fa-user-o'
+                        }),
+                        span({
+                            dataBind: {
+                                text: 'item.meta.owner'
+                            },
+                            class: '-owner',
+                            style: {
+                                marginLeft: '4px'
+                            }
+                        })
+                    ])
+                ]),
+                div({
+                    style: {
+                        display: 'inline-block',
+                        width: '50%',
+                        textAlign: 'right'
+                    }
+                }, [
+                    span({
+                        dataBind: {
+                            text: 'item.meta.created.at'
+                        },
+                        class: '-created-at'
+                    }),
+                    '<!-- ko if: item.meta.created.at !== item.meta.updated.at -->',
+                    ' (last updated ',
+                    span({
+                        dataBind: {
+                            text: 'item.meta.updated.at'
+                        },
+                        class: '-updated-at'
+                    }),
+                    ')',
+                    '<!-- /ko -->'
+                ])
             ])
         ]);
     }
