@@ -6,6 +6,7 @@ define([
     'kb_common/bootstrapUtils',
     'kb_common/jsonRpc/genericClient',
     '../types',
+    '../nanoBus',
 
     './tabset',
     './type-search-summary',
@@ -17,7 +18,8 @@ define([
     html,
     bs,
     GenericClient,
-    Types
+    Types,
+    NanoBus
 ) {
     'use strict';
     var t = html.tag,
@@ -25,7 +27,6 @@ define([
         span = t('span'),
         h2 = t('h2'),
         label = t('label'),
-        form = t('form'),
         input = t('input');
 
     function searchTypes(runtime, searchTerm, withPublic, withPrivate) {
@@ -126,6 +127,10 @@ define([
 
     function viewModel(params) {
         var runtime = params.runtime;
+        var query = params.query;
+
+        // Top level query engine object threaded through all data-centric components
+
 
         // VIEW ELEMENTS
         var searchInput = ko.observable().extend({
@@ -135,6 +140,11 @@ define([
         var searchError = ko.observable();
 
         var status = ko.observable();
+
+        // Little message bus for decoupled comm between components.
+
+        // This one is for talking to the tabset component.
+        var tabsetBus = NanoBus();
 
         // populate the array with all types first.
         var searchResultsMap = {};
@@ -307,6 +317,24 @@ define([
             doSearch();
         }
 
+        function doHelp() {
+            var tab = {
+                label: 'Help',
+                closable: true,
+                component: {
+                    name: 'reske/help',
+                    // NB these params are bound here, not in the tabset.
+                    params: {
+                        title: 'Some Title',
+                        text: 'Some text...'
+                    }
+                }
+            };
+            tabsetBus.send('add-tab', {
+                tab: tab
+            });
+        }
+
         function doSearchDetails(data) {
             // just for now ...
             var query = {
@@ -318,6 +346,25 @@ define([
             }).join('&');
             window.location = url;
         }
+
+        // CALLED AFTER LOADED AND READY...
+
+        // The ready message is called when the tabset has loaded and is ready to 
+        // interact. We use it here to add the initial tab for search results.
+        tabsetBus.on('ready', function () {
+            tabsetBus.send('add-tab', {
+                tab: {
+                    label: 'Results',
+                    component: {
+                        name: 'reske/type-search/summary',
+                        // NB these params are bound here, not in the tabset.
+                        params: {
+
+                        }
+                    }
+                }
+            });
+        });
 
 
         // Tabs and higher level ui.
@@ -335,17 +382,29 @@ define([
         */
 
         return {
+            // INTERFACE
             runtime: runtime,
+            QE: query,
+
+            // UI 
             searchInput: searchInput,
             searchPublicData: searchPublicData,
             searchPrivateData: searchPrivateData,
+
+            // COMPUTED
             searchResults: searchResults,
             searchResultsTabLabel: searchResultsTabLabel,
             resultsColumnLabel: resultsColumnLabel,
             searchError: searchError,
             searching: searching,
+
+            // ACTIONS
             doSearchDetails: doSearchDetails,
-            doSearchAgain: doSearchAgain
+            doSearchAgain: doSearchAgain,
+            doHelp: doHelp,
+
+            // BUS
+            tabsetBus: tabsetBus
         };
     }
 
@@ -405,6 +464,20 @@ define([
                                     style: {
                                         color: 'searching() ? "green" : "black"'
                                     }
+                                }
+                            })),
+                            div({
+                                class: 'input-group-addon',
+                                style: {
+                                    cursor: 'pointer'
+                                },
+                                dataBind: {
+                                    click: 'doHelp'
+                                }
+                            }, span({
+                                class: 'fa fa-info',
+                                style: {
+                                    fontSize: '125%'
                                 }
                             }))
                         ])
@@ -481,29 +554,15 @@ define([
                             name: '"tabset"',
                             params: {
                                 vm: {
+                                    QE: 'QE',
                                     searchResults: 'searchResults',
                                     searching: 'searching',
                                     searchInput: 'searchInput',
                                     withPublicData: 'searchPublicData',
                                     withPrivateData: 'searchPrivateData',
                                     runtime: 'runtime',
-                                    ima: '"hostedvm"'
-                                },
-                                tabs: [{
-                                    label: '"Results"',
-                                    component: {
-                                        name: '"reske/type-search/summary"',
-                                        // NB these params are bound here, not in the tabset.
-                                        params: {
-                                            searchResults: 'searchResults',
-                                            searching: 'searching',
-                                            searchInput: 'searchInput',
-                                            withPublicData: 'searchPublicData',
-                                            withPrivateData: 'searchPrivateData',
-                                            runtime: 'runtime'
-                                        }
-                                    }
-                                }]
+                                    bus: 'tabsetBus',
+                                }
                             }
                         }
                     }

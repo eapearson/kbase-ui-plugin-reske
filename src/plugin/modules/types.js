@@ -27,7 +27,8 @@ define([
         searchKeys: [{
             key: 'title',
             label: 'Title',
-            type: 'string'
+            type: 'string',
+            disableSort: true
         }, {
             key: 'source',
             label: 'Source',
@@ -345,8 +346,8 @@ define([
             },
             {
                 key: 'quality',
-                label: 'float',
-                type: 'Quality'
+                label: 'Quality',
+                type: 'float'
             },
             {
                 key: 'gc_content',
@@ -442,8 +443,50 @@ define([
     });
 
 
+    function getType(key) {
+        return objectTypeMap[key];
+    }
+
+    function typeIt(value) {
+        // duck typing for now...
+        // loop through all types (as defined above)
+        // NB use loop because .find is not suppported on any IE.
+        // var types = Object.keys(objectTypes);
+        for (var i = 0; i < objectTypes.length; i += 1) {
+            var type = objectTypes[i];
+            // loop through each key and see if in the current values data property.
+            var keys = type.typeKeys;
+            if (keys.every(function (key) {
+                    var optional = false;
+                    if (key.substr(-1) === '?') {
+                        optional = true;
+                        key = key.substr(0, -1);
+                    }
+                    var found = (key in value.data);
+                    if (!found && optional) {
+                        return true;
+                    }
+                    return found;
+                })) {
+                return type.id;
+            }
+        }
+        return 'unknown';
+    }
+
+    function getLookup() {
+        return objectTypes.map(function (objectType) {
+            return {
+                id: objectType.id,
+                label: objectType.label
+            };
+        });
+    }
     return {
         types: objectTypes,
-        typesMap: objectTypeMap
+        typesMap: objectTypeMap,
+        typeIt: typeIt,
+        getType: getType,
+        getLookup: getLookup
     };
 });
