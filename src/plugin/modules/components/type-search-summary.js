@@ -33,17 +33,15 @@ define([
         a = t('a');
 
     function viewModel(params1) {
-        // var runtime = params.runtime;
-
-        // var searchResultsMap = params.searchResultsMap;
-
-        var params = params1.searchVM;
+        var params = params1.hostVM;
+        var queryEngine = params.QE;
 
         var searchResults = params.searchResults;
         var searching = params.searching;
         var searchInput = params.searchInput;
         var withPrivateData = params.withPrivateData;
         var withPublicData = params.withPublicData;
+        var bus = params.bus;
 
         var resultsColumnLabel = ko.pureComputed(function () {
             if (searching()) {
@@ -64,10 +62,11 @@ define([
                 component: {
                     name: 'reske/browser',
                     params: {
-                        hostedVM: 'hostedVM',
-                        tabVM: {
-                            type: data.type
-                        }
+                        // hostedVM: 'hostedVM',
+                        // tabVM: {
+                        //     type: data.type
+                        // }
+                        type: data.type
                     }
                 }
             };
@@ -75,13 +74,15 @@ define([
         }
 
         return {
+            QE: queryEngine,
             searchInput: searchInput,
             withPublicData: withPublicData,
             withPrivatData: withPrivateData,
             searchResults: searchResults,
             resultsColumnLabel: resultsColumnLabel,
             searching: searching,
-            doShowDetail: doShowDetail
+            doShowDetail: doShowDetail,
+            bus: bus
         };
     }
 

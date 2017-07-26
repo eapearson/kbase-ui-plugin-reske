@@ -1,0 +1,48 @@
+.component-reske-error {
+    padding-top: 12px;
+}
+
+.component-reske-error .-index {
+    display: inline-block;
+    width: 30%;
+    /* color from bootstrap tabs */
+    border: 1px rgb(221, 221, 221) solid;
+    padding: 6px;
+    vertical-align: top;
+}
+
+.component-reske-error .-index ul {
+    list-style: none;
+    padding: 0;
+}
+
+.component-reske-error .-index li {
+    display: block;
+}
+
+.component-reske-error .-index li a.-item {
+    padding: 4px;
+    display: block;
+}
+
+.component-reske-error .-index .-item:hover,
+.component-reske-error .-index .-item.-active {
+    background-color: #DDD;
+}
+
+.component-reske-error .-body {
+    display: inline-block;
+    width: 70%;
+    /* border: 1px silver solid; */
+    padding: 6px 6px 6px 12px;
+    vertical-align: top;
+}
+
+.component-reske-error .-title {
+    font-weight: bold;
+    margin-top: '6px';
+}
+
+.component-reske-error .-message {
+    margin-top: '6px';
+}

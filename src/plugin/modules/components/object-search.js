@@ -2,12 +2,14 @@ define([
     'knockout-plus',
     'kb_common/html',
     'kb_common/bootstrapUtils',
-    'kb_common/jsonRpc/genericClient'
+    'kb_common/jsonRpc/genericClient',
+    '../types'
 ], function (
     ko,
     html,
     BS,
-    GenericClient
+    GenericClient,
+    Types
 ) {
     var t = html.tag,
         h1 = t('h1'),
@@ -21,95 +23,6 @@ define([
         tr = t('tr'),
         th = t('th'),
         td = t('td');
-
-    // var typeKeys = {
-    //     genome: ['domain', 'features', 'id', 'scientific_name', 'taxonomy?'],
-    //     genomefeature: ['aliases?', 'function?', 'id', 'location', 'protein_translation?', 'type'],
-    //     narrative: ['cells', 'metadata'],
-    //     assembly: ['contigs', 'dna_size', 'external_source_id', 'gc_content', 'name'],
-    //     assemblycontig: ['contig_id', 'description', 'gc_content', 'length'],
-    //     pairedendlibrary: ['insert_size_mean', 'lib1', 'sequencing_tech']
-    // };
-
-    // var typeKeys2 = {
-    //     genome: [{
-    //         key: 'domain',
-    //         label: 'Domain',
-    //         type: 'string'
-    //     }, {
-    //         key: 'features',
-    //         label: 'Feature Count',
-    //         type: 'number'
-    //     }, {
-    //         key: 'id',
-    //         label: 'ID',
-    //         type: 'string'
-    //     }, {
-    //         key: 'scientific_name',
-    //         label: 'Scientific Name',
-    //         type: 'string'
-    //     }, {
-    //         key: 'taxonomy',
-    //         label: 'Taxonomy',
-    //         type: 'string'
-    //     }],
-    //     genomefeature: [{
-    //         key: 'aliases?',
-    //         label: 'Aliases',
-    //         comment: 'list of string',
-    //         type: 'string'
-    //     }, {
-    //         key: 'function?',
-    //         label: 'Function',
-    //         type: 'string'
-    //     }, {
-    //         key: 'id',
-    //         label: 'ID',
-    //         type: 'string'
-    //     }, {
-    //         key: 'location',
-    //         label: 'Location',
-    //         type: 'string',
-    //         comment: 'actually list of string'
-    //     }, {
-    //         key: 'protein_translation?',
-    //         label: 'Protein Translation',
-    //         type: 'string'
-    //     }, {
-    //         key: 'type',
-    //         label: 'Type',
-    //         type: 'string'
-    //     }],
-    //     narrative: [{
-    //         key: 'app_info',
-    //         label: 'App Info',
-    //         type: 'string'
-    //     }, {
-    //         key: 'app_input',
-    //         label: 'App Input',
-    //         type: 'string'
-    //     }, {
-    //         key: 'app_output',
-    //         label: 'App Output',
-    //         type: 'string'
-    //     }, {
-    //         key: 'code_output',
-    //         label: 'Code Output',
-    //         type: 'string'
-    //     }, {
-    //         key: 'job_ids',
-    //         label: 'Job Ids',
-    //         type: 'string'
-    //     }, {
-    //         key: 'source',
-    //         label: 'Source',
-    //         type: 'string'
-    //     }, {
-    //         key: 'title',
-    //         label: 'Title',
-    //         type: 'string'
-    //     }]
-    // };
 
     ko.extenders.parsed = function (target, parseFun) {
         function parseit(newValue) {
@@ -126,6 +39,56 @@ define([
         return target;
     };
 
+    function objectSearch(runtime, param) {
+        var client = new GenericClient({
+            url: runtime.config('services.reske.url'),
+            module: 'KBaseRelationEngine',
+            token: runtime.service('session').getAuthToken()
+        });
+        return client.callFunc('search_objects', [param])
+            .then(function (result) {
+                var hits = result[0];
+
+                // Here we modify each object result, essentially normalizing 
+                // some properties and adding ui-specific properties.
+                hits.objects.forEach(function (object) {
+                    var type = Types.typeIt(object);
+                    object.type = type;
+                    var view = ko.observable('small');
+                    object.view = view;
+                    object.template = ko.pureComputed(function () {
+                        if (type === 'narrative') {
+                            return type + '-' + view() + '-row';
+                        } else {
+                            return 'default-' + view() + '-row';
+                        }
+                    });
+                    object.datestring = new Date(object.timestamp).toLocaleString();
+                    object.dataList = Object.keys(object.data || {}).map(function (key) {
+                        return {
+                            key: key,
+                            type: typeof object.data[key],
+                            value: object.data[key]
+                        };
+                    });
+                    object.parentDataList = Object.keys(object.parent_data || {}).map(function (key) {
+                        return {
+                            key: key,
+                            type: typeof object.data[key],
+                            value: object.data[key]
+                        };
+                    });
+                    object.keyList = Object.keys(object.key_props || {}).map(function (key) {
+                        return {
+                            key: key,
+                            type: typeof object.key_props[key],
+                            value: object.key_props[key]
+                        };
+                    });
+                });
+                return hits;
+            });
+    }
 
     function narrativeSmallRow() {
         function viewModel(params) {
@@ -669,17 +632,7 @@ define([
                     return parseInt(value);
                 }
             });
-            // var pageSize = ko.pureComputed({
-            //     read: function () {
-            //         return this.value;
-            //     },
-            //     write: function (newValue) {
-            //         this.value = parseInt(newValue);
-            //     },
-            //     owner: {
-            //         value: 10
-            //     }
-            // });
+
             var objectType = ko.observable();
             var totalCount = ko.observable();
             var searchResults = ko.observableArray();
@@ -688,344 +641,6 @@ define([
             });
             var message = ko.observable();
             var status = ko.observable('setup');
-
-            var objectTypes = [{
-                id: 'narrative',
-                label: 'Narrative',
-                typeKeys: ['cells?', 'metadata'],
-                searchKeys: [{
-                        key: 'title',
-                        label: 'Title',
-                        type: 'string'
-                    },
-                    {
-                        key: 'source',
-                        label: 'Source',
-                        type: 'string'
-                    },
-                    {
-                        key: 'code_output',
-                        label: 'Code Output',
-                        type: 'string'
-                    },
-                    {
-                        key: 'app_output',
-                        label: 'App Output',
-                        type: 'string'
-                    },
-                    {
-                        key: 'app_info',
-                        label: 'App Info',
-                        type: 'string'
-                    },
-                    {
-                        key: 'app_input',
-                        label: 'App Input',
-                        type: 'string'
-                    },
-                    {
-                        key: 'job_ids',
-                        label: 'Job Ids',
-                        type: 'string'
-                    },
-                ]
-            }, {
-                id: 'genome',
-                label: 'Genome',
-                typeKeys: ['domain', 'features', 'id', 'scientific_name', 'taxonomy?'],
-                searchKeys: [{
-                        key: 'id',
-                        label: 'ID',
-                        type: 'string'
-                    },
-                    {
-                        key: 'domain',
-                        label: 'Domain',
-                        type: 'string'
-                    },
-                    {
-                        key: 'taxonomy',
-                        label: 'Taxonomy',
-                        type: 'string'
-                    },
-                    {
-                        key: 'scientific_name',
-                        label: 'Scientific Name',
-                        type: 'string'
-                    },
-                    {
-                        key: 'features',
-                        label: 'Feature Count',
-                        type: 'integer'
-                    },
-                    // not sure about this, there are three indexing rules,
-                    // with different types...
-                    {
-                        key: 'assembly_guid',
-                        label: 'Assembly GUID',
-                        type: 'string'
-                    },
-                ]
-            }, {
-                id: 'genomefeature',
-                label: 'Genome Feature',
-                typeKeys: ['aliases?', 'function?', 'id', 'location', 'protein_translation?', 'type'],
-                searchKeys: [{
-                        key: 'id',
-                        label: 'ID',
-                        type: 'string'
-                    },
-                    {
-                        key: 'function',
-                        label: 'Function',
-                        type: 'string'
-                    },
-                    {
-                        key: 'aliases',
-                        label: 'Aliases',
-                        comment: 'list of string',
-                        type: 'string'
-                    },
-                    {
-                        key: 'contig_id',
-                        label: 'Contig ID',
-                        type: 'string'
-                    },
-                    // contig_guid is hidden
-                    {
-                        key: 'start',
-                        label: 'Start',
-                        type: 'integer'
-                    },
-                    {
-                        key: 'stop',
-                        label: 'Stop',
-                        type: 'integer'
-                    },
-                    {
-                        key: 'strand',
-                        label: 'Strand',
-                        type: 'string',
-                    },
-                    {
-                        key: 'feature_type',
-                        label: 'Feature Type',
-                        type: 'string'
-                    },
-                    {
-                        key: 'ontology_terms',
-                        label: 'Ontology Terms',
-                        type: 'string'
-                    },
-
-                    {
-                        key: 'genome_domain',
-                        label: 'Genome Domain',
-                        type: 'string'
-                    },
-                    {
-                        key: 'genome_taxonomy',
-                        label: 'Genome Taxonomy',
-                        type: 'string'
-                    },
-                    {
-                        key: 'genome_scientific_name',
-                        label: 'Genome Scientific Name',
-                        type: 'string'
-                    }
-                    // assembly_guid hidden
-                ]
-            }, {
-                id: 'assembly',
-                label: 'Assembly',
-                typeKeys: ['contigs', 'dna_size', 'external_source_id', 'gc_content', 'name'],
-                searchKeys: [{
-                    key: 'contigs',
-                    label: 'Contigs',
-                    type: 'integer'
-                }, {
-                    key: 'dna_size',
-                    label: 'DNA Size',
-                    type: 'integer'
-                }, {
-                    key: 'external_source_id',
-                    label: 'External Source ID',
-                    type: 'string'
-                }, {
-                    key: 'gc_content',
-                    label: 'GC Content',
-                    type: 'float'
-                }, {
-                    key: 'name',
-                    label: 'Name',
-                    type: 'string'
-                }]
-            }, {
-                id: 'assemblycontig',
-                label: 'Assembly Contig',
-                typeKeys: ['contig_id', 'description', 'gc_content', 'length'],
-                searchKeys: [{
-                        key: 'contig_id',
-                        label: 'Contig Id',
-                        type: 'string'
-                    },
-                    {
-                        key: 'description',
-                        label: 'Description',
-                        type: 'string'
-                    },
-                    {
-                        key: 'gc_content',
-                        label: 'GC Content',
-                        type: 'float'
-                    },
-                    {
-                        key: 'length',
-                        label: 'Length',
-                        type: 'integer'
-                    }
-                ]
-            }, {
-                id: 'pairedendlibrary',
-                label: 'Paired End Library',
-                typeKeys: ['insert_size_mean', 'lib1', 'sequencing_tech'],
-                searchKeys: [{
-                        key: 'technology',
-                        label: 'Sequencing Technology',
-                        type: 'string'
-                    },
-                    {
-                        key: 'files',
-                        label: 'Files',
-                        type: 'string'
-                    },
-                    {
-                        key: 'phred_type',
-                        label: 'Phred Type',
-                        type: 'string'
-                    },
-                    {
-                        key: 'read_count',
-                        label: 'Read Count',
-                        type: 'integer'
-                    },
-                    {
-                        key: 'read_length',
-                        label: 'Mean Read Length',
-                        type: 'integer'
-                    },
-                    {
-                        key: 'insert_size',
-                        label: 'Mean Insert Size',
-                        type: 'integer'
-                    },
-                    {
-                        key: 'quality',
-                        label: 'float',
-                        type: 'Quality'
-                    },
-                    {
-                        key: 'gc_content',
-                        label: 'GC Content',
-                        type: 'float'
-                    }
-                ]
-            }, {
-                id: 'singleendlibrary',
-                label: 'Single End Library',
-                typeKeys: ['xxx'],
-                searchKeys: [{
-                        key: 'technology',
-                        label: 'Sequencing Technology',
-                        type: 'string'
-                    },
-                    {
-                        key: 'files',
-                        label: 'Files',
-                        type: 'string'
-                    },
-                    {
-                        key: 'phred_type',
-                        label: 'Phred Type',
-                        type: 'string'
-                    },
-                    {
-                        key: 'read_count',
-                        label: 'Read Count',
-                        type: 'integer'
-                    },
-                    {
-                        key: 'read_length',
-                        label: 'Mean Read Length',
-                        type: 'integer'
-                    },
-                    {
-                        key: 'quality',
-                        label: 'float',
-                        type: 'Quality'
-                    },
-                    {
-                        key: 'gc_content',
-                        label: 'GC Content',
-                        type: 'float'
-                    }
-                ]
-            }];
-            var objectTypeMap = {};
-            objectTypes.forEach(function (type) {
-
-                var searchKeysMap = {};
-                type.searchKeys.forEach(function (searchKey) {
-                    searchKeysMap[searchKey.key] = searchKey;
-                });
-                type.searchKeysMap = searchKeysMap;
-
-                objectTypeMap[type.id] = type;
-            });
-
-            function typeIt(value) {
-                // duck typing for now...
-                // loop through all types (as defined above)
-                // NB use loop because .find is not suppported on any IE.
-                // var types = Object.keys(objectTypes);
-                for (var i = 0; i < objectTypes.length; i += 1) {
-                    var type = objectTypes[i];
-                    // loop through each key and see if in the current values data property.
-                    var keys = type.typeKeys;
-                    if (keys.every(function (key) {
-                            var optional = false;
-                            if (key.substr(-1) === '?') {
-                                optional = true;
-                                key = key.substr(0, -1);
-                            }
-                            var found = (key in value.data);
-                            if (!found && optional) {
-                                return true;
-                            }
-                            return found;
-                        })) {
-                        return type.id;
-                    }
-                }
-                return 'unknown';
-            }
-
-            // var pageSizes = [{
-            //     value: '5',
-            //     label: '5'
-            // }, {
-            //     value: '10',
-            //     label: '10'
-            // }, {
-            //     value: '25',
-            //     label: '25'
-            // }, {
-            //     value: '50',
-            //     label: '50'
-            // }, {
-            //     value: '100',
-            //     label: '100'
-            // }];
 
             var viewTypes = [{
                 value: 'small',
@@ -1099,7 +714,7 @@ define([
                 if (!objectType()) {
                     return [];
                 }
-                return objectTypeMap[objectType()].searchKeys;
+                return Types.getType(objectType()).searchKeys;
             });
             var keySearchKey = ko.observable();
             var keySearchValue = ko.observable();
@@ -1133,9 +748,9 @@ define([
                     };
                 case 'float':
                     return {
-                        double_value: fieldObservable(),
-                        min_double: fieldObservable(),
-                        max_double: fieldObservable()
+                        float_value: fieldObservable(),
+                        min_float: fieldObservable(),
+                        max_float: fieldObservable()
                     };
                 case 'date':
                     return {
@@ -1176,7 +791,7 @@ define([
             function doAddKeySearch() {
                 // objectType being the currently selected object type and
                 // keySearchKey beig the currently selected key for key searching.
-                var keySearchSpec = objectTypeMap[objectType()].searchKeysMap[keySearchKey()];
+                var keySearchSpec = Types.getType(objectType()).searchKeysMap[keySearchKey()];
 
                 var keySearchFields = makeKeySearchField(keySearchSpec.type);
 
@@ -1266,6 +881,51 @@ define([
                 return (value === undefined || value.length === 0);
             }
 
+            // Note that RESKE uses "double" in the api, but otherwise refers to them as floats.
+            function addFloatSearch(keySearch, keySearchTerm) {
+                var value = keySearch.fields.float_value();
+                var minValue = keySearch.fields.min_float();
+                var maxValue = keySearch.fields.max_float();
+                if (isEmpty(value) && isEmpty(minValue) && isEmpty(maxValue)) {
+                    return;
+                }
+                try {
+                    var searchTerm = {};
+                    var termSet = false;
+                    if (!isEmpty(value)) {
+                        var floatValue = parseFloat(value);
+                        if (isNaN(floatValue)) {
+                            return 'Invalid exact float entry: ' + value;
+                        }
+                        searchTerm.double_value = floatValue;
+                        termSet = true;
+                    }
+
+                    if (!(isEmpty(minValue))) {
+                        var minFloatValue = parseFloat(minValue);
+                        if (isNaN(minFloatValue)) {
+                            return 'Invalid min float entry: ' + minValue;
+                        }
+                        searchTerm.min_double = minFloatValue;
+                        termSet = true;
+                    }
+
+                    if (!isEmpty(maxValue)) {
+                        var maxFloatValue = parseFloat(maxValue);
+                        if (isNaN(maxFloatValue)) {
+                            return 'Invalid max float entry: ' + value;
+                        }
+                        searchTerm.max_double = maxFloatValue;
+                        termSet = true;
+                    }
+                    if (termSet) {
+                        keySearchTerm[keySearch.key] = searchTerm;
+                    }
+                } catch (ex) {
+                    return ex.message;
+                }
+            }
+
             function addIntegerSearch(keySearch, keySearchTerm) {
                 var value = keySearch.fields.int_value();
                 var minValue = keySearch.fields.min_int();
@@ -1288,7 +948,7 @@ define([
                     if (!(isEmpty(minValue))) {
                         var minIntValue = parseInt(minValue);
                         if (isNaN(minIntValue)) {
-                            return 'Invalid min integer entry: ' + value;
+                            return 'Invalid min integer entry: ' + minValue;
                         }
                         searchTerm.min_int = minIntValue;
                         termSet = true;
@@ -1297,7 +957,7 @@ define([
                     if (!isEmpty(maxValue)) {
                         var maxIntValue = parseInt(maxValue);
                         if (isNaN(maxIntValue)) {
-                            return 'Invalid max integer entry: ' + value;
+                            return 'Invalid max integer entry: ' + maxValue;
                         }
                         searchTerm.max_int = maxIntValue;
                         termSet = true;
@@ -1310,20 +970,34 @@ define([
                 }
             }
 
+            var currentSearch = null;
 
             function doSearch(source) {
                 // Make sure we have all the right conditions for a search, and if 
                 // not, reset the search results.
-                var originalStatus = status();
-                switch (originalStatus) {
-                case 'needinput':
-                case 'haveresults':
-                case 'noresults':
-                    // continue;
-                    break;
-                default:
-                    return;
+
+                if (currentSearch) {
+                    currentSearch.cancelled = true;
+                    if (currentSearch.search) {
+                        currentSearch.search.cancel();
+                    }
                 }
+                currentSearch = {
+                    cancelled: false,
+                    search: null
+                };
+                var thisSearch = currentSearch;
+
+                // var originalStatus = status();
+                // switch (originalStatus) {
+                // case 'needinput':
+                // case 'haveresults':
+                // case 'noresults':
+                //     // continue;
+                //     break;
+                // default:
+                //     return;
+                // }
 
                 status('setup');
                 searchResults.removeAll();
@@ -1399,8 +1073,15 @@ define([
                                     message(error);
                                 }
                                 break;
+                            case 'float':
+                                error = addFloatSearch(keySearch, keySearchTerm);
+                                if (error) {
+                                    message(error);
+                                }
+                                break;
                                 // TODO: implement the other types!
                             }
+
                         });
                         newFilter.match_filter.lookupInKeys = keySearchTerm;
                     }
@@ -1421,7 +1102,6 @@ define([
                     }
                 }
 
-
                 // Compare old and new filter.
                 // If we have a filter change, we need to reset the page start.
                 if (JSON.stringify(filter) !== JSON.stringify(newFilter)) {
@@ -1432,84 +1112,40 @@ define([
                 param.object_type = filter.object_type;
                 param.match_filter = filter.match_filter;
 
-                var client = new GenericClient({
-                    url: runtime.config('services.reske.url'),
-                    module: 'KBaseRelationEngine',
-                    token: runtime.service('session').getAuthToken()
-                });
-
                 status('searching');
                 message('Searching...');
 
-                return client.callFunc('search_objects', [param])
-                    .then(function (result) {
-                        var hits = result[0];
+                currentSearch.search = objectSearch(runtime, param)
+                    .then(function (hits) {
+                        if (thisSearch.cancelled) {
+                            console.warn('ignoring cancelled request');
+                            return null;
+                        }
                         if (hits.objects.length === 0) {
                             status('noresults');
                             totalCount(0);
                             message('Found nothing');
                             return;
                         }
-                        totalCount(hits.total);
-                        hits.objects.forEach(function (object) {
-                            var type = typeIt(object);
-                            object.type = type;
-                            var view = ko.observable('small');
-                            object.view = view;
-                            object.template = ko.pureComputed(function () {
-                                if (type === 'narrative') {
-                                    return type + '-' + view() + '-row';
-                                    // object.templates = {
-                                    //     small: type + '-row'
-                                    // };
-                                } else {
-                                    return 'default-' + view() + '-row';
-                                    // object.templates = {
-                                    //     small: 'default-row'
-                                    // };
-                                }
-                            });
-                            object.datestring = new Date(object.timestamp).toLocaleString();
-                            object.dataList = Object.keys(object.data || {}).map(function (key) {
-                                return {
-                                    key: key,
-                                    type: typeof object.data[key],
-                                    value: object.data[key]
-                                };
-                            });
-                            object.parentDataList = Object.keys(object.parent_data || {}).map(function (key) {
-                                return {
-                                    key: key,
-                                    type: typeof object.data[key],
-                                    value: object.data[key]
-                                };
-                            });
-                            object.keyList = Object.keys(object.key_props || {}).map(function (key) {
-                                return {
-                                    key: key,
-                                    type: typeof object.key_props[key],
-                                    value: object.key_props[key]
-                                };
-                            });
-                        });
                         message('Found ' + hits.total + ' items');
 
                         hits.objects.forEach(function (object) {
                             searchResults.push(object);
-                            // var renderer = objectTypes
-                            // var renderer = objectTypeMap[object.type].render || defaultRender;
-                            // try {
-                            //     return renderer.small(object);
-                            // } catch (err) {
-                            //     return err.error;
-                            // }
                         });
                         status('haveresults');
-                        return null;
+                        totalCount(hits.total);
                     })
                     .catch(function (err) {
                         console.error('error', err);
                         message(err.message);
+                    })
+                    .finally(function () {
+                        if (thisSearch && thisSearch.search.isCancelled()) {
+                            console.warn('search cancelled');
+                        }
+                        thisSearch = null;
+                        currentSearch = null;
+                        //searching(false);
                     });
             }
 
@@ -1559,8 +1195,7 @@ define([
 
                 // Select data sources
                 pageSizes: pageSizes,
-                objectTypes: objectTypes,
-                objectTypeMap: objectTypeMap,
+                objectTypes: Types.getLookup(),
                 viewTypes: viewTypes,
 
                 calcRow: calcRow,
@@ -1867,6 +1502,60 @@ define([
                                                 input({
                                                     dataBind: {
                                                         textInput: '$data.fields.max_int'
+                                                    },
+                                                    class: 'form-control',
+                                                    style: {
+                                                        display: 'inline',
+                                                        float: 'none',
+                                                        width: '7em'
+                                                    }
+                                                }),
+                                            ]),
+                                            '<!-- /ko -->',
+                                            '<!-- ko case: "float" -->',
+                                            div({
+                                                class: 'input-group form-inline'
+                                            }, [
+                                                label({
+                                                    style: {
+                                                        display: 'inline'
+                                                    }
+                                                }, 'Exact match:'),
+                                                input({
+                                                    dataBind: {
+                                                        textInput: '$data.fields.float_value'
+                                                    },
+                                                    class: 'form-control',
+                                                    style: {
+                                                        display: 'inline',
+                                                        float: 'none',
+                                                        width: '7em'
+                                                    }
+                                                }),
+                                                label({
+                                                    style: {
+                                                        display: 'inline'
+                                                    }
+                                                }, 'Min:'),
+                                                input({
+                                                    dataBind: {
+                                                        textInput: '$data.fields.min_float'
+                                                    },
+                                                    class: 'form-control',
+                                                    style: {
+                                                        display: 'inline',
+                                                        float: 'none',
+                                                        width: '7em'
+                                                    }
+                                                }),
+                                                label({
+                                                    style: {
+                                                        display: 'inline'
+                                                    }
+                                                }, 'Max:'),
+                                                input({
+                                                    dataBind: {
+                                                        textInput: '$data.fields.max_float'
                                                     },
                                                     class: 'form-control',
                                                     style: {

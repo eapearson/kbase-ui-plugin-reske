@@ -1,17 +1,22 @@
 define([
     'knockout-plus',
     'kb_common/html',
+    './query/main',
 
     './components/type-search'
 ], function (
     ko,
-    html
+    html,
+    Query
 ) {
     var t = html.tag,
         div = t('div');
 
     function factory(config) {
         var hostNode, container, runtime = config.runtime;
+        var query = Query.make({
+            runtime: runtime
+        });
 
         function render(params) {
             container.innerHTML = div({
@@ -20,7 +25,8 @@ define([
                         name: '"reske-type-search"',
                         params: {
                             runtime: 'runtime',
-                            search: 'search'
+                            search: 'search',
+                            query: 'query'
                         }
                     }
                 }
@@ -37,10 +43,14 @@ define([
 
         function start(params) {
             runtime.send('ui', 'setTitle', 'RESKE Search Prototype');
-            render({
-                runtime: runtime,
-                search: params.search || null
-            });
+            query.start()
+                .then(function () {
+                    render({
+                        runtime: runtime,
+                        search: params.search || null,
+                        query: query
+                    });
+                });
         }
 
         function stop() {}

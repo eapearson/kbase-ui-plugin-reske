@@ -25,6 +25,186 @@ define([
         label = t('label'),
         select = t('select');
 
+
+
+    function Cacher() {
+        var cache = {};
+        var cacheSize = 0;
+        var maxSize = 200;
+        var trimSize = 20;
+        var maxAge = 60000;
+
+        function add(key, value) {
+            if (has(key)) {
+                throw new Error('Cache entry already exists for ' + key);
+            }
+            if (cacheSize >= maxSize) {
+                trim();
+            }
+            cache[key] = {
+                key: key,
+                value: value,
+                addedAt: new Date().getTime()
+            };
+            cacheSize += 1;
+        }
+
+        function has(key) {
+            var item = cache[key];
+            if (item === undefined) {
+                return false;
+            }
+            var now = new Date().getTime();
+            if ((now - item.addedAt) > maxAge) {
+                delete cache[key];
+                cacheSize -= 1;
+                return false;
+            }
+            return true;
+        }
+
+        function get(key, defaultValue) {
+            var item = cache[key];
+            if (!item) {
+                return defaultValue;
+            }
+            var now = new Date().getTime();
+            if ((now - item.addedAt) > maxAge) {
+                delete cache[key];
+                cacheSize -= 1;
+                return defaultValue;
+            }
+            return item.value;
+        }
+
+        function remove(key) {
+            delete cache[key];
+            cacheSize -= 1;
+        }
+
+        function trim() {
+            // make list of all items
+            var items = Object.keys(cache).map(function (key) {
+                return cache[key];
+            }).sort(function (a, b) {
+                return (a.addedAt - b.addedAt);
+            });
+
+            if (items.length < trimSize) {
+                return;
+            }
+            var toRemove = items.slice(0, trimSize);
+
+            toRemove.forEach(function (item) {
+                remove(item.key);
+            });
+        }
+
+        function check() {
+            var toRecache = [];
+            var newCache = {};
+            var now = new Date().getTime();
+            Object.keys(cache).forEach(function (key) {
+                var item = cache[key];
+                if ((now - item.addedAt) > maxAge) {
+                    return;
+                }
+                toRecache.push(item);
+            });
+            toRecache.forEach(function (item) {
+                newCache[item.key] = item;
+            });
+            cacheSize = toRecache.length;
+            cache = newCache;
+        }
+
+        function size() {
+            return cacheSize;
+        }
+
+        return {
+            add: add,
+            get: get,
+            has: has,
+            remove: remove,
+            check: check,
+            size: size,
+            trim: trim
+        };
+    }
+
+    var objectCache = Cacher();
+
+    function objectQuery(workspace, refSpecs) {
+        var resultsMap = {};
+        var objectsNeeded = [];
+        refSpecs.forEach(function (refSpec) {
+            if (objectCache.has(refSpec.ref)) {
+                resultsMap[refSpec.ref] = objectCache.get(refSpec.ref);
+            } else {
+                objectsNeeded.push(refSpec);
+            }
+        });
+        // Everything is cached?
+        if (objectsNeeded.length === 0) {
+            return refSpecs.map(function (refSpec) {
+                return resultsMap[refSpec.ref];
+            });
+        }
+
+
+        // Otherwise bundle up the object id specs for one request.
+        return workspace.callFunc('get_object_info3', [{
+            objects: objectsNeeded.map(function (obj) { return obj.spec; }),
+            includeMetadata: 1
+        }]).spread(function (result) {
+            result.infos.forEach(function (info, index) {
+                var object = serviceUtils.objectInfoToObject(info);
+                var ref = objectsNeeded[index].ref;
+                // TODO: resolve this - duplicates appearing.
+                if (objectCache.has(ref)) {
+                    console.warn('Duplicate object detected: ' + ref);
+                } else {
+                    objectCache.add(ref, object);
+                }
+                resultsMap[ref] = object;
+            });
+            // unpack the results back into an array with the same shape.
+            // TODO: just accept a map, since we don't want duplicate refs anyway.
+            return refSpecs.map(function (refSpec) {
+                return resultsMap[refSpec.ref];
+            });
+        });
+    }
+
+    var workspaceCache = Cacher();
+
+    function workspaceQuery(workspace, ids) {
+        var resultsMap = {};
+
+        var needed = [];
+        ids.forEach(function (id) {
+            var sid = String(id);
+            if (workspaceCache.has(sid)) {
+                resultsMap[sid] = workspaceCache.get(sid);
+            } else {
+                needed.push(id);
+            }
+        });
+
+        return Promise.all(needed.map(function (id) {
+            return workspace.callFunc('get_workspace_info', [{
+                id: id
+            }]).spread(function (info) {
+                var workspaceInfo = serviceUtils.workspaceInfoToObject(info);
+                workspaceCache.add(String(id), workspaceInfo);
+                resultsMap[String(id)] = workspaceInfo;
+            });
+        })).then(function () {
+            return resultsMap;
+        });
+    }
+
     ko.extenders.parsed = function (target, parseFun) {
         function parseit(newValue) {
             try {
@@ -250,7 +430,6 @@ define([
     // NB: hmm, it looks like the params are those active in the tab which spawned
     // this component...
     function viewModel(params) {
-
         // var searchResults = params.hostedVM.searchResults;
 
         // The original search user interface vm is passed into the tabset and preserved as hostVM.
@@ -258,9 +437,6 @@ define([
         // TODO must be a better way.
         var searchVM = params.hostVM;
         // var tabVM = params.tabVM;
-
-        var queryEngine = searchVM.QE;
-        var bus = searchVM.bus;
 
         var type = params.type;
 
@@ -405,16 +581,15 @@ define([
                 }
             };
             currentSearch.search = searchObjects(runtime, type, searchInput(), withPublicData(), withPrivateData(), currentSortField(), sortDescending(), pageStart(), pageSize())
-                .spread(function (searchResult, filter) {
+                .spread(function (result, filter) {
                     perf.prepare.start = new Date().getTime();
-                    var foundObjects = searchResult.objects;
-                    if (foundObjects.length === 0) {
-                        return [searchResult, filter];
+                    if (result.objects.length === 0) {
+                        return [result, filter];
                     }
 
                     // wrap in a workspace call to get workspace and object info for each narrative.                   
 
-                    var originalObjectSpecs = foundObjects.map(function (object) {
+                    var originalObjectSpecs = result.objects.map(function (object) {
                         var spec = {
                             wsid: object.meta.workspace.workspaceId,
                             objid: object.meta.workspace.objectId,
@@ -427,7 +602,7 @@ define([
                         };
                     });
 
-                    var currentObjectSpecs = foundObjects.map(function (object) {
+                    var currentObjectSpecs = result.objects.map(function (object) {
                         var spec = {
                             wsid: object.meta.workspace.workspaceId,
                             objid: object.meta.workspace.objectId,
@@ -448,7 +623,14 @@ define([
                         allObjectSpecs[spec.ref] = spec;
                     });
 
-                    var uniqueWorkspaces = Object.keys(foundObjects.reduce(function (acc, object) {
+
+                    var workspace = new GenericClient({
+                        url: runtime.config('services.workspace.url'),
+                        module: 'Workspace',
+                        token: runtime.service('session').getAuthToken()
+                    });
+
+                    var uniqueWorkspaces = Object.keys(result.objects.reduce(function (acc, object) {
                         var workspaceId = object.meta.workspace.workspaceId;
                         acc[String(workspaceId)] = true;
                         return acc;
@@ -462,70 +644,63 @@ define([
                     // be distributed back to the original and current object groups.
 
                     perf.workspace.start = new Date().getTime();
-                    return queryEngine.query({
-                            workspace: {
-                                query: {
-                                    objectInfo: Object.keys(allObjectSpecs).map(function (key) { return allObjectSpecs[key]; }),
-                                    workspaceInfo: uniqueWorkspaces
-                                }
+                    return Promise.all([
+                        objectQuery(workspace, Object.keys(allObjectSpecs).map(function (key) { return allObjectSpecs[key]; })),
+                        workspaceQuery(workspace, uniqueWorkspaces)
+                    ]).spread(function (allObjectsInfo, workspacesInfo) {
+                        perf.results.start = new Date().getTime();
+                        for (var i = 0; i < result.objects.length; i += 1) {
+                            var object = result.objects[i];
+
+                            // back to a map!
+                            var allObjectsInfoMap = {};
+                            allObjectsInfo.forEach(function (objectInfo) {
+                                allObjectsInfoMap[objectInfo.ref] = objectInfo;
+                            });
+
+                            object.originalObjectInfo = allObjectsInfoMap[originalObjectSpecs[i].ref];
+                            object.currentObjectInfo = allObjectsInfoMap[currentObjectSpecs[i].ref];
+
+                            // NB workspaceQuery returns a map of String(workspaceId) -> workspaceInfo
+                            // This is not symmetric with the input, but it is only used here, and we 
+                            // do eventually need a map, and internally workspaceQuery accumulates the
+                            // results into a map, so ...
+                            object.workspaceInfo = workspacesInfo[String(object.meta.workspace.workspaceId)];
+
+                            // also patch up the narrative object...
+                            object.meta.owner = object.workspaceInfo.owner;
+                            object.meta.updated = {
+                                by: object.currentObjectInfo.saved_by,
+                                at: dateString(object.currentObjectInfo.saveDate)
+                            };
+                            object.meta.created = {
+                                by: object.originalObjectInfo.saved_by,
+                                at: dateString(object.originalObjectInfo.saveDate)
+                            };
+                            object.meta.public = object.workspaceInfo.globalread === 'y';
+                            object.meta.isOwner = (object.meta.owner === runtime.service('session').getUsername());
+
+                            object.meta.narrativeTitle = object.workspaceInfo.metadata.narrative_nice_name;
+
+                            object.meta.narrativeId = 'ws.' + object.workspaceInfo.id +
+                                '.obj.' + object.workspaceInfo.metadata.narrative;
+
+                            // set sharing info.
+                            if (!object.meta.isOwner) {
+                                object.meta.isShared = true;
                             }
-                        })
-                        .then(function (result) {
-                            var allObjectsInfo = result.workspace.objectInfo;
-                            var workspacesInfo = result.workspace.workspaceInfo;
-                            perf.results.start = new Date().getTime();
-                            for (var i = 0; i < foundObjects.length; i += 1) {
-                                var object = foundObjects[i];
+                            object.meta.canRead = canRead(object.workspaceInfo.user_permission);
+                            object.meta.canWrite = canWrite(object.workspaceInfo.user_permission);
+                            object.meta.canShare = canShare(object.workspaceInfo.user_permission);
 
-                                // back to a map!
-                                var allObjectsInfoMap = {};
-                                allObjectsInfo.forEach(function (objectInfo) {
-                                    allObjectsInfoMap[objectInfo.ref] = objectInfo;
-                                });
-
-                                object.originalObjectInfo = allObjectsInfoMap[originalObjectSpecs[i].ref];
-                                object.currentObjectInfo = allObjectsInfoMap[currentObjectSpecs[i].ref];
-
-                                // NB workspaceQuery returns a map of String(workspaceId) -> workspaceInfo
-                                // This is not symmetric with the input, but it is only used here, and we 
-                                // do eventually need a map, and internally workspaceQuery accumulates the
-                                // results into a map, so ...
-                                object.workspaceInfo = workspacesInfo[String(object.meta.workspace.workspaceId)];
-
-                                // also patch up the narrative object...
-                                object.meta.owner = object.workspaceInfo.owner;
-                                object.meta.updated = {
-                                    by: object.currentObjectInfo.saved_by,
-                                    at: dateString(object.currentObjectInfo.saveDate)
-                                };
-                                object.meta.created = {
-                                    by: object.originalObjectInfo.saved_by,
-                                    at: dateString(object.originalObjectInfo.saveDate)
-                                };
-                                object.meta.public = object.workspaceInfo.globalread === 'y';
-                                object.meta.isOwner = (object.meta.owner === runtime.service('session').getUsername());
-
-                                object.meta.narrativeTitle = object.workspaceInfo.metadata.narrative_nice_name;
-
-                                object.meta.narrativeId = 'ws.' + object.workspaceInfo.id +
-                                    '.obj.' + object.workspaceInfo.metadata.narrative;
-
-                                // set sharing info.
-                                if (!object.meta.isOwner) {
-                                    object.meta.isShared = true;
-                                }
-                                object.meta.canRead = canRead(object.workspaceInfo.user_permission);
-                                object.meta.canWrite = canWrite(object.workspaceInfo.user_permission);
-                                object.meta.canShare = canShare(object.workspaceInfo.user_permission);
-
-                                object.typeIcon = getTypeIcon(object, { runtime: runtime });
-                            }
-                        }).then(function () {
-                            return [searchResult, filter];
-                        });
+                            object.typeIcon = getTypeIcon(object, { runtime: runtime });
+                        }
+                    }).then(function () {
+                        return [result, filter];
+                    });
                 })
-                .spread(function (searchResult, filter) {
-                    totalCount(searchResult.total);
+                .spread(function (result, filter) {
+                    totalCount(result.total);
                     searchResults.removeAll();
 
                     // Compare old and new filter.
@@ -535,24 +710,12 @@ define([
                     }
 
                     currentSearch.filter = filter;
-                    searchResult.objects.forEach(function (object) {
+                    result.objects.forEach(function (object) {
                         searchResults.push(object);
                     });
                 })
                 .catch(function (err) {
-                    bus.send('add-tab', {
-                        tab: {
-                            label: 'Search Error',
-                            closable: true,
-                            component: {
-                                name: 'reske/error',
-                                params: {
-                                    title: 'Search Error',
-                                    message: err.message
-                                }
-                            }
-                        }
-                    });
+                    // +++ tabset
                     console.error('ERROR', err);
                 })
                 .finally(function () {
@@ -562,7 +725,7 @@ define([
                     perf.workspace.elapsed = perf.results.start - perf.workspace.start;
                     perf.results.elapsed = perf.finished.start - perf.results.start;
                     console.log('search perf: object search: ' + perf.search.elapsed + ', prepare for ws calls: ' + perf.prepare.elapsed + ', workspace calls: ' + perf.workspace.elapsed + ', process results: ' + perf.results.elapsed);
-                    // console.log('cache: ', objectCache.size(), workspaceCache.size());
+                    console.log('cache: ', objectCache.size(), workspaceCache.size());
                     searching(false);
                 });
         }
@@ -585,7 +748,6 @@ define([
         }
 
         return {
-            QE: queryEngine,
             type: type,
             typeDef: typeDef,
 
@@ -812,7 +974,6 @@ define([
 
                         name: '"reske/" + $component.typeDef.uiId + "/browse"',
                         params: {
-                            QE: '$component.QE',
                             item: '$data'
                         }
                     }

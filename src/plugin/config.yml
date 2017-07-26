@@ -54,7 +54,15 @@ install:
         -
             name: reske/singleEndLibrary/browse
             module: components/types/singleEndLibrary/browse
-            css: true              
+            css: true
+        -
+            name: reske/help
+            module: components/help
+            css: true      
+        -
+            name: reske/error
+            module: components/error
+            css: true                       
     routes:
         -
             path: ['reske', 'object-search']

@@ -16,16 +16,7 @@ define([
         span = t('span'),
         div = t('div');
 
-    // bootstrap tabs implemeneted in knockout.
-    function makeTab(params) {
-        return {
-            label: params.label,
-            component: params.component,
-            content: params.content,
-            active: ko.observable(false),
-            closable: ko.observable(params.closable || false)
-        };
-    }
+
 
     function viewModel(params) {
         var tabsetId = html.genId();
@@ -33,11 +24,22 @@ define([
         var tabClasses = ko.observableArray(['nav', 'nav-tabs']);
         var activeTab = ko.observable();
 
-        var hostedVM = params.vm;
+        var hostVM = params.vm;
 
-        params.tabs.forEach(function (tab) {
-            tabs.push(makeTab(tab));
+        // Bus -- ??!!
+        // TODO: provide the bus on the top level of the params...
+        var bus = hostVM.bus;
+        bus.on('add-tab', function (message) {
+            addTab(message.tab);
         });
+
+        // Initialize Tabs
+
+        if (params.tabs) {
+            params.tabs.forEach(function (tab) {
+                tabs.push(makeTab(tab));
+            });
+        }
 
         if (!('active' in params)) {
             if (tabs().length > 0) {
@@ -55,6 +57,23 @@ define([
             var currentTab = tabs()[index - 1];
             activateTab(currentTab);
             currentTab.active(true);
+        }
+
+        // bootstrap tabs implemeneted in knockout.
+        function makeTab(params) {
+            // inject the hostVM into the tab params
+            // TODO get rid of that???
+            if (!params.component.params) {
+                params.component.params = {};
+            }
+            params.component.params.hostVM = hostVM;
+            return {
+                label: params.label,
+                component: params.component,
+                content: params.content,
+                active: ko.observable(false),
+                closable: ko.observable(params.closable || false)
+            };
         }
 
         function addTab(tab) {
@@ -81,6 +100,8 @@ define([
             activateTab(tab);
         }
 
+        bus.send('ready');
+
         return {
             tabs: tabs,
             tabClasses: tabClasses,
@@ -88,7 +109,7 @@ define([
             doCloseTab: doCloseTab,
             doSelectTab: doSelectTab,
             addTab: addTab,
-            hostedVM: hostedVM
+            hostVM: hostVM
         };
     }
 
@@ -166,10 +187,18 @@ define([
                     dataBind: {
                         component: {
                             name: 'component.name',
-                            params: {
-                                searchVM: '$component.hostedVM',
-                                tabVM: 'component.params.tabVM'
-                            }
+                            params: 'component.params'
+                                // params: {
+                                //     // The parent vm is the one owned by the tabset, and provided by the 
+                                //     // component whicih hosts the tabset.
+                                //     hostVM: '$component.hostVM',
+                                //     // The tab vm is provided along with the tab data object used to create the
+                                //     // tab. It will probably fail with anything other than data literals since
+                                //     // the caller doesn't know the structure of the vm inside here.
+                                //     // TODO: we should not even do this, as such, perhaps just pass a json object
+                                //     // for configuration, and a data + comm channel for querying the system.
+                                //     tabVM: 'component.params'
+                                // }
                         }
                     }
                 }),

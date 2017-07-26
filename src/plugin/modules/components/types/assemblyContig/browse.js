@@ -88,18 +88,18 @@ define([
                         })
                     ]),
                     common.buildMetaInfo(),
-                    div([
-                        'ID: ',
-                        span({
-                            class: '-contig-id',
-                            dataBind: {
-                                text: 'item.assemblyContig.contigId'
-                            }
-                        })
-                    ]),
                     table({
                         class: '-table '
                     }, [
+                        tr([
+                            th('ID'),
+                            td(div({
+                                dataBind: {
+                                    html: 'item.assemblyContig.contigId'
+                                },
+                                class: '-contig-id'
+                            }))
+                        ]),
                         tr([
                             th('Length (bp)'),
                             td(div({
