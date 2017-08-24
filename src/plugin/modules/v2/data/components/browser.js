@@ -5,7 +5,7 @@ define([
     'kb_common/html',
     'kb_common/jsonRpc/genericClient',
     'kb_service/utils',
-    '../types',
+    '../../../types',
     'css!./browser.css'
 ], function (
     Promise,
@@ -831,5 +831,6 @@ define([
             template: template()
         };
     }
+
     return component;
 });

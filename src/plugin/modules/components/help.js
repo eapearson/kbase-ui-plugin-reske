@@ -120,5 +120,5 @@ define([
             template: template()
         };
     }
-    ko.components.register('reske/help', component());
+    return component;
 });

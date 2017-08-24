@@ -198,5 +198,5 @@ define([
         };
     }
 
-    ko.components.register('reske/genomeFeature/browse', component());
+    return component;
 });

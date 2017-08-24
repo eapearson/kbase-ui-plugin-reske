@@ -1,9 +1,11 @@
 define([
     'knockout-plus',
-    'kb_common/html'
+    'kb_common/html',
+    './mainViewModel'
 ], function (
     ko,
-    html
+    html,
+    MainViewModel
 ) {
     var t = html.tag,
         div = t('div');
@@ -12,19 +14,20 @@ define([
         var hostNode, container, runtime = config.runtime;
 
         function render(params) {
+            var viewModel = MainViewModel(params);
             container.innerHTML = div({
                 dataBind: {
                     component: {
-                        name: '"reske-object-search"',
+                        name: '"reske/data/search/ui"',
                         params: {
-                            runtime: 'runtime',
-                            search: 'search',
-                            type: 'type'
+                            search: 'searchVM'
                         }
                     }
                 }
             });
-            ko.applyBindings(params, container);
+            ko.applyBindings({
+                searchVM: viewModel
+            }, container);
         }
 
         // WIDGET API
@@ -35,7 +38,7 @@ define([
         }
 
         function start(params) {
-            runtime.send('ui', 'setTitle', 'RESKE Search Prototype');
+            runtime.send('ui', 'setTitle', 'RESKE Data Search Prototype');
             render({
                 runtime: runtime,
                 search: params.search || null,

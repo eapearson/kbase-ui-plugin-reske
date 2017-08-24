@@ -34,126 +34,130 @@ define([
 
     function normalizeToNarrative(object, options) {
         // try to suss out interesting narrative bits.
-        var cells = object.data.cells.map(function (cell) {
-            if (Object.keys(cell.metadata).length > 0) {
-                if (cell.metadata.kbase.appCell) {
-                    var appCell = cell.metadata.kbase.appCell;
-                    // console.log('app', appCell);
-                    var app = {
-                        name: null,
-                        method: null,
-                        module: null,
-                        description: null
-                    };
-                    var iconUrl;
-                    // Surface some key attributes of an app, but only if the 
-                    // metadata is well structured.
-                    // Hopefully most of the issues with incompletely structured app 
-                    // cells is due to the presence of early development narratives.
-                    if (appCell.app.spec && 'info' in appCell.app.spec) {
-                        app.name = appCell.app.spec.info.name;
-                        app.id = appCell.app.spec.info.id;
-                        app.method = appCell.app.spec.info.id.split('/')[1];
-                        app.module = appCell.app.spec.info.module_name;
-                        app.description = appCell.app.spec.info.subtitle;
-                        if (appCell.app.spec.info.icon) {
-                            var url = appCell.app.spec.info.icon.url;
-                            if (url) {
-                                iconUrl = options.runtime.config('services.narrative_method_store.image_url') + url;
+        var cells;
+        if (!object.data.cells) {
+            cells = [];
+        } else {
+            cells = object.data.cells.map(function (cell) {
+                if (Object.keys(cell.metadata).length > 0) {
+                    if (cell.metadata.kbase.appCell) {
+                        var appCell = cell.metadata.kbase.appCell;
+                        var app = {
+                            name: null,
+                            method: null,
+                            module: null,
+                            description: null
+                        };
+                        var iconUrl;
+                        // Surface some key attributes of an app, but only if the 
+                        // metadata is well structured.
+                        // Hopefully most of the issues with incompletely structured app 
+                        // cells is due to the presence of early development narratives.
+                        if (appCell.app.spec && 'info' in appCell.app.spec) {
+                            app.name = appCell.app.spec.info.name;
+                            app.id = appCell.app.spec.info.id;
+                            app.method = appCell.app.spec.info.id.split('/')[1];
+                            app.module = appCell.app.spec.info.module_name;
+                            app.description = appCell.app.spec.info.subtitle;
+                            if (appCell.app.spec.info.icon) {
+                                var url = appCell.app.spec.info.icon.url;
+                                if (url) {
+                                    iconUrl = options.runtime.config('services.narrative_method_store.image_url') + url;
+                                }
                             }
                         }
-                    }
 
-                    return {
-                        type: 'app',
-                        params: cell.metadata.kbase.appCell.params,
-                        spec: cell.metadata.kbase.appCell.app.spec,
-                        iconUrl: iconUrl,
-                        app: app
-                    };
-                } else if (cell.metadata.kbase.outputCell) {
-                    return {
-                        type: 'output',
-                        show: ko.observable(false)
+                        return {
+                            type: 'app',
+                            params: cell.metadata.kbase.appCell.params,
+                            spec: cell.metadata.kbase.appCell.app.spec,
+                            iconUrl: iconUrl,
+                            app: app
+                        };
+                    } else if (cell.metadata.kbase.outputCell) {
+                        return {
+                            type: 'output',
+                            show: ko.observable(false)
 
-                    };
-                } else if (cell.metadata.kbase.dataCell) {
-                    return {
-                        type: 'data',
-                        show: ko.observable(false)
-                    };
-                } else {
-                    if (Object.keys(cell.metadata.kbase).length === 0) {
-                        if (cell.outputs) {
-                            // is a code cell that has been run. 
-                            // a code cell not run?
-                            return {
-                                type: 'code',
-                                source: cell.source,
-                                code: renderCode(cell.source),
-                                show: ko.observable(false)
-                            };
-                        } else if (cell.source.match(/kb-cell-out/)) {
-                            var m = cell.source.match(/kbaseNarrativeOutputCell\((.*)\)/);
-                            if (m) {
-                                try {
+                        };
+                    } else if (cell.metadata.kbase.dataCell) {
+                        return {
+                            type: 'data',
+                            show: ko.observable(false)
+                        };
+                    } else {
+                        if (Object.keys(cell.metadata.kbase).length === 0) {
+                            if (cell.outputs) {
+                                // is a code cell that has been run. 
+                                // a code cell not run?
+                                return {
+                                    type: 'code',
+                                    source: cell.source,
+                                    code: renderCode(cell.source),
+                                    show: ko.observable(false)
+                                };
+                            } else if (cell.source.match(/kb-cell-out/)) {
+                                var m = cell.source.match(/kbaseNarrativeOutputCell\((.*)\)/);
+                                if (m) {
+                                    try {
+                                        return {
+                                            type: 'output-widget',
+                                            param: JSON.parse([m[1]]),
+                                            show: ko.observable(false)
+                                        };
+                                    } catch (ex) {
+                                        return {
+                                            type: 'output-widget',
+                                            error: 'Error parsing output widget param: ' + ex.error,
+                                            show: ko.observable(false)
+                                        };
+                                    }
+                                } else {
                                     return {
                                         type: 'output-widget',
-                                        param: JSON.parse([m[1]]),
-                                        show: ko.observable(false)
-                                    };
-                                } catch (ex) {
-                                    return {
-                                        type: 'output-widget',
-                                        error: 'Error parsing output widget param: ' + ex.error,
+                                        error: 'Cannot find widget in output cell source',
                                         show: ko.observable(false)
                                     };
                                 }
                             } else {
+                                // this is a plain Jupyter cell.
+                                // any way to differentiate between code and markdown???
+
                                 return {
-                                    type: 'output-widget',
-                                    error: 'Cannot find widget in output cell source',
-                                    show: ko.observable(false)
+                                    type: 'markdown',
+                                    markdown: cell.source,
+                                    html: renderMarkdown(cell.source)
                                 };
                             }
                         } else {
-                            // this is a plain Jupyter cell.
-                            // any way to differentiate between code and markdown???
-
                             return {
-                                type: 'markdown',
-                                markdown: cell.source,
-                                html: renderMarkdown(cell.source)
+                                type: 'kbase-unknown',
+                                text: 'Unknown kbase cell type: ',
+                                show: ko.observable(false)
                             };
                         }
-                    } else {
+                    }
+                } else {
+                    // Empty metadata - jupyter native
+                    if (cell.outputs) {
+                        // is a code cell that has been run. 
+                        // a code cell not run?
                         return {
-                            type: 'kbase-unknown',
-                            text: 'Unknown kbase cell type: ',
+                            type: 'code',
+                            source: cell.source,
+                            code: renderCode(cell.source),
                             show: ko.observable(false)
                         };
                     }
-                }
-            } else {
-                // Empty metadata - jupyter native
-                if (cell.outputs) {
-                    // is a code cell that has been run. 
-                    // a code cell not run?
                     return {
-                        type: 'code',
-                        source: cell.source,
-                        code: renderCode(cell.source),
-                        show: ko.observable(false)
+                        type: 'markdown',
+                        markdown: cell.source,
+                        html: renderMarkdown(cell.source)
                     };
                 }
-                return {
-                    type: 'markdown',
-                    markdown: cell.source,
-                    html: renderMarkdown(cell.source)
-                };
-            }
 
-        });
+            });
+        }
 
         // add toggling.
         cells.forEach(function (cell) {

@@ -18,20 +18,67 @@ define([
             runtime: runtime
         });
 
+        function renderError(params) {
+            container.innerHTML = '';
+            var node = container.appendChild(document.createElement('div'));
+            node.innerHTML = div({
+                class: 'container-fluid'
+            }, [
+                div({
+                    class: 'row'
+                }, [
+                    div({
+                        class: 'col-sm-12'
+                    }, [
+                        div({
+                            dataBind: {
+                                component: {
+                                    name: '"reske/error"',
+                                    params: {
+                                        title: '"Search Error"',
+                                        error: 'error'
+                                    }
+                                }
+                            }
+                        })
+                    ])
+                ])
+            ]);
+            ko.applyBindings(params, node);
+        }
+
         function render(params) {
-            container.innerHTML = div({
+            var node = container.appendChild(document.createElement('div'));
+            node.innerHTML = div({
                 dataBind: {
                     component: {
-                        name: '"reske-type-search"',
+                        name: '"reske/type-search"',
                         params: {
                             runtime: 'runtime',
                             search: 'search',
-                            query: 'query'
+                            query: 'query',
+                            error: 'error'
                         }
                     }
                 }
             });
-            ko.applyBindings(params, container);
+            ko.applyBindings(params, node);
+        }
+
+        function viewModel(params) {
+            var error = ko.observable();
+            error.subscribe(function (newValue) {
+                renderError({
+                    error: newValue
+                });
+            });
+            var vm = {
+                runtime: params.runtime,
+                search: params.search,
+                query: params.query,
+                error: error
+            };
+            return vm;
         }
 
         // WIDGET API
@@ -45,11 +92,11 @@ define([
             runtime.send('ui', 'setTitle', 'RESKE Search Prototype');
             query.start()
                 .then(function () {
-                    render({
+                    render(viewModel({
                         runtime: runtime,
                         search: params.search || null,
                         query: query
-                    });
+                    }));
                 });
         }
 

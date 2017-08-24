@@ -43,6 +43,63 @@ define([
         };
     }
 
+    function buildTypeView() {
+        return table({
+            class: '-table '
+        }, [
+            tr([
+                th('Scientific name'),
+                td({
+                    dataBind: {
+                        text: 'item.genome.scientificName'
+                    },
+                    class: '-scientific-name'
+                })
+            ]),
+            tr([
+                th('Taxonomy'),
+                td(
+                    [
+                        '<!-- ko if: item.genome.taxonomy.length === 0 -->',
+                        '-',
+                        '<!-- /ko -->',
+                        '<!-- ko if: item.genome.taxonomy.length > 0 -->',
+                        div({
+                            class: '-taxonomy',
+                            dataBind: {
+                                foreach: 'item.genome.taxonomy'
+                            }
+                        }, span([
+                            span({
+                                dataBind: {
+                                    text: '$data'
+                                }
+                            }),
+                            '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
+                            span({
+                                class: 'fa fa-angle-right',
+                                style: {
+                                    margin: '0 4px'
+                                }
+                            }),
+                            '<!-- /ko -->'
+                        ])),
+                        '<!-- /ko -->'
+                    ]
+                )
+            ]),
+            tr([
+                th('Features '),
+                td(div({
+                    dataBind: {
+                        html: 'item.genome.featureCount.formatted'
+                    },
+                    class: '-feature-count'
+                }))
+            ])
+        ]);
+    }
+
     function template() {
         return div({
             class: 'component-reske-genome-browse -row'
@@ -67,71 +124,49 @@ define([
                         width: '70%'
                     }
                 }, [
-                    div({
-                        class: '-title'
-                    }, [
-                        common.buildTypeIcon(),
-                        a({
-                            dataBind: {
-                                attr: {
-                                    href: '"#dataview/" + item.meta.ids.dataviewId'
-                                },
-                                text: 'item.genome.title'
-                            },
-                            target: '_blank',
-                            style: {
-                                verticalAlign: 'middle',
-                                marginLeft: '4px'
-                            }
-                        })
-                    ]),
-                    common.buildMetaInfo(),
-                    table({
-                        class: '-table '
-                    }, [
-                        tr([
-                            th('Scientific name'),
-                            td({
+                    div([
+                        div({
+                            class: '-title'
+                        }, [
+                            common.buildTypeIcon(),
+                            a({
                                 dataBind: {
-                                    text: 'item.genome.scientificName'
+                                    attr: {
+                                        href: '"#dataview/" + item.meta.ids.dataviewId'
+                                    },
+                                    text: 'item.genome.title'
                                 },
-                                class: '-scientific-name'
+                                target: '_blank',
+                                style: {
+                                    verticalAlign: 'middle',
+                                    marginLeft: '4px'
+                                }
                             })
                         ]),
-                        tr([
-                            th('Taxonomy'),
-                            td(div({
-                                class: '-taxonomy',
-                                dataBind: {
-                                    foreach: 'item.genome.taxonomy'
-                                }
-                            }, span([
-                                span({
-                                    dataBind: {
-                                        text: '$data'
-                                    }
-                                }),
-                                '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
-                                span({
-                                    class: 'fa fa-angle-right',
-                                    style: {
-                                        margin: '0 4px'
-                                    }
-                                }),
-                                '<!-- /ko -->'
-                            ])))
-                        ]),
-                        tr([
-                            th('Features '),
-                            td(div({
-                                dataBind: {
-                                    html: 'item.genome.featureCount.formatted'
-                                },
-                                class: '-feature-count'
-                            }))
-                        ])
+                    ]),
+                    div([
+                        div({
+                            style: {
+                                display: 'inline-block',
+                                verticalAlign: 'top',
+                                width: '50%',
+                                padding: '4px',
+                                boxSizing: 'border-box'
+                            }
+                        }, buildTypeView()),
+                        div({
+                            style: {
+                                display: 'inline-block',
+                                verticalAlign: 'top',
+                                width: '50%',
+                                padding: '4px',
+                                boxSizing: 'border-box'
+                            }
+                        }, common.buildMetaInfo())
                     ])
                 ]),
+
+
                 div({
                     style: {
                         display: 'inline-block',
@@ -140,7 +175,7 @@ define([
                         textAlign: 'right'
                     }
                 }, div({
-                    class: '-features'
+                    xclass: '-features'
                 }, [
                     common.buildSharingInfo(),
                     common.buildActions()
@@ -156,5 +191,5 @@ define([
         };
     }
 
-    ko.components.register('reske/genome/browse', component());
+    return component;
 });

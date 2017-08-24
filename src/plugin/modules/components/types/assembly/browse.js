@@ -45,7 +45,7 @@ define([
         };
     }
 
-    function template() {
+    function templatex() {
         return div({
             class: 'component-reske-genome-browse -row'
         }, [
@@ -147,12 +147,138 @@ define([
         ]);
     }
 
+    function buildTypeView() {
+        return table({
+            class: '-table '
+        }, [
+            tr([
+                th('Source'),
+                td({
+                    dataBind: {
+                        html: 'item.assembly.externalSourceId'
+                    },
+                    class: '-source'
+                })
+            ]),
+            tr([
+                th('GC content (%)'),
+                td(div({
+                    dataBind: {
+                        html: 'item.assembly.gcContent.formatted'
+                    },
+                    class: '-gc-content -number'
+                }))
+            ]),
+            tr([
+                th('DNA size (bp)'),
+                td(div({
+                    dataBind: {
+                        html: 'item.assembly.dnaSize.formatted'
+                    },
+                    class: '-dna-size -number'
+                }))
+            ]),
+            tr([
+                th('# contigs'),
+                td(div({
+                    dataBind: {
+                        html: 'item.assembly.contigCount.formatted'
+                    },
+                    class: '-contig-count -number'
+                }))
+            ])
+        ]);
+    }
+
+    function template() {
+        return div({
+            class: 'component-reske-genome-browse -row'
+        }, [
+            div([
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '5%',
+                    },
+                    class: '-field -resultNumber'
+                }, span({
+                    dataBind: {
+                        text: 'item.meta.resultNumber'
+                    }
+                })),
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '70%'
+                    }
+                }, [
+                    div([
+                        div({
+                            class: '-title'
+                        }, [
+                            common.buildTypeIcon(),
+                            a({
+                                dataBind: {
+                                    attr: {
+                                        href: '"#dataview/" + item.meta.ids.dataviewId'
+                                    },
+                                    text: 'item.assembly.title'
+                                },
+                                target: '_blank',
+                                style: {
+                                    verticalAlign: 'middle',
+                                    marginLeft: '4px'
+                                }
+                            })
+                        ]),
+                    ]),
+                    div([
+                        div({
+                            style: {
+                                display: 'inline-block',
+                                verticalAlign: 'top',
+                                width: '50%',
+                                padding: '4px',
+                                boxSizing: 'border-box'
+                            }
+                        }, buildTypeView()),
+                        div({
+                            style: {
+                                display: 'inline-block',
+                                verticalAlign: 'top',
+                                width: '50%',
+                                padding: '4px',
+                                boxSizing: 'border-box'
+                            }
+                        }, common.buildMetaInfo())
+                    ])
+                ]),
+
+
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '25%',
+                        textAlign: 'right'
+                    }
+                }, div({
+                    xclass: '-features'
+                }, [
+                    common.buildSharingInfo(),
+                    common.buildActions()
+                ]))
+            ])
+        ]);
+    }
+
     function component() {
         return {
             viewModel: viewModel,
             template: template()
         };
     }
-
-    ko.components.register('reske/assembly/browse', component());
+    return component;
 });
