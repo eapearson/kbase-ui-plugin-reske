@@ -144,5 +144,5 @@ define([
         };
     }
 
-    ko.components.register('reske/assemblyContig/browse', component());
+    return component;
 });

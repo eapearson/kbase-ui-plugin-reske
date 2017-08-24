@@ -10,20 +10,26 @@ define([
     'use strict';
     var t = html.tag,
         span = t('span'),
+        a = t('a'),
+        ul = t('ul'),
+        li = t('li'),
         div = t('div');
-
 
     function viewModel(params) {
         var title = params.title;
-        var message = params.message;
-        var details = params.details || null;
-        var references = params.references || [];
+        var message = params.error.message;
+        var details = params.error.details || null;
+        var references = params.error.references || [];
+        var data = params.error.data;
+        var renderedData = BS.buildPresentableJson(data);
 
         return {
             title: title,
             message: message,
             details: details,
-            references: references
+            references: references,
+            data: data,
+            renderedData: renderedData
         };
     }
 
@@ -31,22 +37,10 @@ define([
         return div({
             class: 'component-reske-error'
         }, [
-            // div({
-            //     class: '-title',
-            //     dataBind: {
-            //         text: 'title'
-            //     }
-            // }),
-            // div({
-            //     class: '-message',
-            //     dataBind: {
-            //         text: 'message'
-            //     }
-            // }),
             BS.buildPanel({
                 title: span({ dataBind: { text: 'title' } }),
                 type: 'danger',
-                classes: 'kb-panel-light',
+                // classes: 'kb-panel-light',
                 collapsed: true,
                 body: div([
                     div({
@@ -58,23 +52,45 @@ define([
                     BS.buildCollapsiblePanel({
                         title: 'Details',
                         type: 'default',
-                        classes: 'kb-panel-help',
+                        classes: 'kb-panel-error',
                         collapsed: true,
-                        body: 'details here if provided by the exception object ... or maybe synthesized by catching a specific exception and creating good text'
+                        body: div({
+                            dataBind: {
+                                html: 'details'
+                            }
+                        })
                     }),
                     BS.buildCollapsiblePanel({
                         title: 'References',
                         type: 'default',
-                        classes: 'kb-panel-help',
+                        classes: 'kb-panel-error',
                         collapsed: true,
-                        body: 'references here... these are link + label to point the user to helpful resources, probably at kbase.us'
+                        body: ul({
+                            dataBind: {
+                                foreach: 'references'
+                            }
+                        }, li([
+                            a({
+                                dataBind: {
+                                    attr: {
+                                        href: 'url'
+                                    },
+                                    text: 'label'
+                                },
+                                target: '_blank'
+                            })
+                        ]))
                     }),
                     BS.buildCollapsiblePanel({
                         title: 'Data',
                         type: 'default',
-                        classes: 'kb-panel-help',
+                        classes: 'kb-panel-error',
                         collapsed: true,
-                        body: 'raw data provided by the error, if available, is here.'
+                        body: div({
+                            dataBind: {
+                                html: 'renderedData'
+                            }
+                        })
                     })
                 ])
             }),
@@ -88,5 +104,5 @@ define([
             template: template()
         };
     }
-    ko.components.register('reske/error', component());
+    return component;
 });

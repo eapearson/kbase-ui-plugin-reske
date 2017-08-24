@@ -168,5 +168,5 @@ define([
         };
     }
 
-    ko.components.register('reske/singleEndLibrary/browse', component());
+    return component;
 });

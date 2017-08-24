@@ -5,10 +5,8 @@ define([
     'kb_common/html',
     'kb_common/bootstrapUtils',
     'kb_common/jsonRpc/genericClient',
-    '../types',
-    '../nanoBus',
-
-    './tabset'
+    '../../../types',
+    '../../../nanoBus'
 ], function (
     Promise,
     ko,
@@ -21,7 +19,6 @@ define([
 ) {
     'use strict';
     var t = html.tag,
-        p = t('p'),
         div = t('div'),
         span = t('span'),
         h2 = t('h2'),
@@ -122,9 +119,9 @@ define([
     function viewModel(params) {
         var runtime = params.runtime;
         var query = params.query;
-        var error = params.error;
 
         // Top level query engine object threaded through all data-centric components
+
 
         // VIEW ELEMENTS
         var searchInput = ko.observable().extend({
@@ -199,35 +196,6 @@ define([
                         searchResult.totalAvailable(result.hitCount);
                     });
                     return null;
-                })
-                .catch(function (err) {
-                    error({
-                        message: 'An error was encountered with the RESKE search service',
-                        details: div([
-                            p([
-                                'An error was encountered fetching an overview of data available to you.'
-                            ]),
-                            p([
-                                'The problem is temporary; please try again later.'
-                            ]),
-                            p([
-                                'You may use the links below to find out more about this problem.'
-                            ])
-                        ]),
-                        references: [{
-                            url: 'https://kbase.us/help/errors',
-                            label: 'Dealing with Errors in KBase'
-                        }, {
-                            url: 'https://kbase.us/contact',
-                            label: 'Contact KBase about an Error'
-                        }, {
-                            url: 'https://kbase.us/service-status',
-                            label: 'KBase Service Status Page'
-                        }],
-                        data: {
-                            theError: err
-                        }
-                    });
                 });
         }
         doSearchAll();
@@ -408,7 +376,6 @@ define([
             // INTERFACE
             runtime: runtime,
             QE: query,
-            error: error,
 
             // UI 
             searchInput: searchInput,
@@ -560,15 +527,6 @@ define([
             div({
                 class: 'row'
             }, [
-                // div({
-                //     class: 'col-md-8 col-md-offset-2'
-                // }, [
-                //     div({
-                //         dataBind: {
-                //             text: 'searchError'
-                //         }
-                //     })
-                // ]),
                 div({
                     class: 'col-md-12'
                 }, div({
@@ -585,7 +543,6 @@ define([
                                     withPrivateData: 'searchPrivateData',
                                     runtime: 'runtime',
                                     bus: 'tabsetBus',
-                                    error: 'error'
                                 }
                             }
                         }

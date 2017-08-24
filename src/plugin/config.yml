@@ -26,6 +26,14 @@ install:
             module: tabtest
             id: kb_reskeSearch_tabtest
             type: factory
+        -
+            module: v2/narrative/main
+            id: kb_reskeSearch_narrativeSearch
+            type: factory    
+        -
+            module: v2/data/main
+            id: kb_reskeSearch_dataSearch
+            type: factory    
     ko-components:
         -
             name: reske/narrative/browse
@@ -62,7 +70,91 @@ install:
         -
             name: reske/error
             module: components/error
-            css: true                       
+            css: true
+        -
+            name: reske/browser
+            module: components/browser
+            css: true
+        -
+            name: reske/narrative/search/ui
+            module: v2/narrative/components/ui
+            css: true
+        -
+            name: reske/narrative/search/controls
+            module: v2/narrative/components/controls
+            css: true
+        -
+            name: reske/narrative/search/browser
+            module: v2/narrative/components/resultsBrowser
+            css: true
+        -
+            name: reske/narrative/search/results/list
+            module: v2/narrative/components/resultsList
+            css: true      
+        -
+            name: reske/narrative/search/results/detail
+            module: v2/narrative/components/resultsDetail
+            css: true                     
+        -
+            name: reske/data/search/ui
+            module: v2/data/components/ui
+            css: true
+        -
+            name: reske/data/search/controls
+            module: v2/data/components/controls
+            css: true
+        -
+            name: reske/data/search/results
+            module: v2/data/components/results
+            css: true            
+        -
+            name: reske/data/search/summary
+            module: v2/data/components/summary
+            css: true              
+        -
+            name: reske/data/search/browser
+            module: v2/data/components/browser
+            css: true             
+        -
+            name: tabset
+            module: components/tabset
+            css: true
+        -
+            name: reske-object-search
+            module: components/object-search
+            css: false
+        -
+            name: narrative-small-row
+            module: components/types/narrative/rows/small
+            css: false
+        -
+            name: narrative-medium-row
+            module: components/types/narrative/rows/medium
+            css: false
+        -
+            name: narrative-large-row
+            module: components/types/narrative/rows/large
+            css: false
+        -
+            name: default-small-row
+            module: components/types/default/rows/small
+            css: false
+        -
+            name: default-medium-row
+            module: components/types/default/rows/medium
+            css: false
+        -
+            name: default-large-row
+            module: components/types/default/rows/large
+            css: false
+        -
+            name: reske/type-search/summary
+            module: components/type-search-summary 
+            css: true
+        -
+            name: reske/type-search
+            module: components/type-search
+            css: true
     routes:
         -
             path: ['reske', 'object-search']
@@ -81,6 +173,14 @@ install:
             path: ['reske', 'tabtest']
             widget: kb_reskeSearch_tabtest
             authorization: true
+        -
+            path: ['reske', 'search', 'narrative']
+            widget: kb_reskeSearch_narrativeSearch
+            authorization: true            
+        -
+            path: ['reske', 'search', 'data']
+            widget: kb_reskeSearch_dataSearch
+            authorization: true            
         # -
         #     path:
         #         - search2
@@ -102,3 +202,15 @@ install:
                 path: reske/search
                 label: RESKE Search
                 icon: search-plus
+        -
+            name: reske-narrative-search
+            definition:
+                path: reske/search/narrative
+                label: RESKE Narrative Search
+                icon: file-o
+        -
+            name: reske-data-search
+            definition:
+                path: reske/search/data
+                label: RESKE Data Search
+                icon: file-o                

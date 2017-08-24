@@ -19,7 +19,11 @@ define([
         pre = t('pre'),
         code = t('code'),
         div = t('div'),
-        img = t('img');
+        img = t('img'),
+        table = t('table'),
+        tr = t('tr'),
+        th = t('th'),
+        td = t('td');
 
     function viewModel(params) {
         function doOpenNarrative(data) {
@@ -390,7 +394,7 @@ define([
         ];
     }
 
-    function template() {
+    function templatex() {
         return div({
             class: 'component-reske-narrative-browse -row'
         }, [
@@ -459,6 +463,182 @@ define([
         ]);
     }
 
+    function buildTypeView() {
+        return table({
+            class: '-table '
+        }, [
+            tr([
+                th('Creator'),
+                td({
+                    // dataBind: {
+                    //     text: 'item.genome.scientificName'
+                    // },
+                    // class: '-scientific-name'
+                })
+            ]),
+            tr([
+                th('App Cells'),
+                td(
+                    // [
+                    //     '<!-- ko if: item.genome.taxonomy.length === 0 -->',
+                    //     '-',
+                    //     '<!-- /ko -->',
+                    //     '<!-- ko if: item.genome.taxonomy.length > 0 -->',
+                    //     div({
+                    //         class: '-taxonomy',
+                    //         dataBind: {
+                    //             foreach: 'item.genome.taxonomy'
+                    //         }
+                    //     }, span([
+                    //         span({
+                    //             dataBind: {
+                    //                 text: '$data'
+                    //             }
+                    //         }),
+                    //         '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
+                    //         span({
+                    //             class: 'fa fa-angle-right',
+                    //             style: {
+                    //                 margin: '0 4px'
+                    //             }
+                    //         }),
+                    //         '<!-- /ko -->'
+                    //     ])),
+                    //     '<!-- /ko -->'
+                    // ]
+                )
+            ]),
+            tr([
+                th('App Cells'),
+                td(
+                    // [
+                    //     '<!-- ko if: item.genome.taxonomy.length === 0 -->',
+                    //     '-',
+                    //     '<!-- /ko -->',
+                    //     '<!-- ko if: item.genome.taxonomy.length > 0 -->',
+                    //     div({
+                    //         class: '-taxonomy',
+                    //         dataBind: {
+                    //             foreach: 'item.genome.taxonomy'
+                    //         }
+                    //     }, span([
+                    //         span({
+                    //             dataBind: {
+                    //                 text: '$data'
+                    //             }
+                    //         }),
+                    //         '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
+                    //         span({
+                    //             class: 'fa fa-angle-right',
+                    //             style: {
+                    //                 margin: '0 4px'
+                    //             }
+                    //         }),
+                    //         '<!-- /ko -->'
+                    //     ])),
+                    //     '<!-- /ko -->'
+                    // ]
+                )
+            ]),
+            tr([
+                th('Data Objects '),
+                td(div({
+                    // dataBind: {
+                    //     html: 'item.genome.featureCount.formatted'
+                    // },
+                    // class: '-feature-count'
+                }))
+            ])
+        ]);
+    }
+
+    function template() {
+        return div({
+            class: 'component-reske-narrative-browse -row'
+        }, [
+            div([
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '5%',
+                    },
+                    class: '-field -resultNumber'
+                }, span({
+                    dataBind: {
+                        text: 'item.meta.resultNumber'
+                    }
+                })),
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '70%'
+                    }
+                }, [
+                    div([
+                        div({
+                            class: '-title'
+                        }, [
+                            common.buildTypeIcon(),
+                            a({
+                                dataBind: {
+                                    attr: {
+                                        href: '"/narrative/" + item.meta.narrativeId'
+                                    },
+                                    text: 'item.narrative.title'
+                                },
+                                style: {
+                                    verticalAlign: 'middle',
+                                    marginLeft: '4px'
+                                },
+                                target: '_blank'
+                            })
+                        ])
+                    ]),
+                    div([
+                        div({
+                            style: {
+                                display: 'inline-block',
+                                verticalAlign: 'top',
+                                width: '50%',
+                                padding: '4px',
+                                boxSizing: 'border-box'
+                            }
+                        }, buildTypeView()),
+                        div({
+                            style: {
+                                display: 'inline-block',
+                                verticalAlign: 'top',
+                                width: '50%',
+                                padding: '4px',
+                                boxSizing: 'border-box'
+                            }
+                        }, common.buildMetaInfo())
+                    ])
+                ]),
+
+
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '25%',
+                        textAlign: 'right'
+                    }
+                }, div({
+                    xclass: '-features'
+                }, [
+                    common.buildSharingInfo(),
+                    common.buildActions({
+                        dataview: false
+                    })
+                ]))
+            ]),
+            buildCellsPreview()
+        ]);
+    }
+
     function component() {
         return {
             viewModel: viewModel,
@@ -466,6 +646,5 @@ define([
         };
     }
 
-    ko.components.register('reske/narrative/browse', component());
-
+    return component;
 });

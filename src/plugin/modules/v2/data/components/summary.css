@@ -1,0 +1,28 @@
+.component-type-search-summary table {
+    border-collapse: separate;
+    border-spacing: 0 4px;
+}
+
+.component-type-search-summary table td,
+.component-type-search-summary table th {
+    padding: 6px;
+}
+
+.component-type-search-summary table tr {
+    margin: 6px 0;
+}
+
+.component-type-search-summary table tr.has-hits {
+    background-color: #DDD;
+    color: #000;
+    cursor: pointer;
+}
+
+.component-type-search-summary table tr.has-hits:hover {
+    background-color: #CCC;
+}
+
+.component-type-search-summary table tr {
+    background-color: #FFF;
+    /*color: #CCC;*/
+}

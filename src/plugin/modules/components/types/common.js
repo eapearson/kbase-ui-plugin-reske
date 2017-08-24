@@ -8,7 +8,11 @@ define([
     var t = html.tag,
         span = t('span'),
         div = t('div'),
-        a = t('a');
+        a = t('a'),
+        table = t('table'),
+        tr = t('tr'),
+        th = t('th'),
+        td = t('td');
 
     function buildSharingInfo() {
         return div({
@@ -148,6 +152,105 @@ define([
     }
 
     function buildMetaInfo(_options) {
+        var options = _options || {};
+        return table({
+            class: '-table'
+        }, [
+            tr([
+                th('Created'),
+                td(span({
+                    dataBind: {
+                        text: 'item.meta.created.at'
+                    },
+                    class: '-created-at'
+                }))
+            ]),
+
+            tr([
+                th('In Narrative'),
+                td((function () {
+                    if (options.showNarrative === false) {
+                        return;
+                    }
+                    // Narrative context
+                    return div([
+                        a({
+                            dataBind: {
+                                attr: {
+                                    href: '"/narrative/" + item.meta.narrativeId'
+                                }
+                            },
+                            target: '_blank',
+                            dataToggle: 'tooltip',
+                            dataPlacement: 'left',
+                            title: 'Open the Narrative this object is embedded in'
+                        }, [
+                            span({
+                                class: 'fa fa-file-o'
+                            }),
+                            span({
+                                dataBind: {
+                                    text: 'item.meta.narrativeTitle'
+                                },
+                                class: '-narrative-title',
+                                style: {
+                                    marginLeft: '4px'
+                                }
+                            })
+                        ])
+                    ]);
+                }()))
+            ]),
+            tr([
+                th('Owned by'),
+                td(
+                    a({
+                        dataBind: {
+                            attr: {
+                                href: '"#people/" + item.meta.owner'
+                            }
+                        },
+                        target: '_blank',
+                        dataToggle: 'tooltip',
+                        dataPlacement: 'left',
+                        title: 'This is the owner of the Narrative this object is embedded in; click here to view their profile.'
+                    }, [
+                        span({
+                            class: 'fa fa-user-o'
+                        }),
+                        span({
+                            dataBind: {
+                                text: 'item.meta.owner'
+                            },
+                            class: '-owner',
+                            style: {
+                                marginLeft: '4px'
+                            }
+                        })
+                    ])
+
+                )
+            ]),
+            tr([
+                th('Last updated'),
+                td([
+                    '<!-- ko if: item.meta.created.at !== item.meta.updated.at -->',
+                    span({
+                        dataBind: {
+                            text: 'item.meta.updated.at'
+                        },
+                        class: '-updated-at'
+                    }),
+                    '<!-- /ko -->',
+                    '<!-- ko if: item.meta.created.at === item.meta.updated.at -->',
+                    '-',
+                    '<!-- /ko -->'
+                ])
+            ])
+        ]);
+    }
+
+    function buildMetaInfox(_options) {
         var options = _options || {};
         return div({
             style: {

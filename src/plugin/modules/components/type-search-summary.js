@@ -5,9 +5,7 @@ define([
     'kb_common/html',
     'kb_common/bootstrapUtils',
     'kb_common/jsonRpc/genericClient',
-    '../types',
-    './browser',
-    'css!./type-search-summary.css'
+    '../types'
 ], function (
     Promise,
     ko,
@@ -15,8 +13,7 @@ define([
     html,
     bs,
     GenericClient,
-    Types,
-    Browser
+    Types
 ) {
     'use strict';
     var t = html.tag,
@@ -88,7 +85,11 @@ define([
 
     function template() {
         return div({
-            class: 'component-type-search-summary'
+            class: 'component-type-search-summary',
+            style: {
+                width: '40em',
+                margin: 'auto'
+            }
         }, table({}, [
             colgroup([
                 col({
@@ -212,5 +213,5 @@ define([
             template: template()
         };
     }
-    ko.components.register('reske/type-search/summary', component());
+    return component;
 });

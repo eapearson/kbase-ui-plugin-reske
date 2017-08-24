@@ -16,8 +16,6 @@ define([
         span = t('span'),
         div = t('div');
 
-
-
     function viewModel(params) {
         var tabsetId = html.genId();
         var tabs = ko.observableArray();
@@ -77,7 +75,6 @@ define([
         }
 
         function addTab(tab) {
-            //console.log('adding tab, my hosted vm is', ko.toJSON(hostedVM));
             var newTab = makeTab(tab);
             tabs.push(newTab);
             deactivateCurrentTab();
@@ -220,6 +217,5 @@ define([
             template: template()
         };
     }
-
-    ko.components.register('tabset', component());
+    return component;
 });

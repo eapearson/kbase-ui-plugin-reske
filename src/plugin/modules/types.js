@@ -53,6 +53,10 @@ define([
             key: 'job_ids',
             label: 'Job Ids',
             type: 'string'
+        }, {
+            key: 'creator',
+            label: 'Creator',
+            type: 'string'
         }],
         sortFields: [{
             key: 'title',
@@ -74,7 +78,22 @@ define([
             label: 'Owner (fake)',
             isTimestamp: false,
             isObjectName: false
-        }]
+        }, {
+            value: 'creator',
+            label: 'Creator',
+            isTimestamp: false,
+            isObjectname: false
+        }],
+        // Note translated into api-speak.
+        defaultSortingRules: [{
+            is_timestamp: 1,
+            is_object_name: 0,
+            key_name: 'timestamp',
+            descending: 1
+        }],
+        defaultSearch: {
+            key: 'cr'
+        }
     }, {
         id: 'genome',
         uiId: 'genome',
@@ -438,6 +457,12 @@ define([
             searchKeysMap[searchKey.key] = searchKey;
         });
         type.searchKeysMap = searchKeysMap;
+
+        var sortFieldsMap = {};
+        type.sortFields.forEach(function (sortField) {
+            sortFieldsMap[sortField.key] = sortField;
+        });
+        type.sortFieldsMap = sortFieldsMap;
 
         objectTypeMap[type.id] = type;
     });

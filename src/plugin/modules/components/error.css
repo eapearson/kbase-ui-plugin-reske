@@ -46,3 +46,120 @@
 .component-reske-error .-message {
     margin-top: '6px';
 }
+
+
+/* panel tweaks */
+
+.component-reske-error .kb-panel-error {
+    margin: 0;
+}
+
+
+/* panel */
+
+
+/* Help panels */
+
+.kbase-ui .panel.kb-panel-error {
+    border: none;
+    box-shadow: none;
+}
+
+.kbase-ui .panel.kb-panel-error>.panel-heading {
+    background-color: transparent;
+    font-weight: bold;
+    color: #666;
+    padding-left: 0;
+    padding-bottom: 4px;
+    border: none;
+}
+
+.kbase-ui .panel.kb-panel-error .panel-body {
+    padding: 14px 10px 10px 14px;
+    border: none;
+}
+
+.kbase-ui .panel.kb-panel-error .panel-title {
+    font-size: 100%;
+}
+
+.kbase-ui .panel.kb-panel-error .panel-title>[data-toggle="collapse"]::before {
+    content: none;
+}
+
+.kbase-ui .panel.kb-panel-error .panel-title>[data-toggle="collapse"].collapsed::before {
+    content: none;
+}
+
+.kbase-ui .panel.kb-panel-error .panel-title>[data-toggle="collapse"]::after {
+    /* font-size: 120%; */
+    /* width: 18px; */
+    margin-left: 4px;
+    font-family: "FontAwesome";
+    content: "\f063";
+    color: #AAA;
+}
+
+.kbase-ui .panel.kb-panel-error .panel-title:hover>[data-toggle="collapse"].collapsed::after {
+    color: #AAA;
+}
+
+.kbase-ui .panel.kb-panel-error .panel-title>[data-toggle="collapse"].collapsed::after {
+    /* font-size: 120%; */
+    /* width: 18px; */
+    margin-left: 4px;
+    font-family: "FontAwesome";
+    content: "\f061";
+    color: #CCC;
+}
+
+
+/* Bootrap semantic colors ... */
+
+.kbase-ui .panel-danger.kb-panel-error .panel-title {
+    color: #a94442;
+}
+
+.kbase-ui .panel-success.kb-panel-error .panel-title {
+    color: #3c763d;
+}
+
+.kbase-ui .panel-warning.kb-panel-error .panel-title {
+    color: #8a6d3b;
+}
+
+.kbase-ui .panel-info.kb-panel-error .panel-title {
+    color: blue;
+}
+
+.kbase-ui .panel.panel-danger.kb-panel-error .panel-title>[data-toggle="collapse"]::before {
+    color: #a94442;
+}
+
+.kbase-ui .panel.panel-success.kb-panel-error .panel-title>[data-toggle="collapse"]::before {
+    color: #3c763d;
+}
+
+.kbase-ui .panel.panel-warning.kb-panel-error .panel-title>[data-toggle="collapse"]::before {
+    color: #8a6d3b;
+}
+
+.kbase-ui .panel.panel-info.kb-panel-error .panel-title>[data-toggle="collapse"]::before {
+    color: blue;
+}
+
+.kbase-ui .panel.panel-danger.kb-panel-error .panel-title>[data-toggle="collapse"].collapsed::before {
+    color: #a94442;
+}
+
+.kbase-ui .panel.panel-success.kb-panel-error .panel-title>[data-toggle="collapse"].collapsed::before {
+    color: #3c763d;
+}
+
+.kbase-ui .panel.panel-warning.kb-panel-error .panel-title>[data-toggle="collapse"].collapsed::before {
+    color: #8a6d3b;
+}
+
+.kbase-ui .panel.panel-info.kb-panel-error .panel-title>[data-toggle="collapse"].collapsed::before {
+    color: blue;
+}

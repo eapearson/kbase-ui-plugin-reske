@@ -153,5 +153,5 @@ define([
         };
     }
 
-    ko.components.register('reske/pairedEndLibrary/browse', component());
+    return component;
 });
