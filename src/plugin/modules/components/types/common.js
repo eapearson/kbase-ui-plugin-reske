@@ -103,7 +103,7 @@ define([
             }
         }, [
             span({
-                class: 'mini-button',
+                class: '-mini-button',
                 dataToggle: 'tooltip',
                 dataPlacement: 'left',
                 title: 'Click here to open the Narrative this object is embedded in',
@@ -119,7 +119,7 @@ define([
             (function () {
                 if (options.dataview !== false) {
                     return span({
-                        class: 'mini-button',
+                        class: '-mini-button',
                         dataToggle: 'tooltip',
                         dataPlacement: 'left',
                         title: 'Click here to open a detailed viewer page for this data object',
@@ -135,7 +135,7 @@ define([
                 }
             }()),
             span({
-                class: 'mini-button',
+                class: '-mini-button',
                 dataToggle: 'tooltip',
                 dataPlacement: 'left',
                 title: 'Click here to save this search result in your search shopping cart',
@@ -202,7 +202,7 @@ define([
                 }()))
             ]),
             tr([
-                th('Owned by'),
+                th('Owner'),
                 td(
                     a({
                         dataBind: {

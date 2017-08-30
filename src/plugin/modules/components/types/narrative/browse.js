@@ -34,6 +34,7 @@ define([
         function doKeep(data) {
             console.log('keeping...', data);
         }
+        console.log('narrative', params.item);
         return {
             item: params.item,
             doOpenNarrative: doOpenNarrative,
