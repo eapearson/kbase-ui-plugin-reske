@@ -20,11 +20,13 @@ define([
         var tabClasses = ko.observableArray(['nav', 'nav-tabs']);
         var activeTab = ko.observable();
 
+        console.log('tabset host vm?', params);
+
         var hostVM = params.vm;
 
         // Bus -- ??!!
         // TODO: provide the bus on the top level of the params...
-        var bus = hostVM.bus;
+        var bus = hostVM.tabsetBus;
         bus.on('add-tab', function (message) {
             addTab(message.tab);
         });
@@ -98,12 +100,15 @@ define([
         bus.send('ready');
 
         return {
+            // JUST TABS
             tabs: tabs,
             tabClasses: tabClasses,
             tabsetId: tabsetId,
             doCloseTab: doCloseTab,
             doSelectTab: doSelectTab,
             addTab: addTab,
+
+            // PASS THROUGH
             hostVM: hostVM
         };
     }
@@ -119,7 +124,6 @@ define([
                     },
                     foreach: 'tabs'
                 },
-                // class: 'nav nav-tabs',
                 class: 'kb-tabs',
                 role: 'tablist'
             }, li({
@@ -133,9 +137,6 @@ define([
             }, [
                 a({
                     dataBind: {
-                        // attr: {
-                        //     ariaControls: 'panelId'
-                        // },
                         click: '$component.doSelectTab'
                     },
                     role: 'tab',
@@ -183,17 +184,6 @@ define([
                         component: {
                             name: 'component.name',
                             params: 'component.params'
-                                // params: {
-                                //     // The parent vm is the one owned by the tabset, and provided by the 
-                                //     // component whicih hosts the tabset.
-                                //     hostVM: '$component.hostVM',
-                                //     // The tab vm is provided along with the tab data object used to create the
-                                //     // tab. It will probably fail with anything other than data literals since
-                                //     // the caller doesn't know the structure of the vm inside here.
-                                //     // TODO: we should not even do this, as such, perhaps just pass a json object
-                                //     // for configuration, and a data + comm channel for querying the system.
-                                //     tabVM: 'component.params'
-                                // }
                         }
                     }
                 }),

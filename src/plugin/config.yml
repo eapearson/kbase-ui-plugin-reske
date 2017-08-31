@@ -106,15 +106,19 @@ install:
         -
             name: reske/data/search/results
             module: v2/data/components/results
-            css: true            
+            css: true
         -
             name: reske/data/search/summary
             module: v2/data/components/summary
-            css: true              
+            css: true
         -
             name: reske/data/search/browser
             module: v2/data/components/browser
-            css: true             
+            css: true
+        -
+            name: tabset2
+            module: v2/data/components/tabset2
+            css: true
         -
             name: tabset
             module: components/tabset

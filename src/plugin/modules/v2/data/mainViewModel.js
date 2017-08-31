@@ -12,8 +12,7 @@ define([
     'kb_common/jsonRpc/genericClient',
     '../../types',
     '../../nanoBus',
-
-    '../../components/tabset'
+    '../../query/main'
 ], function (
     Promise,
     ko,
@@ -21,14 +20,16 @@ define([
     bs,
     GenericClient,
     Types,
-    NanoBus
+    NanoBus,
+    Query
 ) {
     'use strict';
 
-
     function ViewModel(params) {
         var runtime = params.runtime;
-        var query = params.query;
+        var query = Query.make({
+            runtime: runtime
+        });
 
         // Top level query engine object threaded through all data-centric components
 
@@ -129,11 +130,9 @@ define([
                 tab: {
                     label: 'Search across all types',
                     component: {
-                        name: 'reske/type-search/summary',
+                        name: 'reske/data/search/summary',
                         // NB these params are bound here, not in the tabset.
-                        params: {
-
-                        }
+                        params: {}
                     }
                 }
             });
@@ -157,7 +156,7 @@ define([
         return {
             // INTERFACE
             runtime: runtime,
-            QE: query,
+            query: query,
 
             // UI 
             searchInput: searchInput,

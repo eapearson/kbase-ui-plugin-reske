@@ -47,7 +47,7 @@ define([
                         checked: '$component.search.searchPrivateData'
                     }
                 }),
-                ' your Narratives and Narratives shared with you'
+                ' your data and data shared with you'
             ])),
             span({
                 // class: 'ckeckbox'
@@ -64,7 +64,7 @@ define([
                         checked: '$component.search.searchPublicData'
                     }
                 }),
-                ' Narratives shared publicly'
+                ' data shared publicly'
             ]))
         ]);
     }
@@ -135,7 +135,7 @@ define([
                         style: {
                             textAlign: 'center'
                         }
-                    }, 'RESKE Narratives')
+                    }, 'RESKE Data Search')
                 ])
             ]),
 
