@@ -34,18 +34,16 @@ define([
                     }
                 })
             ]),
-            // div([
-            //     div({
-            //         dataBind: {
-            //             component: {
-            //                 name: '"reske/data/search/results"',
-            //                 params: {
-            //                     search: 'search'
-            //                 }
-            //             }
-            //         }
-            //     })
-            // ])
+            div({
+                dataBind: {
+                    component: {
+                        name: '"tabset2"',
+                        params: {
+                            vm: 'search'
+                        }
+                    }
+                }
+            })
         ]);
     }
 

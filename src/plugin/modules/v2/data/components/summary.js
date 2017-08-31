@@ -33,18 +33,21 @@ define([
 
 
     function searchTypes(runtime, searchTerm, withPublic, withPrivate) {
-
         // With an empty search term, we simply reset the current search results.
         // The default behaviour would be to return all available items.
         if (!searchTerm || searchTerm.length === 0) {
             return Promise.try(function () {
-                var hits = Types.types.map(function (type) {
-                    return {
-                        type: type.id,
-                        title: type.label,
-                        hitCount: null
-                    };
-                });
+                var hits = Types.types
+                    .filter(function (type) {
+                        return (typesToShow.indexOf(type.id) >= 0);
+                    })
+                    .map(function (type) {
+                        return {
+                            type: type.id,
+                            title: type.label,
+                            hitCount: null
+                        };
+                    });
                 return {
                     hits: hits,
                     elapsed: 0
@@ -71,20 +74,28 @@ define([
         return client.callFunc('search_types', [param])
             .then(function (result) {
                 var searchResult = result[0];
-                var hits = Types.types.map(function (type) {
-                    var hitCount = searchResult.type_to_count[type.resultId] || 0;
-                    return {
-                        type: type.id,
-                        title: type.label,
-                        hitCount: hitCount
-                    };
-                });
+                var hits = Types.types
+                    .filter(function (type) {
+                        return (typesToShow.indexOf(type.id) >= 0);
+                    })
+                    .map(function (type) {
+                        console.log(type);
+                        var hitCount = searchResult.type_to_count[type.resultId] || 0;
+                        return {
+                            type: type.id,
+                            title: type.label,
+                            hitCount: hitCount
+                        };
+                    });
                 return {
                     hits: hits,
                     elapsed: searchResult.search_time
                 };
             });
     }
+
+
+    var typesToShow = ['genome', 'assembly', 'pairedendlibrary', 'singleendlibrary'];
 
     function matchAllTypes(runtime, withPublic, withPrivate) {
         var client = new GenericClient({
@@ -104,14 +115,18 @@ define([
         return client.callFunc('search_types', [param])
             .then(function (result) {
                 var searchResult = result[0];
-                var hits = Types.types.map(function (type) {
-                    var hitCount = searchResult.type_to_count[type.resultId] || 0;
-                    return {
-                        type: type.id,
-                        title: type.label,
-                        hitCount: hitCount
-                    };
-                });
+                var hits = Types.types
+                    .filter(function (type) {
+                        return (typesToShow.indexOf(type.id) >= 0);
+                    })
+                    .map(function (type) {
+                        var hitCount = searchResult.type_to_count[type.resultId] || 0;
+                        return {
+                            type: type.id,
+                            title: type.label,
+                            hitCount: hitCount
+                        };
+                    });
                 return {
                     hits: hits,
                     elapsed: searchResult.search_time
@@ -121,50 +136,53 @@ define([
 
     function viewModel(params1) {
         var searchVM = params1.hostVM;
-        var queryEngine = searchVM.QE;
+        var queryEngine = searchVM.query;
+        var runtime = searchVM.runtime;
 
         // var searchResults = params.searchResults;
-        var searching = searchVM.searching;
+        var isSearching = searchVM.isSearching;
         var searchInput = searchVM.searchInput;
-        var withPrivateData = searchVM.withPrivateData;
-        var withPublicData = searchVM.withPublicData;
-        var bus = searchVM.bus;
-
+        var searchPrivateData = searchVM.searchPrivateData;
+        var searchPublicData = searchVM.searchPublicData;
 
         // populate the array with all types first.
         var searchResultsMap = {};
-        var searchResults = ko.observableArray(Types.types.map(function (type) {
-            var hitCount = ko.observable(null);
-            var count = ko.pureComputed(function () {
-                //if (hitCount() > 0) {
-                if (typeof hitCount() === 'number') {
-                    return numeral(hitCount()).format(0, 0);
-                }
-                return '-';
-            });
-            var totalAvailable = ko.observable();
-            var available = ko.pureComputed(function () {
-                if (totalAvailable() === undefined) {
-                    return span({
-                        style: {
-                            fontSize: '50%'
-                        }
-                    }, html.loading());
-                }
-                return numeral(totalAvailable()).format(0, 0);
-            });
-            var searchResult = {
-                type: type.id,
-                uiId: type.uiId,
-                title: type.label,
-                hitCount: hitCount,
-                count: count,
-                totalAvailable: totalAvailable,
-                available: available
-            };
-            searchResultsMap[type.id] = searchResult;
-            return searchResult;
-        }));
+        var searchResults = ko.observableArray(Types.types
+            .filter(function (type) {
+                return (typesToShow.indexOf(type.id) >= 0);
+            })
+            .map(function (type) {
+                var hitCount = ko.observable(null);
+                var count = ko.pureComputed(function () {
+                    //if (hitCount() > 0) {
+                    if (typeof hitCount() === 'number') {
+                        return numeral(hitCount()).format(0, 0);
+                    }
+                    return '-';
+                });
+                var totalAvailable = ko.observable();
+                var available = ko.pureComputed(function () {
+                    if (totalAvailable() === undefined) {
+                        return span({
+                            style: {
+                                fontSize: '50%'
+                            }
+                        }, html.loading());
+                    }
+                    return numeral(totalAvailable()).format(0, 0);
+                });
+                var searchResult = {
+                    type: type.id,
+                    uiId: type.uiId,
+                    title: type.label,
+                    hitCount: hitCount,
+                    count: count,
+                    totalAvailable: totalAvailable,
+                    available: available
+                };
+                searchResultsMap[type.id] = searchResult;
+                return searchResult;
+            }));
 
         // Get initial available types...
         function doSearchAll() {
@@ -182,7 +200,7 @@ define([
         var currentSearch;
 
         function doSearch() {
-            searching(true);
+            isSearching(true);
             // event('search-begin', 1);
             if (currentSearch) {
                 currentSearch.cancelled = true;
@@ -212,8 +230,9 @@ define([
                     return null;
                 })
                 .catch(function (err) {
-                    status('error');
-                    searchError(err.message);
+                    console.error('ERROR', err);
+                    // status('error');
+                    // searchError(err.message);
                 })
                 .finally(function () {
                     if (thisSearch && thisSearch.search.isCancelled()) {
@@ -221,33 +240,38 @@ define([
                     }
                     thisSearch = null;
                     currentSearch = null;
-                    searching(false);
+                    isSearching(false);
                 });
         }
 
-        function doSearchAgain() {
-            doSearch();
-        }
+        // function doSearchAgain() {
+        //     doSearch();
+        // }
 
 
         // Flags for selecting public and private data
         // Each will also trigger a new search for all objects and for the 
         // current search (if any).
-        var searchPublicData = ko.observable(true);
+
+        // TODO: need to also unsubscribe afterwards...
         searchPublicData.subscribe(function () {
             doSearchAll();
             doSearch();
         });
 
-        var searchPrivateData = ko.observable(true);
+
         searchPrivateData.subscribe(function () {
             doSearchAll();
             doSearch();
         });
 
+        searchInput.subscribe(function () {
+            doSearch();
+        });
+
 
         var resultsColumnLabel = ko.pureComputed(function () {
-            if (searching()) {
+            if (isSearching()) {
                 return 'Searching...';
             }
             if (!searchInput() || searchInput().length === 0) {
@@ -277,15 +301,14 @@ define([
         }
 
         return {
-            QE: queryEngine,
+            query: queryEngine,
             searchInput: searchInput,
-            withPublicData: withPublicData,
-            withPrivatData: withPrivateData,
+            searchPublicData: searchPublicData,
+            searchPrivateData: searchPrivateData,
             searchResults: searchResults,
             resultsColumnLabel: resultsColumnLabel,
-            searching: searching,
-            doShowDetail: doShowDetail,
-            bus: bus
+            isSearching: isSearching,
+            doShowDetail: doShowDetail
         };
     }
 
