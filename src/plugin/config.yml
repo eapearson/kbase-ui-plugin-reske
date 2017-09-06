@@ -112,6 +112,10 @@ install:
             module: v2/data/components/summary
             css: true
         -
+            name: reske/data/search/cart
+            module: v2/data/components/cart
+            css: true            
+        -
             name: reske/data/search/browser
             module: v2/data/components/browser
             css: true

@@ -32,14 +32,26 @@ define([
         }
 
         function doKeep(data) {
-            console.log('keeping...', data);
+            if (isInCart()) {
+                params.cart.removeItem(data.item);
+            } else {
+                params.cart.addItem(data.item);
+            }
         }
+
+        var isInCart = ko.pureComputed(function () {
+            // return params.cart.hasItem(params.item);
+            return params.cart.items().some(function (item) {
+                return item.guid === params.item.guid;
+            });
+        });
 
         return {
             item: params.item,
             doOpenNarrative: doOpenNarrative,
             doOpenDataview: doOpenDataview,
-            doKeep: doKeep
+            doKeep: doKeep,
+            isInCart: isInCart
         };
     }
 

@@ -30,6 +30,11 @@ define([
         bus.on('add-tab', function (message) {
             addTab(message.tab);
         });
+        bus.on('select-tab', function (message) {
+            if (typeof message === 'number') {
+                doSelectTab(tabs()[message]);
+            }
+        });
 
         // Initialize Tabs
 

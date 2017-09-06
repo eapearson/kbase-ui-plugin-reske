@@ -44,7 +44,7 @@ define([
                 input({
                     type: 'checkbox',
                     dataBind: {
-                        checked: '$component.search.searchPrivateData'
+                        checked: '$component.search.withPrivateData'
                     }
                 }),
                 ' your data and data shared with you'
@@ -61,7 +61,7 @@ define([
                 input({
                     type: 'checkbox',
                     dataBind: {
-                        checked: '$component.search.searchPublicData'
+                        checked: '$component.search.withPublicData'
                     }
                 }),
                 ' data shared publicly'

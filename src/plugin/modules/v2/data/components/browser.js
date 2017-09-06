@@ -263,8 +263,8 @@ define([
         var searchVM = params.hostVM;
         // var tabVM = params.tabVM;
 
-        var queryEngine = searchVM.QE;
-        var bus = searchVM.bus;
+        var queryEngine = searchVM.query;
+        var bus = searchVM.tabsetBus;
 
         var type = params.type;
 
@@ -588,8 +588,13 @@ define([
             });
         }
 
+        function doKeep(item) {
+            searchVM.cart.push(item);
+        }
+
         return {
             QE: queryEngine,
+            searchVM: searchVM,
             type: type,
             typeDef: typeDef,
 
@@ -615,6 +620,8 @@ define([
 
             doSearch: doSearch,
             searching: searching,
+
+            doKeep: doKeep,
 
             dispose: dispose
         };
@@ -817,7 +824,9 @@ define([
                         name: '"reske/" + $component.typeDef.uiId + "/browse"',
                         params: {
                             QE: '$component.QE',
-                            item: '$data'
+                            item: '$data',
+                            // new: shopping cart support.
+                            cart: '$component.searchVM.cart'
                         }
                     }
                 }

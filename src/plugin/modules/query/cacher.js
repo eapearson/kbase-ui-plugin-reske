@@ -8,7 +8,8 @@ define([], function () {
 
         function add(key, value) {
             if (has(key)) {
-                throw new Error('Cache entry already exists for ' + key);
+                // throw new Error('Cache entry already exists for ' + key);
+                console.warn('Cache entry already exists for key ' + key);
             }
             if (cacheSize >= maxSize) {
                 trim();
