@@ -135,19 +135,34 @@ define([
                 }
             }()),
             span({
-                class: '-mini-button',
-                dataToggle: 'tooltip',
-                dataPlacement: 'left',
-                title: 'Click here to save this search result in your search shopping cart',
-                dataBind: {
-                    click: '$component.doKeep'
-                }
-            }, span({
-                class: 'fa fa-cart-plus',
-                style: {
-                    margin: '0 4px'
-                }
-            }))
+                    class: '-mini-button',
+                    dataToggle: 'tooltip',
+                    dataPlacement: 'left',
+                    title: 'Click here to save this search result in your search shopping cart',
+                    dataBind: {
+                        click: '$component.doKeep'
+                    }
+                }, [
+                    '<!-- ko if: isInCart -->',
+                    span({
+                        class: 'fa fa-shopping-cart',
+                        style: {
+                            margin: '0 4px',
+                            color: 'red'
+                        }
+                    }),
+                    '<!-- /ko -->',
+                    '<!-- ko ifnot: isInCart -->',
+                    span({
+                        class: 'fa fa-cart-plus',
+                        style: {
+                            margin: '0 4px'
+                        }
+                    }),
+                    '<!-- /ko -->'
+                ]
+
+            )
         ]);
     }
 

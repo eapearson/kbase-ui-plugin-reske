@@ -11,8 +11,7 @@ define([
     'kb_common/bootstrapUtils',
     'kb_common/jsonRpc/genericClient',
     '../../types',
-    '../../nanoBus',
-    '../../query/main'
+    '../../nanoBus'
 ], function (
     Promise,
     ko,
@@ -20,16 +19,13 @@ define([
     bs,
     GenericClient,
     Types,
-    NanoBus,
-    Query
+    NanoBus
 ) {
     'use strict';
 
     function ViewModel(params) {
         var runtime = params.runtime;
-        var query = Query.make({
-            runtime: runtime
-        });
+        var query = params.query;
 
         // Top level query engine object threaded through all data-centric components
 
@@ -65,9 +61,9 @@ define([
             // doSearch();
         });
 
-        var searchPublicData = ko.observable(false);
+        var withPublicData = ko.observable(false);
 
-        var searchPrivateData = ko.observable(true);
+        var withPrivateData = ko.observable(true);
 
         var searching = ko.observable(false);
 
@@ -121,6 +117,33 @@ define([
             window.location = url;
         }
 
+        // Data Cart
+
+        // TODO maybe index by guid
+        var cart = (function () {
+            var items = ko.observableArray();
+
+            function removeItem(item) {
+                items.remove(item);
+            }
+
+            function addItem(item) {
+                items.push(item);
+            }
+
+            function hasItem(item) {
+                return items.some(function (it) {
+                    return (it.guid === item.guid);
+                });
+            }
+
+            return {
+                items: items,
+                removeItem: removeItem,
+                addItem: addItem,
+                hasItem: hasItem
+            };
+        }());
         // CALLED AFTER LOADED AND READY...
 
         // The ready message is called when the tabset has loaded and is ready to 
@@ -128,6 +151,7 @@ define([
         tabsetBus.on('ready', function () {
             tabsetBus.send('add-tab', {
                 tab: {
+                    name: 'summary',
                     label: 'Search across all types',
                     component: {
                         name: 'reske/data/search/summary',
@@ -136,6 +160,20 @@ define([
                     }
                 }
             });
+            tabsetBus.send('add-tab', {
+                tab: {
+                    name: 'cart',
+                    label: 'Data Cart',
+                    component: {
+                        name: 'reske/data/search/cart',
+                        // NB these params are bound here, not in the tabset.
+                        params: {
+                            cart: cart
+                        }
+                    }
+                }
+            });
+            tabsetBus.send('select-tab', 0);
         });
 
 
@@ -160,14 +198,17 @@ define([
 
             // UI 
             searchInput: searchInput,
-            searchPublicData: searchPublicData,
-            searchPrivateData: searchPrivateData,
+            withPublicData: withPublicData,
+            withPrivateData: withPrivateData,
 
             // COMPUTED
             searchResultsTabLabel: searchResultsTabLabel,
             resultsColumnLabel: resultsColumnLabel,
             searchError: searchError,
             isSearching: searching,
+
+            // DATA CART
+            cart: cart,
 
             // ACTIONS
             doSearchDetails: doSearchDetails,

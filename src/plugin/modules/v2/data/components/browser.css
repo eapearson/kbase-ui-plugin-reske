@@ -2,18 +2,19 @@
     border-bottom: 1px silver solid;
 }
 
-.mini-button {
+.component-reske-browser .-mini-button {
     padding: 2px;
     border: 2px transparent solid;
     cursor: pointer;
 }
 
-.mini-button:hover {
-    border: 2px silver solid;
+.component-reske-browser .-mini-button:hover {
+    border: 2px gray solid;
+    cursor: pointer;
 }
 
-.mini-button:active {
-    border: 2px silver solid;
+.component-reske-browser .-mini-button:active {
+    border: 2px gray solid;
     background-color: #555;
     color: #FFF;
 }

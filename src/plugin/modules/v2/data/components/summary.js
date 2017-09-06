@@ -142,8 +142,8 @@ define([
         // var searchResults = params.searchResults;
         var isSearching = searchVM.isSearching;
         var searchInput = searchVM.searchInput;
-        var searchPrivateData = searchVM.searchPrivateData;
-        var searchPublicData = searchVM.searchPublicData;
+        var withPrivateData = searchVM.withPrivateData;
+        var withPublicData = searchVM.withPublicData;
 
         // populate the array with all types first.
         var searchResultsMap = {};
@@ -186,7 +186,7 @@ define([
 
         // Get initial available types...
         function doSearchAll() {
-            matchAllTypes(searchVM.runtime, searchPublicData(), searchPrivateData())
+            matchAllTypes(searchVM.runtime, withPublicData(), withPrivateData())
                 .then(function (result) {
                     result.hits.forEach(function (result) {
                         var searchResult = searchResultsMap[result.type];
@@ -216,7 +216,7 @@ define([
             // Do not run a search with an empty input?
             // event('search-starting', 1);
             // var start = new Date().getTime();
-            currentSearch.search = searchTypes(runtime, searchInput(), searchPublicData(), searchPrivateData())
+            currentSearch.search = searchTypes(runtime, searchInput(), withPublicData(), withPrivateData())
                 .then(function (result) {
                     // timing('search-over-types', new Date().getTime() - start);
                     if (thisSearch.cancelled) {
@@ -254,13 +254,13 @@ define([
         // current search (if any).
 
         // TODO: need to also unsubscribe afterwards...
-        searchPublicData.subscribe(function () {
+        withPublicData.subscribe(function () {
             doSearchAll();
             doSearch();
         });
 
 
-        searchPrivateData.subscribe(function () {
+        withPrivateData.subscribe(function () {
             doSearchAll();
             doSearch();
         });
@@ -287,7 +287,7 @@ define([
                 closable: true,
                 active: true,
                 component: {
-                    name: 'reske/browser',
+                    name: 'reske/data/search/browser',
                     params: {
                         // hostedVM: 'hostedVM',
                         // tabVM: {
@@ -303,8 +303,8 @@ define([
         return {
             query: queryEngine,
             searchInput: searchInput,
-            searchPublicData: searchPublicData,
-            searchPrivateData: searchPrivateData,
+            withPublicData: withPublicData,
+            withPrivateData: withPrivateData,
             searchResults: searchResults,
             resultsColumnLabel: resultsColumnLabel,
             isSearching: isSearching,

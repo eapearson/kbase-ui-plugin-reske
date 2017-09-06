@@ -175,22 +175,22 @@ define([
         // Flags for selecting public and private data
         // Each will also trigger a new search for all objects and for the 
         // current search (if any).
-        var searchPublicData = ko.observable(true);
-        searchPublicData.subscribe(function () {
+        var withPublicData = ko.observable(true);
+        withPublicData.subscribe(function () {
             console.log('public');
             doSearchAll();
             doSearch();
         });
 
-        var searchPrivateData = ko.observable(true);
-        searchPrivateData.subscribe(function () {
+        var withPrivateData = ko.observable(true);
+        withPrivateData.subscribe(function () {
             doSearchAll();
             doSearch();
         });
 
         // Get initial available types...
         function doSearchAll() {
-            matchAllTypes(runtime, searchPublicData(), searchPrivateData())
+            matchAllTypes(runtime, withPublicData(), withPrivateData())
                 .then(function (result) {
                     result.hits.forEach(function (result) {
                         var searchResult = searchResultsMap[result.type];
@@ -278,7 +278,7 @@ define([
             // Do not run a search with an empty input?
             // event('search-starting', 1);
             // var start = new Date().getTime();
-            currentSearch.search = searchTypes(runtime, searchInput(), searchPublicData(), searchPrivateData())
+            currentSearch.search = searchTypes(runtime, searchInput(), withPublicData(), withPrivateData())
                 .then(function (result) {
                     // timing('search-over-types', new Date().getTime() - start);
                     if (thisSearch.cancelled) {
@@ -380,8 +380,8 @@ define([
 
             // UI 
             searchInput: searchInput,
-            searchPublicData: searchPublicData,
-            searchPrivateData: searchPrivateData,
+            withPublicData: withPublicData,
+            withPrivateData: withPrivateData,
 
             // COMPUTED
             searchResults: searchResults,
@@ -500,7 +500,7 @@ define([
                             input({
                                 type: 'checkbox',
                                 dataBind: {
-                                    checked: 'searchPublicData'
+                                    checked: 'withPublicData'
                                 }
                             }),
                             ' data shared publicly'
@@ -517,7 +517,7 @@ define([
                             input({
                                 type: 'checkbox',
                                 dataBind: {
-                                    checked: 'searchPrivateData'
+                                    checked: 'withPrivateData'
                                 }
                             }),
                             ' your data and data shared with you'
@@ -540,8 +540,8 @@ define([
                                     searchResults: 'searchResults',
                                     searching: 'searching',
                                     searchInput: 'searchInput',
-                                    withPublicData: 'searchPublicData',
-                                    withPrivateData: 'searchPrivateData',
+                                    withPublicData: 'withPublicData',
+                                    withPrivateData: 'withPrivateData',
                                     runtime: 'runtime',
                                     bus: 'tabsetBus',
                                 }

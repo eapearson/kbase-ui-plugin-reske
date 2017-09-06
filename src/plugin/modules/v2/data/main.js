@@ -1,17 +1,23 @@
 define([
     'knockout-plus',
     'kb_common/html',
-    './mainViewModel'
+    './mainViewModel',
+    '../../query/main'
 ], function (
     ko,
     html,
-    MainViewModel
+    MainViewModel,
+    Query
 ) {
     var t = html.tag,
         div = t('div');
 
     function factory(config) {
         var hostNode, container, runtime = config.runtime;
+
+        var query = Query.make({
+            runtime: runtime
+        });
 
         function render(params) {
             var viewModel = MainViewModel(params);
@@ -39,11 +45,15 @@ define([
 
         function start(params) {
             runtime.send('ui', 'setTitle', 'RESKE Data Search Prototype');
-            render({
-                runtime: runtime,
-                search: params.search || null,
-                type: params.type || null
-            });
+            query.start()
+                .then(function () {
+                    return render({
+                        runtime: runtime,
+                        query: query,
+                        search: params.search || null,
+                        type: params.type || null
+                    });
+                });
         }
 
         function stop() {}
