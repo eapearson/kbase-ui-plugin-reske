@@ -61,6 +61,10 @@ define([
             token: runtime.service('session').getAuthToken()
         });
 
+        if (searchTerm === '*') {
+            searchTerm = null;
+        }
+
         var param = self.searchTypesInput = {
             match_filter: {
                 full_text_in_all: searchTerm
@@ -79,7 +83,6 @@ define([
                         return (typesToShow.indexOf(type.id) >= 0);
                     })
                     .map(function (type) {
-                        console.log(type);
                         var hitCount = searchResult.type_to_count[type.resultId] || 0;
                         return {
                             type: type.id,

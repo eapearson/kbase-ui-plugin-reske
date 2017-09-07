@@ -34,15 +34,72 @@ define([
         }
 
         function doKeep(data) {
-            console.log('keeping...', data);
+            if (isInCart()) {
+                params.cart.removeItem(data.item);
+            } else {
+                params.cart.addItem(data.item);
+            }
         }
+
+        var isInCart = ko.pureComputed(function () {
+            // return params.cart.hasItem(params.item);
+            return params.cart.items().some(function (item) {
+                return item.guid === params.item.guid;
+            });
+        });
 
         return {
             item: params.item,
             doOpenNarrative: doOpenNarrative,
             doOpenDataview: doOpenDataview,
-            doKeep: doKeep
+            doKeep: doKeep,
+            isInCart: isInCart
         };
+    }
+
+
+
+    function buildTypeView() {
+        return table({
+            class: '-table '
+        }, [
+            tr([
+                th('Sequenced with'),
+                td({
+                    dataBind: {
+                        html: 'item.pairedEndLibrary.sequencingTechnology'
+                    },
+                    class: '-sequence-tehcnology'
+                })
+            ]),
+            tr([
+                th('GC content (%)'),
+                td(div({
+                    dataBind: {
+                        html: 'item.pairedEndLibrary.gcContent.formatted'
+                    },
+                    class: '-gc-content -number'
+                }))
+            ]),
+            tr([
+                th('Read count'),
+                td(div({
+                    dataBind: {
+                        html: 'item.pairedEndLibrary.readCount.formatted'
+                    },
+                    class: '-read-count -number'
+                }))
+            ]),
+            tr([
+                th('Mean read length'),
+                td(div({
+                    dataBind: {
+                        html: 'item.pairedEndLibrary.meanReadLength.formatted'
+                    },
+                    class: '-mean-read-length -number',
+                }))
+            ])
+        ]);
     }
 
     function template() {
@@ -54,7 +111,7 @@ define([
                     style: {
                         display: 'inline-block',
                         verticalAlign: 'top',
-                        width: '5%'
+                        width: '5%',
                     },
                     class: '-field -resultNumber'
                 }, span({
@@ -69,66 +126,49 @@ define([
                         width: '70%'
                     }
                 }, [
-                    div({
-                        class: '-title'
-                    }, [
-                        common.buildTypeIcon(),
-                        a({
-                            dataBind: {
-                                attr: {
-                                    href: '"#dataview/" + item.meta.ids.dataviewId'
-                                },
-                                text: 'item.pairedEndLibrary.title'
-                            },
-                            target: '_blank',
-                            style: {
-                                verticalAlign: 'middle',
-                                marginLeft: '4px'
-                            }
-                        })
-                    ]),
-                    common.buildMetaInfo(),
-                    table({
-                        class: '-table '
-                    }, [
-                        tr([
-                            th('Sequenced with'),
-                            td({
+                    div([
+                        div({
+                            class: '-title'
+                        }, [
+                            common.buildTypeIcon(),
+                            a({
                                 dataBind: {
-                                    html: 'item.pairedEndLibrary.sequencingTechnology'
+                                    attr: {
+                                        href: '"#dataview/" + item.meta.ids.dataviewId'
+                                    },
+                                    text: 'item.pairedEndLibrary.title'
                                 },
-                                class: '-sequence-tehcnology'
+                                target: '_blank',
+                                style: {
+                                    verticalAlign: 'middle',
+                                    marginLeft: '4px'
+                                }
                             })
                         ]),
-                        tr([
-                            th('GC content (%)'),
-                            td(div({
-                                dataBind: {
-                                    html: 'item.pairedEndLibrary.gcContent.formatted'
-                                },
-                                class: '-gc-content -number'
-                            }))
-                        ]),
-                        tr([
-                            th('Read count'),
-                            td(div({
-                                dataBind: {
-                                    html: 'item.pairedEndLibrary.readCount.formatted'
-                                },
-                                class: '-read-count -number'
-                            }))
-                        ]),
-                        tr([
-                            th('Mean read length'),
-                            td(div({
-                                dataBind: {
-                                    html: 'item.pairedEndLibrary.meanReadLength.formatted'
-                                },
-                                class: '-mean-read-length -number',
-                            }))
-                        ])
+                    ]),
+                    div([
+                        div({
+                            style: {
+                                display: 'inline-block',
+                                verticalAlign: 'top',
+                                width: '50%',
+                                padding: '4px',
+                                boxSizing: 'border-box'
+                            }
+                        }, buildTypeView()),
+                        div({
+                            style: {
+                                display: 'inline-block',
+                                verticalAlign: 'top',
+                                width: '50%',
+                                padding: '4px',
+                                boxSizing: 'border-box'
+                            }
+                        }, common.buildMetaInfo())
                     ])
                 ]),
+
+
                 div({
                     style: {
                         display: 'inline-block',
@@ -137,7 +177,7 @@ define([
                         textAlign: 'right'
                     }
                 }, div({
-                    class: '-features'
+                    xclass: '-features'
                 }, [
                     common.buildSharingInfo(),
                     common.buildActions()

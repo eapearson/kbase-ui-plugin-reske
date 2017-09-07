@@ -56,7 +56,7 @@ install:
             module: components/types/assemblyContig/browse
             css: true
         -
-            name: reske/pariedEndLibrary/browse
+            name: reske/pairedEndLibrary/browse
             module: components/types/pairedEndLibrary/browse
             css: true 
         -

@@ -22,15 +22,21 @@ define([
         function render(params) {
             var viewModel = MainViewModel(params);
             container.innerHTML = div({
-                dataBind: {
-                    component: {
-                        name: '"reske/data/search/ui"',
-                        params: {
-                            search: 'searchVM'
+                class: 'container-fluid'
+            }, [
+
+                div({
+                    dataBind: {
+                        component: {
+                            name: '"reske/data/search/ui"',
+                            params: {
+                                search: 'searchVM'
+                            }
                         }
                     }
-                }
-            });
+                })
+
+            ]);
             ko.applyBindings({
                 searchVM: viewModel
             }, container);
