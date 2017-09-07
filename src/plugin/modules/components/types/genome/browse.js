@@ -13,6 +13,7 @@ define([
 
     var t = html.tag,
         a = t('a'),
+        select = t('select'),
         span = t('span'),
         div = t('div'),
         table = t('table'),
@@ -76,26 +77,43 @@ define([
                         '-',
                         '<!-- /ko -->',
                         '<!-- ko if: item.genome.taxonomy.length > 0 -->',
-                        div({
-                            class: '-taxonomy',
+
+                        select({
+                            class: 'form-control',
+                            style: {
+                                backgroundColor: 'transparent',
+                                backgroundImage: 'none',
+                                // border: 'none',
+                                // outline: 'none',
+                                '-webkit-appearance': 'none'
+
+                            },
                             dataBind: {
-                                foreach: 'item.genome.taxonomy'
+                                options: 'item.genome.taxonomy',
+                                optionsText: '$data',
+                                optionsValue: '$data'
                             }
-                        }, span([
-                            span({
-                                dataBind: {
-                                    text: '$data'
-                                }
-                            }),
-                            '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
-                            span({
-                                class: 'fa fa-angle-right',
-                                style: {
-                                    margin: '0 4px'
-                                }
-                            }),
-                            '<!-- /ko -->'
-                        ])),
+                        }),
+                        // div({
+                        //     class: '-taxonomy',
+                        //     dataBind: {
+                        //         foreach: 'item.genome.taxonomy'
+                        //     }
+                        // }, span([
+                        //     span({
+                        //         dataBind: {
+                        //             text: '$data'
+                        //         }
+                        //     }),
+                        //     '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
+                        //     span({
+                        //         class: 'fa fa-angle-right',
+                        //         style: {
+                        //             margin: '0 4px'
+                        //         }
+                        //     }),
+                        //     '<!-- /ko -->'
+                        // ])),
                         '<!-- /ko -->'
                     ]
                 )
