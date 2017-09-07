@@ -58,11 +58,11 @@
 /* right hand features column */
 
 .component-reske-single-end-library-browse.-row .-features {
-    visibility: hidden;
+    /* visibility: hidden; */
 }
 
 .component-reske-single-end-library-browse.-row:hover .-features {
-    visibility: visible;
+    /* visibility: visible; */
 }
 
 

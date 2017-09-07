@@ -26,56 +26,46 @@ define([
         }
 
         var columns = [{
-                name: 'rowNumber',
-                label: '#',
-                type: 'integer',
-                width: '5%'
+            name: 'rowNumber',
+            label: '#',
+            type: 'integer',
+            width: '5%'
+        }, {
+            name: 'title',
+            label: 'Title',
+            type: 'string',
+            width: '50%',
+            sort: {
+                keyName: 'title',
+                direction: 'ascending'
             },
-            {
-                name: 'title',
-                label: 'Title',
-                type: 'string',
-                width: '50%',
-                sort: {
-                    keyName: 'title',
-                    direction: 'ascending'
-                },
-                action: doOpenNarrative
-            },
-            {
-                name: 'timestamp',
-                label: 'Timestamp',
-                type: 'string',
-                width: '15%',
-                sort: {
-                    keyName: 'timestamp',
-                    isTimestamp: true,
-                    direction: 'descending'
-                }
-            },
-            // {
-            //     name: 'cellCount',
-            //     type: 'integer',
-            //     width: '25%'
-            // },
-            {
-                name: 'owner',
-                label: 'Owner',
-                type: 'string',
-                width: '15%'
-            },
-            {
-                name: 'creator',
-                label: 'Creator',
-                type: 'string',
-                width: '15%',
-                sort: {
-                    keyName: 'creator',
-                    isTimestamp: false,
-                    direction: 'ascending'
-                }
+            action: doOpenNarrative
+        }, {
+            name: 'timestamp',
+            label: 'Timestamp',
+            type: 'string',
+            width: '15%',
+            sort: {
+                keyName: 'timestamp',
+                isTimestamp: true,
+                direction: 'descending'
             }
-        ];
+        }, {
+            name: 'owner',
+            label: 'Owner',
+            type: 'string',
+            width: '15%'
+        }, {
+            name: 'creator',
+            label: 'Creator',
+            type: 'string',
+            width: '15%',
+            sort: {
+                keyName: 'creator',
+                isTimestamp: false,
+                direction: 'ascending'
+            }
+        }];
         var columnsMap = columns.reduce(function (map, column) {
             map[column.name] = column;
             return map;

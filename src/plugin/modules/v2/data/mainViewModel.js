@@ -125,10 +125,22 @@ define([
 
             function removeItem(item) {
                 items.remove(item);
+                runtime.send('notification', 'notify', {
+                    type: 'success',
+                    icon: 'thumbs-up',
+                    message: 'Successfuly removed data item from cart',
+                    autodismiss: 2000
+                });
             }
 
             function addItem(item) {
                 items.push(item);
+                runtime.send('notification', 'notify', {
+                    type: 'success',
+                    icon: 'thumbs-up',
+                    message: 'Successfuly added data item to cart',
+                    autodismiss: 2000
+                });
             }
 
             function hasItem(item) {
@@ -168,7 +180,8 @@ define([
                         name: 'reske/data/search/cart',
                         // NB these params are bound here, not in the tabset.
                         params: {
-                            cart: cart
+                            cart: cart,
+                            runtime: runtime
                         }
                     }
                 }

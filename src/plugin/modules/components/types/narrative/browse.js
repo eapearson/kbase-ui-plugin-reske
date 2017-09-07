@@ -32,118 +32,27 @@ define([
         }
 
         function doKeep(data) {
-            console.log('keeping...', data);
+            if (isInCart()) {
+                params.cart.removeItem(data.item);
+            } else {
+                params.cart.addItem(data.item);
+            }
         }
-        console.log('narrative', params.item);
+
+        var isInCart = ko.pureComputed(function () {
+            // return params.cart.hasItem(params.item);
+            return params.cart.items().some(function (item) {
+                return item.guid === params.item.guid;
+            });
+        });
         return {
             item: params.item,
             doOpenNarrative: doOpenNarrative,
-            doKeep: doKeep
+            doKeep: doKeep,
+            isInCart: isInCart
         };
     }
 
-    function buildMarkdown() {
-        // TODO okay, maybe we do need a separate list of markdown cells; we want to
-        // detect that there are any before inserting the collapsible panel.
-        // manual panel, start closed
-        return [
-            '<!-- ko if: item.narrative.markdownCells.cells.length > 0 -->',
-            '<!-- ko with: item.narrative.markdownCells -->',
-            div({
-                dataBind: {
-                    css: {
-                        '-active': 'show()'
-                    }
-                },
-                class: '-markdown'
-            }, [
-                div({
-                    style: {
-                        display: 'inline-block',
-                        width: '5%'
-                    }
-                }),
-                div({
-                    style: {
-                        display: 'inline-block',
-                        width: '95%'
-                    }
-                }, [
-                    // title and collapse control
-                    div({
-                        class: '-toggler'
-                    }, [
-                        span({
-                            dataBind: {
-                                click: 'doToggleShow',
-                                css: {
-                                    showing: 'show'
-                                }
-                            },
-                            style: {
-                                cursor: 'pointer'
-                            }
-                        }, [
-                            'view markdown',
-                            span({
-                                dataBind: {
-                                    css: {
-                                        'fa-arrow-right -deg45': '!show()',
-                                        'fa-arrow-down': 'show()'
-                                    }
-                                },
-                                class: 'fa',
-                                style: {
-                                    marginLeft: '4px'
-                                }
-                            })
-                        ])
-                    ]),
-                    // body
-                    div({
-                        dataBind: {
-                            visible: 'show'
-                        },
-                        class: '-content'
-                    }, [
-                        // div({
-                        //     style: {
-                        //         padding: '4px 0',
-                        //         fontWeight: 'bold'
-                        //     }
-                        // }, 'Markdown cells'),
-                        div({
-                            style: {
-                                border: '1px silver solid',
-                                padding: '6px;'
-                            }
-                        }, [
-                            '<!-- ko foreach: cells -->',
-                            div({
-                                class: '-item'
-                            }, [
-
-                                div({
-                                    dataBind: {
-                                        html: 'html'
-                                    },
-                                    class: '-html',
-                                    style: {
-                                        display: 'inline-block',
-                                        verticalAlign: 'top',
-                                        width: '100%'
-                                    }
-                                })
-                            ]),
-                            '<!-- /ko -->'
-                        ])
-                    ])
-                ])
-            ]),
-            '<!-- /ko -->',
-            '<!-- /ko -->'
-        ];
-    }
 
     function buildCellsPreview() {
         // TODO okay, maybe we do need a separate list of markdown cells; we want to
@@ -395,74 +304,6 @@ define([
         ];
     }
 
-    function templatex() {
-        return div({
-            class: 'component-reske-narrative-browse -row'
-        }, [
-            div([
-                div({
-                    style: {
-                        display: 'inline-block',
-                        verticalAlign: 'top',
-                        width: '5%',
-                        // textAlign: 'center',
-                        // color: '#FFF',
-                        // backgroundColor: '#AAA'
-                    },
-                    class: '-field -resultNumber'
-                }, span({
-                    dataBind: {
-                        // text: '$index() + $component.pageStart() + 1'
-                        text: 'item.meta.resultNumber'
-                    }
-                })),
-                div({
-                    style: {
-                        display: 'inline-block',
-                        verticalAlign: 'top',
-                        width: '75%'
-                    }
-                }, [
-                    div({
-                        class: '-title'
-                    }, [
-                        common.buildTypeIcon(),
-                        a({
-                            dataBind: {
-                                attr: {
-                                    href: '"/narrative/" + item.meta.narrativeId'
-                                },
-                                text: 'item.narrative.title'
-                            },
-                            style: {
-                                verticalAlign: 'middle',
-                                marginLeft: '4px'
-                            },
-                            target: '_blank'
-                        })
-                    ]),
-                    common.buildMetaInfo({
-                        showNarrative: false
-                    })
-                ]),
-                div({
-                    style: {
-                        display: 'inline-block',
-                        verticalAlign: 'top',
-                        width: '20%'
-                    }
-                }, div({
-                    class: '-features'
-                }, [
-                    common.buildSharingInfo(),
-                    common.buildActions({
-                        dataview: false
-                    })
-                ]))
-            ]),
-            buildCellsPreview()
-        ]);
-    }
 
     function buildTypeView() {
         return table({
@@ -615,7 +456,9 @@ define([
                                 padding: '4px',
                                 boxSizing: 'border-box'
                             }
-                        }, common.buildMetaInfo())
+                        }, common.buildMetaInfo({
+                            showNarrative: false
+                        }))
                     ])
                 ]),
 
@@ -632,7 +475,8 @@ define([
                 }, [
                     common.buildSharingInfo(),
                     common.buildActions({
-                        dataview: false
+                        dataview: false,
+                        cart: false
                     })
                 ]))
             ]),
