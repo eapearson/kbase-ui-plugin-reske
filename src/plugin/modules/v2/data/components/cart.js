@@ -240,7 +240,7 @@ define([
                     class: 'col-sm-6'
                 }, [
                     BS.buildPanel({
-                        title: 'Copy to A Narrative',
+                        title: 'Copy to a Narrative',
                         body: div([
                             '<!-- ko if: cart.items().length === 0 -->',
                             'When you have items in your cart, you may transfer them to an existing or new Narrative in this space',
