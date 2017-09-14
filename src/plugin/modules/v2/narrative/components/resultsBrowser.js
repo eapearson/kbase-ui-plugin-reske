@@ -226,7 +226,6 @@ define([
                 display: 'inline-block'
             }
         }, [
-            'view:',
             button({
                 class: 'btn btn-default',
                 dataBind: {
@@ -253,7 +252,9 @@ define([
     }
 
     function template() {
-        return div([
+        return div({
+            class: 'container-fluid'
+        }, [
             div({
                 class: 'row',
                 style: {
