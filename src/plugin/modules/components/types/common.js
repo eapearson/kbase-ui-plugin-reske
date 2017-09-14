@@ -186,8 +186,6 @@ define([
                 }))
             ]),
 
-
-
             '<!-- ko if: item.context.type === "narrative" -->',
             tr([
                 th('In Narrative'),
@@ -295,6 +293,66 @@ define([
                         text: 'item.context.sourceId'
                     }
                 })
+            ]),
+            '<!-- /ko -->',
+            '<!-- ko if: item.context.type === "unknown" -->',
+            tr([
+                th('Unknown Ctx'),
+                td({
+                    dataBind: {
+                        text: 'item.context.workspaceName'
+                    }
+                })
+            ]),
+            tr([
+                th('Comment'),
+                td('This may be an obsolete narrative')
+            ]),
+            tr([
+                th('Owner'),
+                td(
+                    a({
+                        dataBind: {
+                            attr: {
+                                href: '"#people/" + item.meta.owner'
+                            }
+                        },
+                        target: '_blank',
+                        dataToggle: 'tooltip',
+                        dataPlacement: 'left',
+                        title: 'This is the owner of the Narrative this object is embedded in; click here to view their profile.'
+                    }, [
+                        span({
+                            class: 'fa fa-user-o'
+                        }),
+                        span({
+                            dataBind: {
+                                text: 'item.meta.owner'
+                            },
+                            class: '-owner',
+                            style: {
+                                marginLeft: '4px'
+                            }
+                        })
+                    ])
+
+                )
+            ]),
+            tr([
+                th('Last updated'),
+                td([
+                    '<!-- ko if: item.meta.created.at !== item.meta.updated.at -->',
+                    span({
+                        dataBind: {
+                            text: 'item.meta.updated.at'
+                        },
+                        class: '-updated-at'
+                    }),
+                    '<!-- /ko -->',
+                    '<!-- ko if: item.meta.created.at === item.meta.updated.at -->',
+                    '-',
+                    '<!-- /ko -->'
+                ])
             ]),
             '<!-- /ko -->'
         ]);

@@ -520,19 +520,17 @@ define([
                                 // This may be a narrative or a reference workspace.
                                 // We get this from the metadata.
                                 if (object.workspaceInfo.metadata.narrative) {
-                                    object.meta.narrativeTitle = object.workspaceInfo.metadata.narrative_nice_name;
-                                    object.meta.narrativeId = 'ws.' + object.workspaceInfo.id +
-                                        '.obj.' + object.workspaceInfo.metadata.narrative;
-                                    object.meta.workspaceType = 'narrative';
+                                    // object.meta.narrativeTitle = object.workspaceInfo.metadata.narrative_nice_name;
+                                    // object.meta.narrativeId = 'ws.' + object.workspaceInfo.id +
+                                    //     '.obj.' + object.workspaceInfo.metadata.narrative;
+                                    // object.meta.workspaceType = 'narrative';
                                     object.context = {
                                         type: 'narrative',
                                         narrativeTitle: object.workspaceInfo.metadata.narrative_nice_name,
                                         narrativeId: 'ws.' + object.workspaceInfo.id +
                                             '.obj.' + object.workspaceInfo.metadata.narrative
                                     };
-                                } else {
-                                    object.meta.workspaceType = 'reference';
-                                    object.meta.referenceWorkspaceName = object.workspaceInfo.name;
+                                } else if (object.originalObjectInfo.metadata.Source) {
                                     object.context = {
                                         type: 'reference',
                                         workspaceName: object.workspaceInfo.name,
@@ -540,6 +538,11 @@ define([
                                         sourceId: object.originalObjectInfo.metadata['Source ID']
                                     };
                                     // TODO: don't reference workspaces have some metadata to describe
+                                } else {
+                                    object.context = {
+                                        type: 'unknown',
+                                        workspaceName: object.workspaceInfo.name
+                                    };
                                 }
 
                                 object.typeIcon = getTypeIcon(object, { runtime: runtime });
