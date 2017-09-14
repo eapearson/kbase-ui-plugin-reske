@@ -20,8 +20,6 @@ define([
         var tabClasses = ko.observableArray(['nav', 'nav-tabs']);
         var activeTab = ko.observable();
 
-        console.log('tabset host vm?', params);
-
         var hostVM = params.vm;
 
         // Bus -- ??!!

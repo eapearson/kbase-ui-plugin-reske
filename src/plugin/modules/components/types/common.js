@@ -186,6 +186,9 @@ define([
                 }))
             ]),
 
+
+
+            '<!-- ko if: item.context.type === "narrative" -->',
             tr([
                 th('In Narrative'),
                 td((function () {
@@ -197,7 +200,7 @@ define([
                         a({
                             dataBind: {
                                 attr: {
-                                    href: '"/narrative/" + item.meta.narrativeId'
+                                    href: '"/narrative/" + item.context.narrativeId'
                                 }
                             },
                             target: '_blank',
@@ -210,7 +213,7 @@ define([
                             }),
                             span({
                                 dataBind: {
-                                    text: 'item.meta.narrativeTitle'
+                                    text: 'item.context.narrativeTitle'
                                 },
                                 class: '-narrative-title',
                                 style: {
@@ -266,7 +269,34 @@ define([
                     '-',
                     '<!-- /ko -->'
                 ])
-            ])
+            ]),
+            '<!-- /ko -->',
+            '<!-- ko if: item.context.type === "reference" -->',
+            tr([
+                th('Reference WS'),
+                td({
+                    dataBind: {
+                        text: 'item.context.workspaceName'
+                    }
+                })
+            ]),
+            tr([
+                th('Source'),
+                td({
+                    dataBind: {
+                        text: 'item.context.source'
+                    }
+                })
+            ]),
+            tr([
+                th('Source Id'),
+                td({
+                    dataBind: {
+                        text: 'item.context.sourceId'
+                    }
+                })
+            ]),
+            '<!-- /ko -->'
         ]);
     }
 

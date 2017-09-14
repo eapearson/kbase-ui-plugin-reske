@@ -58,7 +58,6 @@ define([
         });
         return client.callFunc('search_objects', [param])
             .spread(function (hits) {
-                // console.log('returning;', hits);
                 return hits;
             });
     }
@@ -75,7 +74,6 @@ define([
 
         fetchNarratives(runtime)
             .then(function (result) {
-                // console.log('result', result);
                 var narratives = result.objects;
                 narratives.forEach(function (narrative) {
                     var m = /^WS:(.*)\/(.*)\/(.*)$/.exec(narrative.guid);
@@ -86,7 +84,6 @@ define([
                         label: title
                     });
                 });
-                // console.log('narratives', narratives)
             });
 
 
