@@ -177,7 +177,6 @@ define([
         // current search (if any).
         var withPublicData = ko.observable(true);
         withPublicData.subscribe(function () {
-            console.log('public');
             doSearchAll();
             doSearch();
         });

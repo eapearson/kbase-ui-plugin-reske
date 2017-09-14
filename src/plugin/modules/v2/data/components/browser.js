@@ -184,6 +184,7 @@ define([
         return reske.callFunc('search_objects', [param])
             .then(function (result) {
                 perf.results.start = new Date().getTime();
+                console.log('got', result);
 
                 // We have the results, now we munge it around to make it more readily displayable.
                 var hits = result[0];
@@ -508,12 +509,6 @@ define([
                                 };
                                 object.meta.public = object.workspaceInfo.globalread === 'y';
                                 object.meta.isOwner = (object.meta.owner === runtime.service('session').getUsername());
-
-                                object.meta.narrativeTitle = object.workspaceInfo.metadata.narrative_nice_name;
-
-                                object.meta.narrativeId = 'ws.' + object.workspaceInfo.id +
-                                    '.obj.' + object.workspaceInfo.metadata.narrative;
-
                                 // set sharing info.
                                 if (!object.meta.isOwner) {
                                     object.meta.isShared = true;
@@ -521,6 +516,31 @@ define([
                                 object.meta.canRead = canRead(object.workspaceInfo.user_permission);
                                 object.meta.canWrite = canWrite(object.workspaceInfo.user_permission);
                                 object.meta.canShare = canShare(object.workspaceInfo.user_permission);
+
+                                // This may be a narrative or a reference workspace.
+                                // We get this from the metadata.
+                                if (object.workspaceInfo.metadata.narrative) {
+                                    object.meta.narrativeTitle = object.workspaceInfo.metadata.narrative_nice_name;
+                                    object.meta.narrativeId = 'ws.' + object.workspaceInfo.id +
+                                        '.obj.' + object.workspaceInfo.metadata.narrative;
+                                    object.meta.workspaceType = 'narrative';
+                                    object.context = {
+                                        type: 'narrative',
+                                        narrativeTitle: object.workspaceInfo.metadata.narrative_nice_name,
+                                        narrativeId: 'ws.' + object.workspaceInfo.id +
+                                            '.obj.' + object.workspaceInfo.metadata.narrative
+                                    };
+                                } else {
+                                    object.meta.workspaceType = 'reference';
+                                    object.meta.referenceWorkspaceName = object.workspaceInfo.name;
+                                    object.context = {
+                                        type: 'reference',
+                                        workspaceName: object.workspaceInfo.name,
+                                        source: object.originalObjectInfo.metadata.Source,
+                                        sourceId: object.originalObjectInfo.metadata['Source ID']
+                                    };
+                                    // TODO: don't reference workspaces have some metadata to describe
+                                }
 
                                 object.typeIcon = getTypeIcon(object, { runtime: runtime });
                             }
