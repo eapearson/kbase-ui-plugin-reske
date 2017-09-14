@@ -125,19 +125,19 @@ define([
         return div({
             class: 'container-fluid component-type-search'
         }, [
-            div({
-                class: 'row'
-            }, [
-                div({
-                    class: 'col-md-8 col-md-offset-2'
-                }, [
-                    h2({
-                        style: {
-                            textAlign: 'center'
-                        }
-                    }, 'RESKE Narratives')
-                ])
-            ]),
+            // div({
+            //     class: 'row'
+            // }, [
+            //     div({
+            //         class: 'col-md-8 col-md-offset-2'
+            //     }, [
+            //         h2({
+            //             style: {
+            //                 textAlign: 'center'
+            //             }
+            //         }, 'RESKE Narratives')
+            //     ])
+            // ]),
 
             div({
                 class: 'row'
