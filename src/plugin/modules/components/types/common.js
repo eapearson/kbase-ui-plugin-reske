@@ -188,7 +188,11 @@ define([
 
             '<!-- ko if: item.context.type === "narrative" -->',
             tr([
-                th('In Narrative'),
+                th('Type'),
+                td('Narrative')
+            ]),
+            tr([
+                th('Narrative'),
                 td((function () {
                     if (options.showNarrative === false) {
                         return;
@@ -271,7 +275,11 @@ define([
             '<!-- /ko -->',
             '<!-- ko if: item.context.type === "reference" -->',
             tr([
-                th('Reference WS'),
+                th('Type'),
+                td('Reference Data')
+            ]),
+            tr([
+                th('Name'),
                 td({
                     dataBind: {
                         text: 'item.context.workspaceName'
@@ -297,7 +305,11 @@ define([
             '<!-- /ko -->',
             '<!-- ko if: item.context.type === "unknown" -->',
             tr([
-                th('Unknown Ctx'),
+                th('Type'),
+                td('Unknown')
+            ]),
+            tr([
+                th('Workspace'),
                 td({
                     dataBind: {
                         text: 'item.context.workspaceName'
@@ -306,7 +318,7 @@ define([
             ]),
             tr([
                 th('Comment'),
-                td('This may be an obsolete narrative')
+                td('The type of this workspace cannot be determined; it may be an obsolete narrative')
             ]),
             tr([
                 th('Owner'),
@@ -354,7 +366,17 @@ define([
                     '<!-- /ko -->'
                 ])
             ]),
-            '<!-- /ko -->'
+            '<!-- /ko -->',
+            '<!-- ko if: item.context.type === "exampleData" -->',
+            tr([
+                th('Type'),
+                td('KBase Example Data')
+            ]),
+            tr([
+                th('Comment'),
+                td('A special workspace which contains example data objects. Also available under "Example" in the Narrative data panel.')
+            ]),
+            '<!-- /ko -->',
         ]);
     }
 

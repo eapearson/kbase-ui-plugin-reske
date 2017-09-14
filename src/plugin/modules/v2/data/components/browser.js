@@ -538,6 +538,10 @@ define([
                                         sourceId: object.originalObjectInfo.metadata['Source ID']
                                     };
                                     // TODO: don't reference workspaces have some metadata to describe
+                                } else if (object.workspaceInfo.name === 'KBaseExampleData') {
+                                    object.context = {
+                                        type: 'exampleData'
+                                    };
                                 } else {
                                     object.context = {
                                         type: 'unknown',
