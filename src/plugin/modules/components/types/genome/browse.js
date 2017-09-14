@@ -14,6 +14,7 @@ define([
     var t = html.tag,
         a = t('a'),
         select = t('select'),
+        option = t('option'),
         span = t('span'),
         div = t('div'),
         table = t('table'),
@@ -85,15 +86,26 @@ define([
                                 backgroundImage: 'none',
                                 // border: 'none',
                                 // outline: 'none',
-                                '-webkit-appearance': 'none'
-
+                                '-webkit-appearance': 'none',
+                                disabled: true,
+                                readonly: true
                             },
                             dataBind: {
-                                options: 'item.genome.taxonomy',
-                                optionsText: '$data',
-                                optionsValue: '$data'
+                                foreach: 'item.genome.taxonomy'
+                                    // options: 'item.genome.taxonomy',
+                                    // optionsText: '$data',
+                                    // optionsValue: '$data'
                             }
-                        }),
+                        }, option({
+                            disabled: true,
+                            dataBind: {
+                                value: '$data',
+                                text: '$data',
+                                attr: {
+                                    selected: '$index() === 0 ? "selected" : false'
+                                }
+                            }
+                        })),
                         // div({
                         //     class: '-taxonomy',
                         //     dataBind: {

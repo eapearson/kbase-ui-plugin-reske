@@ -39,7 +39,7 @@ define([
         }
 
         function start(params) {
-            runtime.send('ui', 'setTitle', 'RESKE Narratives');
+            runtime.send('ui', 'setTitle', 'Browse and Search Narratives');
             render({
                 runtime: runtime,
                 search: params.search || null,

@@ -50,7 +50,7 @@ define([
         }
 
         function start(params) {
-            runtime.send('ui', 'setTitle', 'RESKE Data Search Prototype');
+            runtime.send('ui', 'setTitle', 'Search and Explore Private and Public Data');
             query.start()
                 .then(function () {
                     return render({
