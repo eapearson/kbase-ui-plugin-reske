@@ -1,5 +1,6 @@
 .component-reske-browser .-toolbar {
-    border-bottom: 1px silver solid;
+    /* border-bottom: 1px silver solid; */
+    margin-bottom: 4px;
 }
 
 .component-reske-browser .-mini-button {

@@ -1,0 +1,46 @@
+.component-reske-data-search .-detail-toggle {
+    padding: 4px;
+}
+
+.component-reske-data-search .-detail-toggle:hover {
+    background-color: rgba(220, 220, 220, 0.5);
+}
+
+.component-reske-data-search .-row {
+    /*background-color: #DDD;*/
+    padding: 6px;
+    /*border: 1px transparent solid;*/
+    padding-bottom: 6px;
+    border-bottom: 1px rgb(238, 238, 238) solid;
+}
+
+.component-reske-data-search .-row:hover {
+    /*border: 1px #CCC solid;*/
+    background-color: rgba(220, 220, 220, 0.5);
+}
+
+.component-reske-data-search .-header.-row {
+    font-weight: bold;
+    background-color: rgba(220, 220, 220, 0.5);
+}
+
+.component-reske-data-search .-row .-field {
+    display: inline-block;
+    vertical-align: top;
+}
+
+
+/* FIELD */
+
+
+/* These are universal fields  */
+
+.component-reske-data-search .-row.-header .-field.-sharing {
+    text-align: right;
+    padding-right: 15px;
+}
+
+.component-reske-data-search .-row.-header .-field.-actions {
+    text-align: right;
+    padding-right: 30px;
+}

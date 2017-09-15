@@ -506,16 +506,16 @@ define([
                                     by: object.originalObjectInfo.saved_by,
                                     at: dateString(object.originalObjectInfo.saveDate)
                                 };
-                                object.meta.public = object.workspaceInfo.globalread === 'y';
+                                object.meta.isPublic = (object.workspaceInfo.globalread === 'r');
                                 object.meta.isOwner = (object.meta.owner === runtime.service('session').getUsername());
 
                                 object.meta.narrativeTitle = object.workspaceInfo.metadata.narrative_nice_name;
 
-                                object.meta.narrativeId = 'ws.' + object.workspaceInfo.id +
+                                object.context.narrativeId = 'ws.' + object.workspaceInfo.id +
                                     '.obj.' + object.workspaceInfo.metadata.narrative;
 
                                 // set sharing info.
-                                if (!object.meta.isOwner) {
+                                if (!object.meta.isOwner && !object.meta.isPublic) {
                                     object.meta.isShared = true;
                                 }
                                 object.meta.canRead = canRead(object.workspaceInfo.user_permission);
@@ -804,6 +804,16 @@ define([
                     marginTop: '10px'
                 }
             }, buildPagingControls()),
+            div({
+                dataBind: {
+                    component: {
+                        name: '"reske/" + $component.typeDef.uiId + "/header"',
+                        params: {
+                            item: '$data'
+                        }
+                    }
+                }
+            }),
             div({
                 dataBind: {
                     foreach: 'searchResults'

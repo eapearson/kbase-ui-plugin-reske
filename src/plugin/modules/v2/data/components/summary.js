@@ -98,7 +98,7 @@ define([
     }
 
 
-    var typesToShow = ['genome', 'assembly', 'pairedendlibrary', 'singleendlibrary'];
+    var typesToShow = ['narrative', 'genome', 'assembly', 'pairedendlibrary', 'singleendlibrary'];
 
     function matchAllTypes(runtime, withPublic, withPrivate) {
         var client = new GenericClient({
@@ -120,6 +120,7 @@ define([
                 var searchResult = result[0];
                 var hits = Types.types
                     .filter(function (type) {
+                        console.log(type.id);
                         return (typesToShow.indexOf(type.id) >= 0);
                     })
                     .map(function (type) {

@@ -21,7 +21,9 @@ define([
     }
 
     function template() {
-        return div({}, [
+        return div({
+            class: 'component-reske-data-search'
+        }, [
             div([
                 div({
                     dataBind: {

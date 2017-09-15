@@ -1,13 +1,19 @@
 define([
+    'bluebird',
     'knockout-plus',
     'kb_common/html',
     'kb_common/bootstrapUtils',
-    'kb_common/jsonRpc/genericClient'
+    'kb_common/jsonRpc/genericClient',
+    'kb_common/jsonRpc/dynamicServiceClient',
+    'kb_service/utils'
 ], function (
+    Promise,
     ko,
     html,
     BS,
-    GenericClient
+    GenericClient,
+    DynamicServiceClient,
+    serviceUtil
 ) {
     'use strict';
 
@@ -25,45 +31,70 @@ define([
         th = t('th'),
         td = t('td');
 
-    function fetchNarratives(runtime) {
-        var param = {
-            object_type: 'narrative',
-            // TODO: this should accept a filter eventually.
-            match_filter: {
-                full_text_in_all: null
-            },
-            pagination: {
-                start: 0,
-                count: 1000 // can ask for unlimited?
-            },
-            post_processing: {
-                ids_only: 0,
-                skip_info: 0,
-                skip_keys: 0,
-                skip_data: 0
-            },
-            // TODO: also need with permissions...
-            // Unless we should use the narrative service for this...
-            access_filter: {
-                with_private: 1,
-                with_public: 0
-            }
-            // sorting_rules: sortingRules()
-        };
 
-        var client = new GenericClient({
-            url: runtime.config('services.reske.url'),
-            module: 'KBaseRelationEngine',
-            token: runtime.service('session').getAuthToken()
-        });
-        return client.callFunc('search_objects', [param])
-            .spread(function (hits) {
-                return hits;
-            });
-    }
 
     function viewModel(params) {
         var runtime = params.runtime;
+
+        // SUPPORT FUNCTIONS
+
+        function serviceCall(moduleName, functionName, params) {
+            var override = runtime.config(['services', moduleName, 'url'].join('.'));
+            var token = runtime.service('session').getAuthToken();
+            var client;
+            if (override) {
+                client = new GenericClient({
+                    module: moduleName,
+                    url: override,
+                    token: token
+                });
+            } else {
+                client = new DynamicServiceClient({
+                    url: runtime.config('services.service_wizard.url'),
+                    token: token,
+                    module: moduleName
+                });
+            }
+            return client.callFunc(functionName, params);
+        }
+
+        function fetchNarratives() {
+            var param = {
+                object_type: 'narrative',
+                // TODO: this should accept a filter eventually.
+                match_filter: {
+                    full_text_in_all: null
+                },
+                pagination: {
+                    start: 0,
+                    count: 1000 // can ask for unlimited?
+                },
+                post_processing: {
+                    ids_only: 0,
+                    skip_info: 0,
+                    skip_keys: 0,
+                    skip_data: 0
+                },
+                // TODO: also need with permissions...
+                // Unless we should use the narrative service for this...
+                access_filter: {
+                    with_private: 1,
+                    with_public: 0
+                }
+                // sorting_rules: sortingRules()
+            };
+
+            var client = new GenericClient({
+                url: runtime.config('services.reske.url'),
+                module: 'KBaseRelationEngine',
+                token: runtime.service('session').getAuthToken()
+            });
+            return client.callFunc('search_objects', [param])
+                .spread(function (hits) {
+                    return hits;
+                });
+        }
+        // THE MODEL
 
         function doRemove(data) {
             params.cart.removeItem(data);
@@ -72,7 +103,7 @@ define([
         var writableNarratives = ko.observableArray();
         var selectedNarrative = ko.observable();
 
-        fetchNarratives(runtime)
+        fetchNarratives()
             .then(function (result) {
                 var narratives = result.objects;
                 narratives.forEach(function (narrative) {
@@ -86,12 +117,164 @@ define([
                 });
             });
 
+        function NewNarrative() {
+            var newName = ko.observable();
+            var error = ko.observable();
+            var isValid = ko.observable(false);
+
+            newName.subscribe(function () {
+                checkName();
+            });
+
+            function checkName() {
+                var name = newName();
+                error('');
+                if (name === undefined) {
+                    isValid(false);
+                    return;
+                }
+                if (name.length < 3) {
+                    error('Narrative name must be 3 characters or longer.');
+                    isValid(false);
+                    return;
+                }
+                // otherwise check if valid...
+                // must start with letter and only contain...
+                // var re = /[a-zA-Z][a-zA-Z0-9]+/;
+                // if (re.test(name)) {
+                //     isValid(true);
+                //     return;
+                // }
+                // error('Narrative name must contain only letters and numbers and start with a letter');
+                isValid(true);
+            }
+
+            // function doCreateNewNarrative() {
+            //     var name = newName();
+            //     serviceCall('NarrativeService', 'create_new_narrative', [{
+            //             markdown: '# Data Copy Example\n\nThis narrative created by the RESKE search data cart!'
+            //         }])
+            //         .spread(function (result) {
+            //             // return serviceCall('Workspace', 'rename_workspace', [{
+            //             //     wsi: {
+            //             //         id: info.workspaceInfo.id
+            //             //     },
+            //             //     new_name: name
+            //             // }])
+            //             return serviceCall('Workspace', 'alter_workspace_metadata', [{
+            //                     wsi: {
+            //                         id: result.workspaceInfo.id
+            //                     },
+            //                     new: {
+            //                         narrative_nice_name: name
+            //                     }
+            //                 }])
+            //                 .then(function () {
+            //                     return serviceCall('Workspace', 'get_objects2', [{
+            //                         objects: [{
+            //                             ref: result.objectInfo.ref
+            //                         }]
+            //                     }]);
+            //                 })
+            //                 .spread(function (objects) {
+            //                     var narrative = objects[0].data;
+
+            //                 }
+            //         })
+            //         .then(function () {
+            //             runtime.send('notification', 'notify', {
+            //                 type: 'success',
+            //                 icon: 'thumbs-up',
+            //                 message: 'Successfuly created a new narrative and named it ' + name,
+            //                 autodismiss: 2000
+            //             });
+            //             return fetchNarratives();
+            //         })
+            //         .catch(function (err) {
+            //             runtime.send('notification', 'notify', {
+            //                 type: 'error',
+            //                 icon: 'frown-o',
+            //                 message: 'Error creating new narrative ' + err.message
+            //             });
+            //         });
+            // }
+            function doCreateNewNarrative() {
+                alert('We need support from NarrativeService to enable this feature.');
+            }
+            return {
+                newName: newName,
+                isValid: isValid,
+                error: error,
+                doCreate: doCreateNewNarrative
+            };
+        }
+
+        // SUBSCRIPTIONS
+        selectedNarrative.subscribe(function () {
+            serviceCall('Workspace', 'get_object_info3', [{
+                    objects: [{
+                        ref: selectedNarrative()
+                    }],
+                    includeMetadata: 1
+                }])
+                .spread(function (result) {
+                    var info = serviceUtil.objectInfoToObject(result.infos[0]);
+                    console.log('object info', info);
+                    return serviceCall('Workspace', 'get_workspace_info', [{
+                        id: info.wsid
+                    }]);
+                })
+                .spread(function (workspaceInfo) {
+                    console.log('workspaceInfo', workspaceInfo);
+                })
+                .catch(function (err) {
+                    console.error('OOPS', err);
+                });
+        });
+
+        function Copy() {
+            var message = ko.observable();
+            var error = ko.observable();
+            var isCopying = ko.observable(false);
+
+            function doCopy() {
+                message('Copying...');
+                Promise.all(params.cart.items().map(function (item) {
+                        var ref = item.meta.ids.ref;
+                        var m = /^(\d+?)\/(\d+?)\/(\d+?)$/.exec(selectedNarrative());
+                        var workspaceId = parseInt(m[1]);
+                        return serviceCall('NarrativeService', 'copy_object', [{
+                                ref: ref,
+                                target_ws_id: workspaceId
+                            }])
+                            .spread(function (result) {
+                                return result.info;
+                            });
+                    }))
+                    .then(function () {
+                        message('Successfully copied ' + params.cart.items().length + ' objects');
+                    })
+                    .catch(function (err) {
+                        message('Error copying: ' + err.message);
+                    });
+
+            }
+
+            return {
+                doCopy: doCopy,
+                message: message,
+                error: error,
+                isCopying: isCopying
+            };
+        }
 
         return {
             cart: params.cart,
             narratives: writableNarratives,
             selectedNarrative: selectedNarrative,
-            doRemove: doRemove
+            newNarrative: NewNarrative(),
+            doRemove: doRemove,
+            copy: Copy()
         };
     }
 
@@ -166,34 +349,49 @@ define([
 
     function buildNewNarrativeForm() {
         return div({
-            class: 'form-group'
+            class: 'form-group',
+            dataBind: {
+                with: 'newNarrative'
+            }
         }, [
             label('Create a new Narrative: '),
             div({
                 class: 'input-group'
             }, [
                 input({
-                    class: 'form-control'
+                    class: 'form-control',
+                    dataBind: {
+                        textInput: 'newName'
+                    }
                 }),
                 span({
                     class: 'input-group-btn'
                 }, button({
-                    class: 'btn btn-primary'
-                }, 'Create'))
-            ])
+                    class: 'btn btn-primary',
+                    dataBind: {
+                        click: 'doCreate',
+                        disable: '!isValid()'
+                    }
+                }, 'Create')),
+            ]),
+            div({
+                dataBind: {
+                    text: 'error'
+                }
+            })
         ]);
     }
 
     function buildCopyDisplay() {
         return div([
             p([
-                buildNarrativeSelector(),
-                '(' + span({
-                    dataBind: {
-                        text: 'selectedNarrative'
-                    }
-                }),
-                ')'
+                buildNarrativeSelector()
+                // '(' + span({
+                //     dataBind: {
+                //         text: 'selectedNarrative'
+                //     }
+                // }),
+                // ')'
             ]),
             p([
                 buildNewNarrativeForm()
@@ -202,9 +400,16 @@ define([
             button({
                 class: 'btn btn-primary',
                 dataBind: {
-                    disable: '!selectedNarrative() || selectedNarrative().length === 0'
+                    disable: '!selectedNarrative() || selectedNarrative().length === 0',
+                    click: 'copy.doCopy',
+                    text: 'copy.isCopying() ? "Copying..." : "Copy"'
                 }
-            }, 'Copy')
+            }),
+            div({
+                dataBind: {
+                    text: 'copy.message'
+                }
+            })
         ]);
     }
 
@@ -250,8 +455,6 @@ define([
                 ])
             ])
         ]);
-
-        return;
     }
 
     function component() {
