@@ -12,19 +12,12 @@ define([
     'use strict';
 
     var t = html.tag,
-        a = t('a'),
-        select = t('select'),
-        option = t('option'),
         span = t('span'),
-        div = t('div'),
-        table = t('table'),
-        tr = t('tr'),
-        th = t('th'),
-        td = t('td');
+        div = t('div');
 
     function viewModel(params) {
         function doOpenNarrative(data) {
-            var url = '/narrative/' + data.item.meta.narrativeId;
+            var url = '/narrative/' + data.item.context.narrativeId;
             window.open(url, '_blank');
         }
 
@@ -48,115 +41,64 @@ define([
             });
         });
 
+        function doToggleDetail() {
+            params.item.showDetail(!params.item.showDetail());
+        }
+
         return {
+            runtime: params.runtime,
             item: params.item,
             doOpenNarrative: doOpenNarrative,
             doOpenDataview: doOpenDataview,
             doKeep: doKeep,
+            doToggleDetail: doToggleDetail,
             isInCart: isInCart
         };
-    }
-
-    function buildTypeView() {
-        return table({
-            class: '-table '
-        }, [
-            tr([
-                th('Scientific name'),
-                td({
-                    dataBind: {
-                        text: 'item.genome.scientificName'
-                    },
-                    class: '-scientific-name'
-                })
-            ]),
-            tr([
-                th('Taxonomy'),
-                td(
-                    [
-                        '<!-- ko if: item.genome.taxonomy.length === 0 -->',
-                        '-',
-                        '<!-- /ko -->',
-                        '<!-- ko if: item.genome.taxonomy.length > 0 -->',
-
-                        select({
-                            class: 'form-control',
-                            style: {
-                                backgroundColor: 'transparent',
-                                backgroundImage: 'none',
-                                // border: 'none',
-                                // outline: 'none',
-                                '-webkit-appearance': 'none',
-                                disabled: true,
-                                readonly: true
-                            },
-                            dataBind: {
-                                foreach: 'item.genome.taxonomy'
-                                    // options: 'item.genome.taxonomy',
-                                    // optionsText: '$data',
-                                    // optionsValue: '$data'
-                            }
-                        }, option({
-                            disabled: true,
-                            dataBind: {
-                                value: '$data',
-                                text: '$data',
-                                attr: {
-                                    selected: '$index() === 0 ? "selected" : false'
-                                }
-                            }
-                        })),
-                        // div({
-                        //     class: '-taxonomy',
-                        //     dataBind: {
-                        //         foreach: 'item.genome.taxonomy'
-                        //     }
-                        // }, span([
-                        //     span({
-                        //         dataBind: {
-                        //             text: '$data'
-                        //         }
-                        //     }),
-                        //     '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
-                        //     span({
-                        //         class: 'fa fa-angle-right',
-                        //         style: {
-                        //             margin: '0 4px'
-                        //         }
-                        //     }),
-                        //     '<!-- /ko -->'
-                        // ])),
-                        '<!-- /ko -->'
-                    ]
-                )
-            ]),
-            tr([
-                th('Features '),
-                td(div({
-                    dataBind: {
-                        html: 'item.genome.featureCount.formatted'
-                    },
-                    class: '-feature-count'
-                }))
-            ])
-        ]);
     }
 
     function template() {
         return div({
             class: 'component-reske-genome-browse -row'
         }, [
-            div([
+            // first the summary row.
+
+            div({
+                // dataBind: {
+                //     click: 'doToggleDetail',
+                //     clickBubble: false
+                // }
+            }, [
+                // div({
+                //     style: {
+                //         display: 'inline-block',
+                //         verticalAlign: 'top',
+                //         width: '5%',
+                //     },
+                //     class: '-field -resultNumber'
+                // }, span({
+                //     dataBind: {
+                //         text: 'item.meta.resultNumber'
+                //     }
+                // })),
                 div({
                     style: {
                         display: 'inline-block',
                         verticalAlign: 'top',
                         width: '5%',
                     },
-                    class: '-field -resultNumber'
+                    class: '-field -viewToggle'
                 }, span({
                     dataBind: {
-                        text: 'item.meta.resultNumber'
+                        css: {
+                            'fa-chevron-right': '!item.showDetail()',
+                            'fa-chevron-down': 'item.showDetail()'
+                        },
+                        click: 'doToggleDetail',
+                        clickBubble: false
+                    },
+                    class: '-detail-toggle fa',
+                    style: {
+                        cursor: 'pointer'
                     }
                 })),
                 div({
@@ -166,63 +108,74 @@ define([
                         width: '70%'
                     }
                 }, [
-                    div([
-                        div({
-                            class: '-title'
-                        }, [
-                            common.buildTypeIcon(),
-                            a({
-                                dataBind: {
-                                    attr: {
-                                        href: '"#dataview/" + item.meta.ids.dataviewId'
-                                    },
-                                    text: 'item.genome.title'
-                                },
-                                target: '_blank',
-                                style: {
-                                    verticalAlign: 'middle',
-                                    marginLeft: '4px'
+                    div({
+                        dataBind: {
+                            component: {
+                                name: '"reske/search/data/type/genome/view/summary"',
+                                params: {
+                                    item: 'item'
                                 }
-                            })
-                        ]),
-                    ]),
-                    div([
-                        div({
-                            style: {
-                                display: 'inline-block',
-                                verticalAlign: 'top',
-                                width: '50%',
-                                padding: '4px',
-                                boxSizing: 'border-box'
                             }
-                        }, buildTypeView()),
-                        div({
-                            style: {
-                                display: 'inline-block',
-                                verticalAlign: 'top',
-                                width: '50%',
-                                padding: '4px',
-                                boxSizing: 'border-box'
-                            }
-                        }, common.buildMetaInfo())
-                    ])
+                        }
+                    })
                 ]),
-
-
                 div({
                     style: {
                         display: 'inline-block',
                         verticalAlign: 'top',
-                        width: '25%',
+                        width: '10%',
                         textAlign: 'right'
                     }
                 }, div({
                     xclass: '-features'
                 }, [
-                    common.buildSharingInfo(),
+                    common.buildSharingInfo()
+                ])),
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '15%',
+                        textAlign: 'right'
+                    }
+                }, div({
+                    xclass: '-features'
+                }, [
                     common.buildActions()
                 ]))
-            ])
+            ]),
+            // then detail
+            '<!-- ko if: item.showDetail -->',
+            div([
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '5%',
+                    },
+                    class: '-field -resultNumber'
+                }),
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '95%'
+                    }
+                }, [
+                    div({
+                        dataBind: {
+                            component: {
+                                name: '"reske/search/data/type/genome/view/detail"',
+                                params: {
+                                    item: 'item',
+                                    runtime: 'runtime'
+                                }
+                            }
+                        }
+                    })
+                ])
+            ]),
+            '<!-- /ko -->'
         ]);
     }
 

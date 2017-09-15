@@ -26,8 +26,10 @@ define([
         td = t('td');
 
     function viewModel(params) {
+        console.log('params', params);
+
         function doOpenNarrative(data) {
-            var url = '/narrative/' + data.item.meta.narrativeId;
+            var url = '/narrative/' + data.item.context.narrativeId;
             window.open(url, '_blank');
         }
 
@@ -319,77 +321,36 @@ define([
                 })
             ]),
             tr([
-                th('App Cells'),
-                td(
-                    // [
-                    //     '<!-- ko if: item.genome.taxonomy.length === 0 -->',
-                    //     '-',
-                    //     '<!-- /ko -->',
-                    //     '<!-- ko if: item.genome.taxonomy.length > 0 -->',
-                    //     div({
-                    //         class: '-taxonomy',
-                    //         dataBind: {
-                    //             foreach: 'item.genome.taxonomy'
-                    //         }
-                    //     }, span([
-                    //         span({
-                    //             dataBind: {
-                    //                 text: '$data'
-                    //             }
-                    //         }),
-                    //         '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
-                    //         span({
-                    //             class: 'fa fa-angle-right',
-                    //             style: {
-                    //                 margin: '0 4px'
-                    //             }
-                    //         }),
-                    //         '<!-- /ko -->'
-                    //     ])),
-                    //     '<!-- /ko -->'
-                    // ]
-                )
+                th('Cell count'),
+                td({
+                    dataBind: {
+                        text: 'item.narrative.cellCount'
+                    }
+                })
             ]),
             tr([
                 th('App Cells'),
-                td(
-                    // [
-                    //     '<!-- ko if: item.genome.taxonomy.length === 0 -->',
-                    //     '-',
-                    //     '<!-- /ko -->',
-                    //     '<!-- ko if: item.genome.taxonomy.length > 0 -->',
-                    //     div({
-                    //         class: '-taxonomy',
-                    //         dataBind: {
-                    //             foreach: 'item.genome.taxonomy'
-                    //         }
-                    //     }, span([
-                    //         span({
-                    //             dataBind: {
-                    //                 text: '$data'
-                    //             }
-                    //         }),
-                    //         '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
-                    //         span({
-                    //             class: 'fa fa-angle-right',
-                    //             style: {
-                    //                 margin: '0 4px'
-                    //             }
-                    //         }),
-                    //         '<!-- /ko -->'
-                    //     ])),
-                    //     '<!-- /ko -->'
-                    // ]
-                )
+                td({
+                    dataBind: {
+                        text: 'item.narrative.appCellCount'
+                    }
+                })
+            ]),
+            tr([
+                th('Code Cells'),
+                td({
+                    dataBind: {
+                        text: 'item.narrative.codeCellCount'
+                    }
+                })
             ]),
             tr([
                 th('Data Objects '),
-                td(div({
-                    // dataBind: {
-                    //     html: 'item.genome.featureCount.formatted'
-                    // },
-                    // class: '-feature-count'
-                }))
+                td({
+                    dataBind: {
+                        text: 'item.narrative.dataObjectCount'
+                    }
+                })
             ])
         ]);
     }
@@ -426,7 +387,7 @@ define([
                             a({
                                 dataBind: {
                                     attr: {
-                                        href: '"/narrative/" + item.meta.narrativeId'
+                                        href: '"/narrative/" + item.context.narrativeId'
                                     },
                                     text: 'item.narrative.title'
                                 },

@@ -10,6 +10,7 @@ define([
         div = t('div'),
         a = t('a'),
         table = t('table'),
+        tbody = t('tbody'),
         tr = t('tr'),
         th = t('th'),
         td = t('td');
@@ -21,30 +22,30 @@ define([
                 marginRight: '10px'
             }
         }, [
-
-            '<!-- ko if: item.meta.public -->',
+            '<!-- ko if: item.meta.isOwner -->',
             span({
-                class: 'fa fa-globe',
+                class: 'fa fa-key',
                 style: {
                     margin: '0 4px'
                 },
                 dataToggle: 'tooltip',
                 dataPlacement: 'left',
-                title: 'This object is shared publicly'
+                title: 'You are the owner of this data object'
             }),
             '<!-- /ko -->',
-            '<!-- ko ifnot: item.meta.public -->',
+            '<!-- ko ifnot: item.meta.isOwner -->',
             span({
-                class: 'fa fa-globe',
+                class: 'fa fa-key',
                 style: {
                     margin: '0 4px',
                     color: '#CCC'
                 },
                 dataToggle: 'tooltip',
                 dataPlacement: 'left',
-                title: 'This object is not shared publicly'
+                title: 'You are not the owner of this data object'
             }),
             '<!-- /ko -->',
+
             '<!-- ko if: item.meta.isShared -->',
             span({
                 class: 'fa fa-share-alt',
@@ -67,28 +68,30 @@ define([
                 dataPlacement: 'left',
                 title: 'This assembly object has not been shared with you'
             }),
-            '<!-- ko if: item.meta.isOwner -->',
             '<!-- /ko -->',
+
+
+            '<!-- ko if: item.meta.isPublic -->',
             span({
-                class: 'fa fa-key',
+                class: 'fa fa-globe',
                 style: {
                     margin: '0 4px'
                 },
                 dataToggle: 'tooltip',
                 dataPlacement: 'left',
-                title: 'You are the owner of this data object'
+                title: 'This object is shared publicly'
             }),
             '<!-- /ko -->',
-            '<!-- ko ifnot: item.meta.isOwner -->',
+            '<!-- ko ifnot: item.meta.isPublic -->',
             span({
-                class: 'fa fa-key',
+                class: 'fa fa-globe',
                 style: {
                     margin: '0 4px',
                     color: '#CCC'
                 },
                 dataToggle: 'tooltip',
                 dataPlacement: 'left',
-                title: 'You are not the owner of this data object'
+                title: 'This object is not shared publicly'
             }),
             '<!-- /ko -->',
         ]);
@@ -171,112 +174,110 @@ define([
         ]);
     }
 
+    function buildNarrativeMeta(options) {
+        if (options.showNarrative === false) {
+            return;
+        }
+        // Narrative context
+        return div([
+            a({
+                dataBind: {
+                    attr: {
+                        href: '"/narrative/" + item.context.narrativeId'
+                    }
+                },
+                target: '_blank',
+                dataToggle: 'tooltip',
+                dataPlacement: 'left',
+                title: 'Open the Narrative this object is embedded in'
+            }, [
+                span({
+                    class: 'fa fa-file-o'
+                }),
+                span({
+                    dataBind: {
+                        text: 'item.context.narrativeTitle'
+                    },
+                    class: '-narrative-title',
+                    style: {
+                        marginLeft: '4px'
+                    }
+                })
+            ])
+        ]);
+    }
+
+    function buildOwnerMeta(options) {
+        return a({
+            dataBind: {
+                attr: {
+                    href: '"#people/" + item.meta.owner'
+                }
+            },
+            target: '_blank',
+            dataToggle: 'tooltip',
+            dataPlacement: 'left',
+            title: 'This is the owner of the Narrative this object is embedded in; click here to view their profile.'
+        }, [
+            span({
+                class: 'fa fa-user-o'
+            }),
+            span({
+                dataBind: {
+                    text: 'item.meta.owner'
+                },
+                class: '-owner',
+                style: {
+                    marginLeft: '4px'
+                }
+            })
+        ]);
+    }
+
+    function buildMetaLastUpdated(options) {
+        return [
+            '<!-- ko if: item.meta.created.at !== item.meta.updated.at -->',
+            span({
+                dataBind: {
+                    text: 'item.meta.updated.at'
+                },
+                class: '-updated-at'
+            }),
+            '<!-- /ko -->',
+            '<!-- ko if: item.meta.created.at === item.meta.updated.at -->',
+            '-',
+            '<!-- /ko -->'
+        ];
+    }
+
     function buildMetaInfo(_options) {
         var options = _options || {};
         return table({
             class: '-table'
-        }, [
-            tr([
-                th('Created'),
-                td(span({
-                    dataBind: {
-                        text: 'item.meta.created.at'
-                    },
-                    class: '-created-at'
-                }))
-            ]),
+        }, tbody([
 
             '<!-- ko if: item.context.type === "narrative" -->',
             tr([
-                th('Type'),
+                th('Container'),
                 td('Narrative')
             ]),
             tr([
                 th('Narrative'),
-                td((function () {
-                    if (options.showNarrative === false) {
-                        return;
-                    }
-                    // Narrative context
-                    return div([
-                        a({
-                            dataBind: {
-                                attr: {
-                                    href: '"/narrative/" + item.context.narrativeId'
-                                }
-                            },
-                            target: '_blank',
-                            dataToggle: 'tooltip',
-                            dataPlacement: 'left',
-                            title: 'Open the Narrative this object is embedded in'
-                        }, [
-                            span({
-                                class: 'fa fa-file-o'
-                            }),
-                            span({
-                                dataBind: {
-                                    text: 'item.context.narrativeTitle'
-                                },
-                                class: '-narrative-title',
-                                style: {
-                                    marginLeft: '4px'
-                                }
-                            })
-                        ])
-                    ]);
-                }()))
+                td(buildNarrativeMeta(options))
             ]),
             tr([
                 th('Owner'),
-                td(
-                    a({
-                        dataBind: {
-                            attr: {
-                                href: '"#people/" + item.meta.owner'
-                            }
-                        },
-                        target: '_blank',
-                        dataToggle: 'tooltip',
-                        dataPlacement: 'left',
-                        title: 'This is the owner of the Narrative this object is embedded in; click here to view their profile.'
-                    }, [
-                        span({
-                            class: 'fa fa-user-o'
-                        }),
-                        span({
-                            dataBind: {
-                                text: 'item.meta.owner'
-                            },
-                            class: '-owner',
-                            style: {
-                                marginLeft: '4px'
-                            }
-                        })
-                    ])
-
-                )
+                td(buildOwnerMeta(options))
             ]),
-            tr([
-                th('Last updated'),
-                td([
-                    '<!-- ko if: item.meta.created.at !== item.meta.updated.at -->',
-                    span({
-                        dataBind: {
-                            text: 'item.meta.updated.at'
-                        },
-                        class: '-updated-at'
-                    }),
-                    '<!-- /ko -->',
-                    '<!-- ko if: item.meta.created.at === item.meta.updated.at -->',
-                    '-',
-                    '<!-- /ko -->'
-                ])
-            ]),
+            // tr([
+            //     th('Last updated'),
+            //     td(buildMetaLastUpdated(options))
+            // ]),
             '<!-- /ko -->',
             '<!-- ko if: item.context.type === "reference" -->',
             tr([
-                th('Type'),
-                td('Reference Data')
+                th('Container'),
+                td('Reference Data Workspace')
             ]),
             tr([
                 th('Name'),
@@ -305,8 +306,8 @@ define([
             '<!-- /ko -->',
             '<!-- ko if: item.context.type === "unknown" -->',
             tr([
-                th('Type'),
-                td('Unknown')
+                th('Container'),
+                td('Workspace')
             ]),
             tr([
                 th('Workspace'),
@@ -377,112 +378,10 @@ define([
                 td('A special workspace which contains example data objects. Also available under "Example" in the Narrative data panel.')
             ]),
             '<!-- /ko -->',
-        ]);
+        ]));
     }
 
-    function buildMetaInfox(_options) {
-        var options = _options || {};
-        return div({
-            style: {
-                marginLeft: '5px'
-            }
-        }, [
-            (function () {
-                if (options.showNarrative === false) {
-                    return;
-                }
-                // Narrative context
-                return div([
-                    a({
-                        dataBind: {
-                            attr: {
-                                href: '"/narrative/" + item.meta.narrativeId'
-                            }
-                        },
-                        target: '_blank',
-                        dataToggle: 'tooltip',
-                        dataPlacement: 'left',
-                        title: 'Open the Narrative this object is embedded in'
-                    }, [
-                        span({
-                            class: 'fa fa-file-o'
-                        }),
-                        span({
-                            dataBind: {
-                                text: 'item.meta.narrativeTitle'
-                            },
-                            class: '-narrative-title',
-                            style: {
-                                marginLeft: '4px'
-                            }
-                        })
-                    ])
-                ]);
-            }()),
-            // Owner and creation/modification dates
-            div({
-                style: {
-                    maxWidth: '40em'
-                }
-            }, [
-                div({
-                    style: {
-                        display: 'inline-block',
-                        width: '50%'
-                    }
-                }, [
-                    a({
-                        dataBind: {
-                            attr: {
-                                href: '"#people/" + item.meta.owner'
-                            }
-                        },
-                        target: '_blank',
-                        dataToggle: 'tooltip',
-                        dataPlacement: 'left',
-                        title: 'This is the owner of the Narrative this object is embedded in; click here to view their profile.'
-                    }, [
-                        span({
-                            class: 'fa fa-user-o'
-                        }),
-                        span({
-                            dataBind: {
-                                text: 'item.meta.owner'
-                            },
-                            class: '-owner',
-                            style: {
-                                marginLeft: '4px'
-                            }
-                        })
-                    ])
-                ]),
-                div({
-                    style: {
-                        display: 'inline-block',
-                        width: '50%',
-                        textAlign: 'right'
-                    }
-                }, [
-                    span({
-                        dataBind: {
-                            text: 'item.meta.created.at'
-                        },
-                        class: '-created-at'
-                    }),
-                    '<!-- ko if: item.meta.created.at !== item.meta.updated.at -->',
-                    ' (last updated ',
-                    span({
-                        dataBind: {
-                            text: 'item.meta.updated.at'
-                        },
-                        class: '-updated-at'
-                    }),
-                    ')',
-                    '<!-- /ko -->'
-                ])
-            ])
-        ]);
-    }
+
 
     function buildTypeIcon() {
         return;

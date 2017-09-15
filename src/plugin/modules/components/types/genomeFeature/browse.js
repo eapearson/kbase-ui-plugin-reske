@@ -24,7 +24,7 @@ define([
 
     function viewModel(params) {
         function doOpenNarrative(data) {
-            var url = '/narrative/' + data.item.meta.narrativeId;
+            var url = '/narrative/' + data.item.context.narrativeId;
             window.open(url, '_blank');
         }
         // ?sub=Feature&subid=kb|g.220339.CDS.1139

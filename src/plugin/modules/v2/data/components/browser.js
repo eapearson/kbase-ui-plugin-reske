@@ -235,7 +235,6 @@ define([
 
                     // TODO: get this from the type-specific object / vm creator
 
-                    normalizeToType(object, runtime);
                     object.meta = {
                         workspace: reference,
                         ids: reference,
@@ -507,11 +506,13 @@ define([
                                     by: object.originalObjectInfo.saved_by,
                                     at: dateString(object.originalObjectInfo.saveDate)
                                 };
-                                object.meta.public = object.workspaceInfo.globalread === 'y';
+                                object.meta.isPublic = (object.workspaceInfo.globalread === 'r');
                                 object.meta.isOwner = (object.meta.owner === runtime.service('session').getUsername());
                                 // set sharing info.
-                                if (!object.meta.isOwner) {
+                                if (!object.meta.isOwner && !object.meta.isPublic) {
                                     object.meta.isShared = true;
+                                } else {
+                                    object.meta.isShared = false;
                                 }
                                 object.meta.canRead = canRead(object.workspaceInfo.user_permission);
                                 object.meta.canWrite = canWrite(object.workspaceInfo.user_permission);
@@ -521,7 +522,7 @@ define([
                                 // We get this from the metadata.
                                 if (object.workspaceInfo.metadata.narrative) {
                                     // object.meta.narrativeTitle = object.workspaceInfo.metadata.narrative_nice_name;
-                                    // object.meta.narrativeId = 'ws.' + object.workspaceInfo.id +
+                                    // object.context.narrativeId = 'ws.' + object.workspaceInfo.id +
                                     //     '.obj.' + object.workspaceInfo.metadata.narrative;
                                     // object.meta.workspaceType = 'narrative';
                                     object.context = {
@@ -529,6 +530,10 @@ define([
                                         narrativeTitle: object.workspaceInfo.metadata.narrative_nice_name,
                                         narrativeId: 'ws.' + object.workspaceInfo.id +
                                             '.obj.' + object.workspaceInfo.metadata.narrative
+                                    };
+                                } else if (object.workspaceInfo.name === 'KBaseExampleData') {
+                                    object.context = {
+                                        type: 'exampleData'
                                     };
                                 } else if (object.originalObjectInfo.metadata.Source) {
                                     object.context = {
@@ -538,10 +543,6 @@ define([
                                         sourceId: object.originalObjectInfo.metadata['Source ID']
                                     };
                                     // TODO: don't reference workspaces have some metadata to describe
-                                } else if (object.workspaceInfo.name === 'KBaseExampleData') {
-                                    object.context = {
-                                        type: 'exampleData'
-                                    };
                                 } else {
                                     object.context = {
                                         type: 'unknown',
@@ -550,6 +551,11 @@ define([
                                 }
 
                                 object.typeIcon = getTypeIcon(object, { runtime: runtime });
+
+                                normalizeToType(object, runtime);
+
+                                // Some more view stuff...
+                                object.showDetail = ko.observable(false); // show details in the browser?
                             }
                         }).then(function () {
                             return [searchResult, filter];
@@ -620,6 +626,7 @@ define([
         }
 
         return {
+            runtime: runtime,
             QE: queryEngine,
             searchVM: searchVM,
             type: type,
@@ -667,7 +674,7 @@ define([
             div({
                 style: {
                     display: 'inline-block',
-                    width: '25%',
+                    width: '35%',
                     verticalAlign: 'top'
                 }
             }, [
@@ -707,7 +714,6 @@ define([
                         },
                         class: 'btn btn-default'
                     }, buildIcon('step-forward')),
-                    '<br>',
                     span({
                         style: {
                             // why not work??
@@ -716,7 +722,7 @@ define([
                             textAlign: 'center',
                             margin: '6px 0 0 4px',
                             float: 'none',
-                            width: '100%'
+                            // width: '100%'
                         },
                         dataBind: {
                             ifnot: 'isNaN(pageEnd())'
@@ -788,7 +794,7 @@ define([
             div({
                 class: 'btn-group form-inline',
                 style: {
-                    width: '55%',
+                    width: '35%',
                     margin: '0',
                     textAlign: 'right',
                     float: 'none',
@@ -840,6 +846,17 @@ define([
             }, buildPagingControls()),
             div({
                 dataBind: {
+                    component: {
+                        name: '"reske/" + $component.typeDef.uiId + "/header"',
+                        params: {
+                            searchResults: 'searchResults',
+                            runtime: 'runtime'
+                        }
+                    }
+                }
+            }),
+            div({
+                dataBind: {
                     foreach: 'searchResults'
                 }
             }, div({
@@ -853,7 +870,8 @@ define([
                             QE: '$component.QE',
                             item: '$data',
                             // new: shopping cart support.
-                            cart: '$component.searchVM.cart'
+                            cart: '$component.searchVM.cart',
+                            runtime: '$component.runtime'
                         }
                     }
                 }

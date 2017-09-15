@@ -160,6 +160,9 @@ define([
         }
 
         // add toggling.
+        var cellTypeCounts = {};
+
+
         cells.forEach(function (cell) {
             if (!cell.show) {
                 cell.show = ko.observable(true);
@@ -167,7 +170,14 @@ define([
             cell.doToggleShow = function () {
                 cell.show(!cell.show());
             };
+            if (!cellTypeCounts[cell.type]) {
+                cellTypeCounts[cell.type] = 1;
+            } else {
+                cellTypeCounts[cell.type] += 1;
+            }
         });
+
+        console.log('normalizeing', object);
 
         object['narrative'] = {
             title: object.data.metadata.name,
@@ -187,7 +197,13 @@ define([
                 cells: cells.filter(function (cell) {
                     return (cell.type === 'markdown');
                 })
-            }
+            },
+            cellCount: cells.length,
+            appCellCount: cellTypeCounts.app || 0,
+            dataCellCount: ((cellTypeCounts.output || 0) + (cellTypeCounts.data || 0)),
+            markdownCellCount: cellTypeCounts.markdown || 0,
+            codeCellCount: cellTypeCounts.code || 0,
+            dataObjectCount: object.workspaceInfo.object_count - 1 // approximate, because there may be hidden objects.
         };
     }
 

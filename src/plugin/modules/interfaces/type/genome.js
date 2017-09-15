@@ -13,10 +13,11 @@ define([
             description: 'description here...',
             assemblyGuid: object.data.assembly_guid,
             domain: object.data.domain,
-            featureCount: {
-                value: object.data.contigs,
-                formatted: common.padRight(numeral(object.data.features).format('0,0'), 2)
-            },
+            featureCount: object.data.features,
+            // featureCount: {
+            //     value: object.data.contigs,
+            //     formatted: common.padRight(numeral(object.data.features).format('0,0'), 2)
+            // },
             scientificName: object.data.scientific_name,
             taxonomy: object.data.taxonomy ? object.data.taxonomy.split(';').map(function (item) {
                 return item.trim(' ');

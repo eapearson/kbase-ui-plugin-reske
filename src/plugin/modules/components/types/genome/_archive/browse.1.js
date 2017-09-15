@@ -1,13 +1,11 @@
 define([
     'knockout-plus',
-    'highlight',
     'kb_common/html',
     '../common',
-
-    'css!./browse.css'
+    'bootstrap',
+    'css!font_awesome'
 ], function (
     ko,
-    highlight,
     html,
     common
 ) {
@@ -15,6 +13,8 @@ define([
 
     var t = html.tag,
         a = t('a'),
+        select = t('select'),
+        option = t('option'),
         span = t('span'),
         div = t('div'),
         table = t('table'),
@@ -59,42 +59,84 @@ define([
 
     function buildTypeView() {
         return table({
-            class: '-table'
+            class: '-table '
         }, [
             tr([
-                th('Sequenced with'),
+                th('Scientific name'),
                 td({
                     dataBind: {
-                        html: 'item.singleEndLibrary.sequencingTechnology'
+                        text: 'item.genome.scientificName'
                     },
-                    class: '-sequence-tehcnology'
+                    class: '-scientific-name'
                 })
             ]),
             tr([
-                th('GC content (%)'),
-                td(div({
-                    dataBind: {
-                        html: 'item.singleEndLibrary.gcContent.formatted'
-                    },
-                    class: '-gc-content -number'
-                }))
+                th('Taxonomy'),
+                td(
+                    [
+                        '<!-- ko if: item.genome.taxonomy.length === 0 -->',
+                        '-',
+                        '<!-- /ko -->',
+                        '<!-- ko if: item.genome.taxonomy.length > 0 -->',
+
+                        select({
+                            class: 'form-control',
+                            style: {
+                                backgroundColor: 'transparent',
+                                backgroundImage: 'none',
+                                // border: 'none',
+                                // outline: 'none',
+                                '-webkit-appearance': 'none',
+                                disabled: true,
+                                readonly: true
+                            },
+                            dataBind: {
+                                foreach: 'item.genome.taxonomy'
+                                    // options: 'item.genome.taxonomy',
+                                    // optionsText: '$data',
+                                    // optionsValue: '$data'
+                            }
+                        }, option({
+                            disabled: true,
+                            dataBind: {
+                                value: '$data',
+                                text: '$data',
+                                attr: {
+                                    selected: '$index() === 0 ? "selected" : false'
+                                }
+                            }
+                        })),
+                        // div({
+                        //     class: '-taxonomy',
+                        //     dataBind: {
+                        //         foreach: 'item.genome.taxonomy'
+                        //     }
+                        // }, span([
+                        //     span({
+                        //         dataBind: {
+                        //             text: '$data'
+                        //         }
+                        //     }),
+                        //     '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
+                        //     span({
+                        //         class: 'fa fa-angle-right',
+                        //         style: {
+                        //             margin: '0 4px'
+                        //         }
+                        //     }),
+                        //     '<!-- /ko -->'
+                        // ])),
+                        '<!-- /ko -->'
+                    ]
+                )
             ]),
             tr([
-                th('Read count'),
+                th('Features '),
                 td(div({
                     dataBind: {
-                        html: 'item.singleEndLibrary.readCount.formatted'
+                        html: 'item.genome.featureCount.formatted'
                     },
-                    class: '-read-count -number'
-                }))
-            ]),
-            tr([
-                th('Mean read length'),
-                td(div({
-                    dataBind: {
-                        html: 'item.singleEndLibrary.meanReadLength.formatted'
-                    },
-                    class: '-mean-read-length -number'
+                    class: '-feature-count'
                 }))
             ])
         ]);
@@ -102,7 +144,7 @@ define([
 
     function template() {
         return div({
-            class: 'component-reske-single-end-library-browse -row'
+            class: 'component-reske-genome-browse -row'
         }, [
             div([
                 div({
@@ -134,7 +176,7 @@ define([
                                     attr: {
                                         href: '"#dataview/" + item.meta.ids.dataviewId'
                                     },
-                                    text: 'item.singleEndLibrary.title'
+                                    text: 'item.genome.title'
                                 },
                                 target: '_blank',
                                 style: {
@@ -175,7 +217,7 @@ define([
                         textAlign: 'right'
                     }
                 }, div({
-                    class: '-features'
+                    xclass: '-features'
                 }, [
                     common.buildSharingInfo(),
                     common.buildActions()

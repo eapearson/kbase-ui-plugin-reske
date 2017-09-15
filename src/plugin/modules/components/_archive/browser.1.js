@@ -682,7 +682,7 @@ define([
 
                             object.meta.narrativeTitle = object.workspaceInfo.metadata.narrative_nice_name;
 
-                            object.meta.narrativeId = 'ws.' + object.workspaceInfo.id +
+                            object.context.narrativeId = 'ws.' + object.workspaceInfo.id +
                                 '.obj.' + object.workspaceInfo.metadata.narrative;
 
                             // set sharing info.

@@ -39,10 +39,32 @@ install:
             name: reske/narrative/browse
             module: components/types/narrative/browse
             css: true   
+        # GENOME
         -
             name: reske/genome/browse
             module: components/types/genome/browse
             css: true
+        -
+            name: reske/genome/header
+            module: components/types/genome/header
+            css: true
+        -
+            name: reske/search/data/type/genome/view/detail
+            module: components/types/genome/views/detail
+            css: true
+        -
+            name: reske/search/data/type/genome/view/header
+            module: components/types/genome/views/header
+            css: true            
+        -
+            name: reske/search/data/type/genome/view/summary
+            module: components/types/genome/views/summary
+            css: true    
+        -
+            name: reske/search/data/type/genome/view/nutshell
+            module: components/types/genome/views/nutshell
+            css: true    
+        # GENOME FEATURES
         -
             name: reske/genomeFeature/browse
             module: components/types/genomeFeature/browse
