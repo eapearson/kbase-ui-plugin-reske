@@ -1,5 +1,4 @@
 define([
-    'bluebird',
     'knockout-plus',
     'kb_common/html',
     'kb_common/jsonRpc/dynamicServiceClient',
@@ -7,7 +6,6 @@ define([
     'bootstrap',
     'css!font_awesome'
 ], function (
-    Promise,
     ko,
     html,
     DynamicServiceClient,
@@ -25,12 +23,11 @@ define([
     function viewModel(params) {
         var runtime = params.runtime;
 
+        var kbaseGenomeId = ko.observable();
         var dnaLength = ko.observable();
         var contigCount = ko.observable();
         var gcContent = ko.observable();
-        var externalSource = ko.observable();
-        var externalSourceId = ko.observable();
-        var externalSourceOriginationDate = ko.observable();
+        var featureCount = ko.observable();
 
         var fetching = ko.observable(false);
 
@@ -39,27 +36,19 @@ define([
             var client = new DynamicServiceClient({
                 url: runtime.config('services.service_wizard.url'),
                 token: runtime.service('session').getAuthToken(),
-                module: 'AssemblyAPI'
+                module: 'GenomeAnnotationAPI'
             });
-            Promise.all([
-                    client.callFunc('get_stats', [
-                        params.item.meta.ids.ref
-                    ]).spread(function (stats) {
-                        return stats;
-                    }),
-                    client.callFunc('get_external_source_info', [
-                        params.item.meta.ids.ref
-                    ]).spread(function (result) {
-                        return result;
-                    })
-                ])
-                .spread(function (stats, sourceInfo) {
-                    dnaLength(stats.dna_size);
-                    contigCount(stats.num_contigs);
-                    gcContent(stats.gc_content);
-                    externalSource(sourceInfo.external_source);
-                    externalSourceId(sourceInfo.external_source_id);
-                    externalSourceOriginationDate(sourceInfo.external_source_origination_date);
+            client.callFunc('get_genome_v1', [{
+                    genomes: [{ ref: params.item.meta.ids.ref }],
+                    included_fields: ['id', 'dna_size', 'contig_lengths', 'gc_content', 'features']
+                }])
+                .spread(function (result) {
+                    var genome = result.genomes[0];
+                    dnaLength(genome.data.dna_size);
+                    contigCount(genome.data.contig_lengths.length);
+                    gcContent(genome.data.gc_content);
+                    featureCount(genome.data.features.length);
+                    kbaseGenomeId(genome.data.id);
                 })
                 .finally(function () {
                     fetching(false);
@@ -69,13 +58,12 @@ define([
         fetchData();
 
         return {
+            kbaseGenomeId: kbaseGenomeId,
             dnaLength: dnaLength,
             contigCount: contigCount,
             gcContent: gcContent,
-            fetching: fetching,
-            externalSource: externalSource,
-            externalSourceId: externalSourceId,
-            externalSourceOriginationDate: externalSourceOriginationDate
+            featureCount: featureCount,
+            fetching: fetching
         };
     }
 
@@ -83,6 +71,14 @@ define([
         return table({
             class: '-table '
         }, [
+            tr([
+                th('KBase Genome Id'),
+                td({
+                    dataBind: {
+                        text: 'kbaseGenomeId'
+                    }
+                })
+            ]),
             tr([
                 th('DNA Length'),
                 td({
@@ -111,26 +107,11 @@ define([
                 })
             ]),
             tr([
-                th('External Source'),
+                th('Feature Count'),
                 td({
                     dataBind: {
-                        text: 'externalSource() || "-"'
-                    }
-                })
-            ]),
-            tr([
-                th('Ext. Source Id'),
-                td({
-                    dataBind: {
-                        text: 'externalSourceId() || "-"'
-                    }
-                })
-            ]),
-            tr([
-                th('Ext. Source Orig. Date'),
-                td({
-                    dataBind: {
-                        text: 'externalSourceOriginationDate() || "-"'
+                        numberText: 'featureCount',
+                        numberFormat: '"0,0"'
                     }
                 })
             ])
@@ -140,7 +121,7 @@ define([
     function template() {
         return div([
             '<!-- ko if: fetching -->',
-            html.loading('Loading assembly stats...'),
+            html.loading('Loading genome stats...'),
             '<!-- /ko -->',
             '<!-- ko ifnot: fetching -->',
             buildNutshell(),

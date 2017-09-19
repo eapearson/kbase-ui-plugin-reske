@@ -23,7 +23,7 @@ define([
 
         function doOpenDataview(data) {
             var url = '#dataview/' + data.item.meta.ids.dataviewId;
-            window.open(url, '_blank');
+            window.open(url);
         }
 
         return {

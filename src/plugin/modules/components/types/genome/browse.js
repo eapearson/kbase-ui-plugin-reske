@@ -23,7 +23,7 @@ define([
 
         function doOpenDataview(data) {
             var url = '#dataview/' + data.item.meta.ids.dataviewId;
-            window.open(url, '_blank');
+            window.open(url);
         }
 
         function doKeep(data) {
@@ -111,7 +111,7 @@ define([
                     div({
                         dataBind: {
                             component: {
-                                name: '"reske/search/data/type/genome/view/summary"',
+                                name: '"reske/search/data/type/genome/view/list"',
                                 params: {
                                     item: 'item'
                                 }

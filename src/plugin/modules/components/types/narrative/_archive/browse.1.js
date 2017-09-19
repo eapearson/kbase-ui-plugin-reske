@@ -1,7 +1,7 @@
 define([
     'knockout-plus',
     'kb_common/html',
-    '../../common',
+    '../common',
     'bootstrap',
     'css!font_awesome'
 ], function (
@@ -30,7 +30,7 @@ define([
 
         function doOpenDataview(data) {
             var url = '#dataview/' + data.item.meta.ids.dataviewId;
-            window.open(url);
+            window.open(url, '_blank');
         }
 
         function doKeep(data) {
@@ -53,8 +53,7 @@ define([
             doOpenNarrative: doOpenNarrative,
             doOpenDataview: doOpenDataview,
             doKeep: doKeep,
-            isInCart: isInCart,
-            runtime: params.runtime
+            isInCart: isInCart
         };
     }
 
@@ -85,12 +84,17 @@ define([
                             style: {
                                 backgroundColor: 'transparent',
                                 backgroundImage: 'none',
+                                // border: 'none',
+                                // outline: 'none',
                                 '-webkit-appearance': 'none',
                                 disabled: true,
                                 readonly: true
                             },
                             dataBind: {
                                 foreach: 'item.genome.taxonomy'
+                                    // options: 'item.genome.taxonomy',
+                                    // optionsText: '$data',
+                                    // optionsValue: '$data'
                             }
                         }, option({
                             disabled: true,
@@ -102,6 +106,26 @@ define([
                                 }
                             }
                         })),
+                        // div({
+                        //     class: '-taxonomy',
+                        //     dataBind: {
+                        //         foreach: 'item.genome.taxonomy'
+                        //     }
+                        // }, span([
+                        //     span({
+                        //         dataBind: {
+                        //             text: '$data'
+                        //         }
+                        //     }),
+                        //     '<!-- ko if: $index() < $parent.item.genome.taxonomy.length - 1 -->',
+                        //     span({
+                        //         class: 'fa fa-angle-right',
+                        //         style: {
+                        //             margin: '0 4px'
+                        //         }
+                        //     }),
+                        //     '<!-- /ko -->'
+                        // ])),
                         '<!-- /ko -->'
                     ]
                 )
@@ -110,8 +134,7 @@ define([
                 th('Features '),
                 td(div({
                     dataBind: {
-                        numberText: 'item.genome.featureCount',
-                        numberFormat: '"0,0"'
+                        html: 'item.genome.featureCount.formatted'
                     },
                     class: '-feature-count'
                 }))
@@ -121,37 +144,84 @@ define([
 
     function template() {
         return div({
-            class: '-detail'
+            class: 'component-reske-genome-browse -row'
         }, [
             div([
                 div({
                     style: {
                         display: 'inline-block',
                         verticalAlign: 'top',
-                        width: '50%',
-                        padding: '4px',
-                        boxSizing: 'border-box'
-                    }
-                }, div({
+                        width: '5%',
+                    },
+                    class: '-field -resultNumber'
+                }, span({
                     dataBind: {
-                        component: {
-                            name: '"reske/search/data/type/genome/view/nutshell"',
-                            params: {
-                                runtime: 'runtime',
-                                item: 'item'
-                            }
-                        }
+                        text: 'item.meta.resultNumber'
                     }
                 })),
                 div({
                     style: {
                         display: 'inline-block',
                         verticalAlign: 'top',
-                        width: '50%',
-                        padding: '4px',
-                        boxSizing: 'border-box'
+                        width: '70%'
                     }
-                }, common.buildMetaInfo())
+                }, [
+                    div([
+                        div({
+                            class: '-title'
+                        }, [
+                            common.buildTypeIcon(),
+                            a({
+                                dataBind: {
+                                    attr: {
+                                        href: '"#dataview/" + item.meta.ids.dataviewId'
+                                    },
+                                    text: 'item.genome.title'
+                                },
+                                target: '_blank',
+                                style: {
+                                    verticalAlign: 'middle',
+                                    marginLeft: '4px'
+                                }
+                            })
+                        ]),
+                    ]),
+                    div([
+                        div({
+                            style: {
+                                display: 'inline-block',
+                                verticalAlign: 'top',
+                                width: '50%',
+                                padding: '4px',
+                                boxSizing: 'border-box'
+                            }
+                        }, buildTypeView()),
+                        div({
+                            style: {
+                                display: 'inline-block',
+                                verticalAlign: 'top',
+                                width: '50%',
+                                padding: '4px',
+                                boxSizing: 'border-box'
+                            }
+                        }, common.buildMetaInfo())
+                    ])
+                ]),
+
+
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '25%',
+                        textAlign: 'right'
+                    }
+                }, div({
+                    xclass: '-features'
+                }, [
+                    common.buildSharingInfo(),
+                    common.buildActions()
+                ]))
             ])
         ]);
     }

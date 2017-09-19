@@ -177,8 +177,6 @@ define([
             }
         });
 
-        console.log('normalizeing', object);
-
         object['narrative'] = {
             title: object.data.metadata.name,
             description: 'narrative description here...',

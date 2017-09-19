@@ -36,7 +36,7 @@ define([
 
     function template() {
         return div({
-            class: 'component-reske-assembly-header -header -row'
+            class: 'component-reske-narrative-header -header -row'
         }, [
             // div({
             //     style: {
@@ -74,7 +74,7 @@ define([
                 div({
                     dataBind: {
                         component: {
-                            name: '"reske/search/data/type/assembly/view/header"',
+                            name: '"reske/search/data/type/narrative/view/header"',
                             params: {
 
                             }

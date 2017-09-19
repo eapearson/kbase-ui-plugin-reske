@@ -74,7 +74,7 @@ define([
                 }, div({
                     dataBind: {
                         component: {
-                            name: '"reske/search/data/type/assembly/view/nutshell"',
+                            name: '"reske/search/data/type/narrative/view/nutshell"',
                             params: {
                                 runtime: 'runtime',
                                 item: 'item'
