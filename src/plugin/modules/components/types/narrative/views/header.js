@@ -35,17 +35,17 @@ define([
             }, 'Name'),
 
             div({
-                class: '-field -dna-size',
+                class: '-field -app-cell-count',
                 style: {
                     width: '10%'
                 }
-            }, 'DNA Size'),
+            }, 'App Cells'),
             div({
-                class: '-field -contig-count',
+                class: '-field -data-object-count',
                 style: {
                     width: '10%'
                 }
-            }, buildSortLabel('contig_size', 'Contigs')),
+            }, 'Data Objects'),
             div({
                 class: '-field -created',
                 style: {

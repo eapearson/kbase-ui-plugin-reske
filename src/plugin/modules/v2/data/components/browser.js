@@ -184,7 +184,6 @@ define([
         return reske.callFunc('search_objects', [param])
             .then(function (result) {
                 perf.results.start = new Date().getTime();
-                console.log('got', result);
 
                 // We have the results, now we munge it around to make it more readily displayable.
                 var hits = result[0];

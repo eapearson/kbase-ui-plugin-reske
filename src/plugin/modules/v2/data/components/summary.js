@@ -120,7 +120,6 @@ define([
                 var searchResult = result[0];
                 var hits = Types.types
                     .filter(function (type) {
-                        console.log(type.id);
                         return (typesToShow.indexOf(type.id) >= 0);
                     })
                     .map(function (type) {

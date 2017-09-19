@@ -58,42 +58,71 @@ define([
             return client.callFunc(functionName, params);
         }
 
-        function fetchNarratives() {
-            var param = {
-                object_type: 'narrative',
-                // TODO: this should accept a filter eventually.
-                match_filter: {
-                    full_text_in_all: null
-                },
-                pagination: {
-                    start: 0,
-                    count: 1000 // can ask for unlimited?
-                },
-                post_processing: {
-                    ids_only: 0,
-                    skip_info: 0,
-                    skip_keys: 0,
-                    skip_data: 0
-                },
-                // TODO: also need with permissions...
-                // Unless we should use the narrative service for this...
-                access_filter: {
-                    with_private: 1,
-                    with_public: 0
-                }
-                // sorting_rules: sortingRules()
-            };
-
-            var client = new GenericClient({
-                url: runtime.config('services.reske.url'),
-                module: 'KBaseRelationEngine',
+        function getWritableNarratives(params) {
+            var workspaceClient = new GenericClient({
+                url: runtime.config('services.workspace.url'),
+                module: 'Workspace',
                 token: runtime.service('session').getAuthToken()
             });
-            return client.callFunc('search_objects', [param])
-                .spread(function (hits) {
-                    return hits;
+            return workspaceClient.callFunc('list_workspace_info', [{
+                    perm: 'w'
+                }])
+                .spread(function (data) {
+                    var objects = data.map(function (workspaceInfo) {
+                        return serviceUtil.workspaceInfoToObject(workspaceInfo);
+                    });
+                    return objects.filter(function (obj) {
+                        if (obj.metadata.narrative && (!isNaN(parseInt(obj.metadata.narrative, 10))) &&
+                            obj.metadata.narrative_nice_name &&
+                            obj.metadata.is_temporary && obj.metadata.is_temporary !== 'true') {
+                            return true;
+                        }
+                        return false;
+                    }).map(function (workspaceInfo) {
+                        return {
+                            ref: workspaceInfo.id + '/' + workspaceInfo.metadata.narrative,
+                            title: workspaceInfo.metadata.narrative_nice_name
+                        };
+                    });
                 });
         }
+
+        // function fetchNarratives() {
+        //     var param = {
+        //         object_type: 'narrative',
+        //         // TODO: this should accept a filter eventually.
+        //         match_filter: {
+        //             full_text_in_all: null
+        //         },
+        //         pagination: {
+        //             start: 0,
+        //             count: 1000 // can ask for unlimited?
+        //         },
+        //         post_processing: {
+        //             ids_only: 0,
+        //             skip_info: 0,
+        //             skip_keys: 0,
+        //             skip_data: 0
+        //         },
+        //         // TODO: also need with permissions...
+        //         // Unless we should use the narrative service for this...
+        //         access_filter: {
+        //             with_private: 1,
+        //             with_public: 0
+        //         }
+        //         // sorting_rules: sortingRules()
+        //     };
+
+        //     var client = new GenericClient({
+        //         url: runtime.config('services.reske.url'),
+        //         module: 'KBaseRelationEngine',
+        //         token: runtime.service('session').getAuthToken()
+        //     });
+        //     return client.callFunc('search_objects', [param])
+        //         .spread(function (hits) {
+        //             return hits;
+        //         });
+        // }
         // THE MODEL
 
         function doRemove(data) {
@@ -103,19 +132,31 @@ define([
         var writableNarratives = ko.observableArray();
         var selectedNarrative = ko.observable();
 
-        fetchNarratives()
-            .then(function (result) {
-                var narratives = result.objects;
-                narratives.forEach(function (narrative) {
-                    var m = /^WS:(.*)\/(.*)\/(.*)$/.exec(narrative.guid);
-                    var ref = m.slice(1).join('/');
-                    var title = narrative.key_props.title;
-                    writableNarratives.push({
-                        value: ref,
-                        label: title
-                    });
+        function updateWritableNarratives() {
+
+            return getWritableNarratives()
+                .then(function (narratives) {
+                    // var narratives = result.objects;
+                    writableNarratives(narratives.map(function (narrative) {
+                        // // var m = /^WS:(.*)\/(.*)\/(.*)$/.exec(narrative.guid);
+                        // // var ref = m.slice(1).join('/');
+                        // // var title = narrative.key_props.title;
+                        // // writableNarratives.push({
+                        // //     value: ref,
+                        // //     label: title
+                        // // });
+                        // var selected = false;
+                        // if (selectedNarrative === narrative.ref) {
+                        //     selected = true;
+                        // }
+                        return {
+                            value: narrative.ref,
+                            label: narrative.title
+                        };
+                    }));
                 });
-            });
+        }
+        updateWritableNarratives();
 
         function NewNarrative() {
             var newName = ko.observable();
@@ -149,58 +190,35 @@ define([
                 isValid(true);
             }
 
-            // function doCreateNewNarrative() {
-            //     var name = newName();
-            //     serviceCall('NarrativeService', 'create_new_narrative', [{
-            //             markdown: '# Data Copy Example\n\nThis narrative created by the RESKE search data cart!'
-            //         }])
-            //         .spread(function (result) {
-            //             // return serviceCall('Workspace', 'rename_workspace', [{
-            //             //     wsi: {
-            //             //         id: info.workspaceInfo.id
-            //             //     },
-            //             //     new_name: name
-            //             // }])
-            //             return serviceCall('Workspace', 'alter_workspace_metadata', [{
-            //                     wsi: {
-            //                         id: result.workspaceInfo.id
-            //                     },
-            //                     new: {
-            //                         narrative_nice_name: name
-            //                     }
-            //                 }])
-            //                 .then(function () {
-            //                     return serviceCall('Workspace', 'get_objects2', [{
-            //                         objects: [{
-            //                             ref: result.objectInfo.ref
-            //                         }]
-            //                     }]);
-            //                 })
-            //                 .spread(function (objects) {
-            //                     var narrative = objects[0].data;
-
-            //                 }
-            //         })
-            //         .then(function () {
-            //             runtime.send('notification', 'notify', {
-            //                 type: 'success',
-            //                 icon: 'thumbs-up',
-            //                 message: 'Successfuly created a new narrative and named it ' + name,
-            //                 autodismiss: 2000
-            //             });
-            //             return fetchNarratives();
-            //         })
-            //         .catch(function (err) {
-            //             runtime.send('notification', 'notify', {
-            //                 type: 'error',
-            //                 icon: 'frown-o',
-            //                 message: 'Error creating new narrative ' + err.message
-            //             });
-            //         });
-            // }
             function doCreateNewNarrative() {
-                alert('We need support from NarrativeService to enable this feature.');
+                var name = newName();
+                serviceCall('NarrativeService', 'create_new_narrative', [{
+                        markdown: '# Data Copy Example\n\nThis narrative created by the RESKE search data cart!',
+                        title: name
+                    }])
+                    .spread(function (result) {
+                        runtime.send('notification', 'notify', {
+                            type: 'success',
+                            icon: 'thumbs-up',
+                            message: 'Successfuly created a new narrative and named it ' + name,
+                            autodismiss: 2000
+                        });
+                        return updateWritableNarratives()
+                            .then(function () {
+                                selectedNarrative([result.workspaceInfo.id, result.narrativeInfo.id].join('/'));
+                            });
+                    })
+                    .catch(function (err) {
+                        runtime.send('notification', 'notify', {
+                            type: 'error',
+                            icon: 'frown-o',
+                            message: 'Error creating new narrative ' + err.message
+                        });
+                    });
             }
+            // function doCreateNewNarrative() {
+            //     alert('We need support from NarrativeService to enable this feature.');
+            // }
             return {
                 newName: newName,
                 isValid: isValid,
@@ -210,27 +228,27 @@ define([
         }
 
         // SUBSCRIPTIONS
-        selectedNarrative.subscribe(function () {
-            serviceCall('Workspace', 'get_object_info3', [{
-                    objects: [{
-                        ref: selectedNarrative()
-                    }],
-                    includeMetadata: 1
-                }])
-                .spread(function (result) {
-                    var info = serviceUtil.objectInfoToObject(result.infos[0]);
-                    console.log('object info', info);
-                    return serviceCall('Workspace', 'get_workspace_info', [{
-                        id: info.wsid
-                    }]);
-                })
-                .spread(function (workspaceInfo) {
-                    console.log('workspaceInfo', workspaceInfo);
-                })
-                .catch(function (err) {
-                    console.error('OOPS', err);
-                });
-        });
+        // selectedNarrative.subscribe(function () {
+        //     serviceCall('Workspace', 'get_object_info3', [{
+        //             objects: [{
+        //                 ref: selectedNarrative()
+        //             }],
+        //             includeMetadata: 1
+        //         }])
+        //         .spread(function (result) {
+        //             var info = serviceUtil.objectInfoToObject(result.infos[0]);
+        //             console.log('object info', info);
+        //             return serviceCall('Workspace', 'get_workspace_info', [{
+        //                 id: info.wsid
+        //             }]);
+        //         })
+        //         .spread(function (workspaceInfo) {
+        //             console.log('workspaceInfo', workspaceInfo);
+        //         })
+        //         .catch(function (err) {
+        //             console.error('OOPS', err);
+        //         });
+        // });
 
         function Copy() {
             var message = ko.observable();
@@ -241,7 +259,11 @@ define([
                 message('Copying...');
                 Promise.all(params.cart.items().map(function (item) {
                         var ref = item.meta.ids.ref;
-                        var m = /^(\d+?)\/(\d+?)\/(\d+?)$/.exec(selectedNarrative());
+                        // var m = /^(\d+?)\/(\d+?)\/(\d+?)$/.exec(selectedNarrative());
+                        // NB this is derived just from the workspace, so we don't have
+                        // the version, plus we don't really need it, plus we really
+                        // DO mean -- the most recent version of the narrative.
+                        var m = /^(\d+?)\/(\d+?)$/.exec(selectedNarrative());
                         var workspaceId = parseInt(m[1]);
                         return serviceCall('NarrativeService', 'copy_object', [{
                                 ref: ref,
@@ -314,11 +336,13 @@ define([
                         }
                     }),
                     td(button({
-                        class: 'btn btn-danger',
+                        class: 'btn btn-danger btn-sm',
                         dataBind: {
                             click: '$component.doRemove'
                         }
-                    }, 'X'))
+                    }, span({
+                        class: 'fa fa-trash-o'
+                    })))
                 ]),
                 '<!-- /ko -->'
             ])

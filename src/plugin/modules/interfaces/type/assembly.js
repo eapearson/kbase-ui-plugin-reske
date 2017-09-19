@@ -11,19 +11,22 @@ define([
         object['assembly'] = {
             title: object.data.scientific_name || object.object_name,
             description: 'description here...',
-            contigCount: {
-                value: object.data.contigs,
-                formatted: common.padRight(numeral(object.data.contigs).format('0,0'), 2)
-            },
-            dnaSize: {
-                value: object.data.dna_size,
-                formatted: common.padRight(numeral(object.data.dna_size).format('0,0'), 2)
-            },
+            contigCount: object.data.contigs,
+            dnaSize: object.data.dna_size,
+            gcContent: object.data.gc_content,
+            // contigCount: {
+            //     value: object.data.contigs,
+            //     formatted: common.padRight(numeral(object.data.contigs).format('0,0'), 2)
+            // },
+            // dnaSize: {
+            //     value: object.data.dna_size,
+            //     formatted: common.padRight(numeral(object.data.dna_size).format('0,0'), 2)
+            // },
             externalSourceId: object.data.external_source_id,
-            gcContent: {
-                value: object.data.gc_content,
-                formatted: numeral(100 * object.data.gc_content).format('0.0')
-            },
+            // gcContent: {
+            //     value: object.data.gc_content,
+            //     formatted: numeral(100 * object.data.gc_content).format('0.0')
+            // },
             name: object.data.name
         };
     }

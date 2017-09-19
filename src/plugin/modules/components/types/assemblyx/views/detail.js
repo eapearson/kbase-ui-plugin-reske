@@ -30,7 +30,7 @@ define([
 
         function doOpenDataview(data) {
             var url = '#dataview/' + data.item.meta.ids.dataviewId;
-            window.open(url);
+            window.open(url, '_blank');
         }
 
         function doKeep(data) {
@@ -58,6 +58,67 @@ define([
         };
     }
 
+    function buildTypeView() {
+        return table({
+            class: '-table '
+        }, [
+            tr([
+                th('Scientific name'),
+                td({
+                    dataBind: {
+                        text: 'item.genome.scientificName'
+                    },
+                    class: '-scientific-name'
+                })
+            ]),
+            tr([
+                th('Taxonomy'),
+                td(
+                    [
+                        '<!-- ko if: item.genome.taxonomy.length === 0 -->',
+                        '-',
+                        '<!-- /ko -->',
+                        '<!-- ko if: item.genome.taxonomy.length > 0 -->',
+
+                        select({
+                            class: 'form-control',
+                            style: {
+                                backgroundColor: 'transparent',
+                                backgroundImage: 'none',
+                                '-webkit-appearance': 'none',
+                                disabled: true,
+                                readonly: true
+                            },
+                            dataBind: {
+                                foreach: 'item.genome.taxonomy'
+                            }
+                        }, option({
+                            disabled: true,
+                            dataBind: {
+                                value: '$data',
+                                text: '$data',
+                                attr: {
+                                    selected: '$index() === 0 ? "selected" : false'
+                                }
+                            }
+                        })),
+                        '<!-- /ko -->'
+                    ]
+                )
+            ]),
+            tr([
+                th('Features '),
+                td(div({
+                    dataBind: {
+                        numberText: 'item.genome.featureCount',
+                        numberFormat: '"0,0"'
+                    },
+                    class: '-feature-count'
+                }))
+            ])
+        ]);
+    }
+
     function template() {
         return div({
             class: '-detail'
@@ -74,7 +135,7 @@ define([
                 }, div({
                     dataBind: {
                         component: {
-                            name: '"reske/search/data/type/assembly/view/nutshell"',
+                            name: '"reske/search/data/type/genome/view/nutshell"',
                             params: {
                                 runtime: 'runtime',
                                 item: 'item'

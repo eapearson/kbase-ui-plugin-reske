@@ -35,10 +35,31 @@ install:
             id: kb_reskeSearch_dataSearch
             type: factory    
     ko-components:
+         # NARRATIVE
         -
             name: reske/narrative/browse
             module: components/types/narrative/browse
-            css: true   
+            css: true
+        -
+            name: reske/narrative/header
+            module: components/types/narrative/header
+            css: true
+        -
+            name: reske/search/data/type/narrative/view/detail
+            module: components/types/narrative/views/detail
+            css: true
+        -
+            name: reske/search/data/type/narrative/view/header
+            module: components/types/narrative/views/header
+            css: true            
+        -
+            name: reske/search/data/type/narrative/view/list
+            module: components/types/narrative/views/list
+            css: true    
+        -
+            name: reske/search/data/type/narrative/view/nutshell
+            module: components/types/narrative/views/nutshell
+            css: true    
         # GENOME
         -
             name: reske/genome/browse
@@ -56,23 +77,54 @@ install:
             name: reske/search/data/type/genome/view/header
             module: components/types/genome/views/header
             css: true            
+        # -
+        #     name: reske/search/data/type/genome/view/summary
+        #     module: components/types/genome/views/summary
+        #     css: true    
         -
-            name: reske/search/data/type/genome/view/summary
-            module: components/types/genome/views/summary
+            name: reske/search/data/type/genome/view/list
+            module: components/types/genome/views/list
             css: true    
         -
             name: reske/search/data/type/genome/view/nutshell
             module: components/types/genome/views/nutshell
             css: true    
+
+        # ASSEMBLY
+        -
+            name: reske/assembly/browse
+            module: components/types/assembly/browse
+            css: true
+        -
+            name: reske/assembly/header
+            module: components/types/assembly/header
+            css: true
+        -
+            name: reske/search/data/type/assembly/view/detail
+            module: components/types/assembly/views/detail
+            css: true
+        -
+            name: reske/search/data/type/assembly/view/header
+            module: components/types/assembly/views/header
+            css: true            
+        # -
+        #     name: reske/search/data/type/assembly/view/summary
+        #     module: components/types/assembly/views/summary
+        #     css: true    
+        -
+            name: reske/search/data/type/assembly/view/list
+            module: components/types/assembly/views/list
+            css: true    
+        -
+            name: reske/search/data/type/assembly/view/nutshell
+            module: components/types/assembly/views/nutshell
+            css: true  
+
         # GENOME FEATURES
         -
             name: reske/genomeFeature/browse
             module: components/types/genomeFeature/browse
             css: true
-        -
-            name: reske/assembly/browse
-            module: components/types/assembly/browse
-            css: true    
         -
             name: reske/assemblyContig/browse
             module: components/types/assemblyContig/browse
@@ -153,18 +205,18 @@ install:
             name: reske-object-search
             module: components/object-search
             css: false
-        -
-            name: narrative-small-row
-            module: components/types/narrative/rows/small
-            css: false
-        -
-            name: narrative-medium-row
-            module: components/types/narrative/rows/medium
-            css: false
-        -
-            name: narrative-large-row
-            module: components/types/narrative/rows/large
-            css: false
+        # -
+        #     name: narrative-small-row
+        #     module: components/types/narrative/rows/small
+        #     css: false
+        # -
+        #     name: narrative-medium-row
+        #     module: components/types/narrative/rows/medium
+        #     css: false
+        # -
+        #     name: narrative-large-row
+        #     module: components/types/narrative/rows/large
+        #     css: false
         -
             name: default-small-row
             module: components/types/default/rows/small

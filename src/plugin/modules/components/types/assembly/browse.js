@@ -1,26 +1,19 @@
 define([
     'knockout-plus',
-    'highlight',
     'kb_common/html',
     '../common',
-
-    'css!./browse.css'
+    'bootstrap',
+    'css!font_awesome'
 ], function (
     ko,
-    highlight,
     html,
     common
 ) {
     'use strict';
 
     var t = html.tag,
-        a = t('a'),
         span = t('span'),
-        div = t('div'),
-        table = t('table'),
-        tr = t('tr'),
-        th = t('th'),
-        td = t('td');
+        div = t('div');
 
     function viewModel(params) {
         function doOpenNarrative(data) {
@@ -30,7 +23,7 @@ define([
 
         function doOpenDataview(data) {
             var url = '#dataview/' + data.item.meta.ids.dataviewId;
-            window.open(url, '_blank');
+            window.open(url);
         }
 
         function doKeep(data) {
@@ -48,74 +41,64 @@ define([
             });
         });
 
+        function doToggleDetail() {
+            params.item.showDetail(!params.item.showDetail());
+        }
+
         return {
+            runtime: params.runtime,
             item: params.item,
             doOpenNarrative: doOpenNarrative,
             doOpenDataview: doOpenDataview,
             doKeep: doKeep,
+            doToggleDetail: doToggleDetail,
             isInCart: isInCart
         };
     }
 
-
-    function buildTypeView() {
-        return table({
-            class: '-table '
-        }, [
-            tr([
-                th('Source'),
-                td({
-                    dataBind: {
-                        html: 'item.assembly.externalSourceId'
-                    },
-                    class: '-source'
-                })
-            ]),
-            tr([
-                th('GC content (%)'),
-                td(div({
-                    dataBind: {
-                        html: 'item.assembly.gcContent.formatted'
-                    },
-                    class: '-gc-content -number'
-                }))
-            ]),
-            tr([
-                th('DNA size (bp)'),
-                td(div({
-                    dataBind: {
-                        html: 'item.assembly.dnaSize.formatted'
-                    },
-                    class: '-dna-size -number'
-                }))
-            ]),
-            tr([
-                th('# contigs'),
-                td(div({
-                    dataBind: {
-                        html: 'item.assembly.contigCount.formatted'
-                    },
-                    class: '-contig-count -number'
-                }))
-            ])
-        ]);
-    }
-
     function template() {
         return div({
-            class: 'component-reske-genome-browse -row'
+            class: 'component-reske-assembly-browse -row'
         }, [
-            div([
+            // first the summary row.
+
+            div({
+                // dataBind: {
+                //     click: 'doToggleDetail',
+                //     clickBubble: false
+                // }
+            }, [
+                // div({
+                //     style: {
+                //         display: 'inline-block',
+                //         verticalAlign: 'top',
+                //         width: '5%',
+                //     },
+                //     class: '-field -resultNumber'
+                // }, span({
+                //     dataBind: {
+                //         text: 'item.meta.resultNumber'
+                //     }
+                // })),
                 div({
                     style: {
                         display: 'inline-block',
                         verticalAlign: 'top',
                         width: '5%',
                     },
-                    class: '-field -resultNumber'
+                    class: '-field -viewToggle'
                 }, span({
                     dataBind: {
-                        text: 'item.meta.resultNumber'
+                        css: {
+                            'fa-chevron-right': '!item.showDetail()',
+                            'fa-chevron-down': 'item.showDetail()'
+                        },
+                        click: 'doToggleDetail',
+                        clickBubble: false
+                    },
+                    class: '-detail-toggle fa',
+                    style: {
+                        cursor: 'pointer'
                     }
                 })),
                 div({
@@ -125,63 +108,74 @@ define([
                         width: '70%'
                     }
                 }, [
-                    div([
-                        div({
-                            class: '-title'
-                        }, [
-                            common.buildTypeIcon(),
-                            a({
-                                dataBind: {
-                                    attr: {
-                                        href: '"#dataview/" + item.meta.ids.dataviewId'
-                                    },
-                                    text: 'item.assembly.title'
-                                },
-                                target: '_blank',
-                                style: {
-                                    verticalAlign: 'middle',
-                                    marginLeft: '4px'
+                    div({
+                        dataBind: {
+                            component: {
+                                name: '"reske/search/data/type/assembly/view/list"',
+                                params: {
+                                    item: 'item'
                                 }
-                            })
-                        ]),
-                    ]),
-                    div([
-                        div({
-                            style: {
-                                display: 'inline-block',
-                                verticalAlign: 'top',
-                                width: '50%',
-                                padding: '4px',
-                                boxSizing: 'border-box'
                             }
-                        }, buildTypeView()),
-                        div({
-                            style: {
-                                display: 'inline-block',
-                                verticalAlign: 'top',
-                                width: '50%',
-                                padding: '4px',
-                                boxSizing: 'border-box'
-                            }
-                        }, common.buildMetaInfo())
-                    ])
+                        }
+                    })
                 ]),
-
-
                 div({
                     style: {
                         display: 'inline-block',
                         verticalAlign: 'top',
-                        width: '25%',
+                        width: '10%',
                         textAlign: 'right'
                     }
                 }, div({
                     xclass: '-features'
                 }, [
-                    common.buildSharingInfo(),
+                    common.buildSharingInfo()
+                ])),
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '15%',
+                        textAlign: 'right'
+                    }
+                }, div({
+                    xclass: '-features'
+                }, [
                     common.buildActions()
                 ]))
-            ])
+            ]),
+            // then detail
+            '<!-- ko if: item.showDetail -->',
+            div([
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '5%',
+                    },
+                    class: '-field -resultNumber'
+                }),
+                div({
+                    style: {
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        width: '95%'
+                    }
+                }, [
+                    div({
+                        dataBind: {
+                            component: {
+                                name: '"reske/search/data/type/assembly/view/detail"',
+                                params: {
+                                    item: 'item',
+                                    runtime: 'runtime'
+                                }
+                            }
+                        }
+                    })
+                ])
+            ]),
+            '<!-- /ko -->'
         ]);
     }
 
@@ -191,5 +185,6 @@ define([
             template: template()
         };
     }
+
     return component;
 });
