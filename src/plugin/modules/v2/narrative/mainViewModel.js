@@ -13,16 +13,36 @@
 define([
     'knockout-plus',
     'uuid',
+    'moment',
     'kb_common/jsonRpc/genericClient',
     'kb_common/props',
+    'kb_common/html',
     '../../types'
 ], function (
     ko,
     Uuid,
+    moment,
     GenericClient,
     Props,
+    html,
     Types
 ) {
+    'use strict';
+
+    var t = html.tag,
+        span = t('span');
+
+    function niceRelativeTimestamp(timestamp) {
+        var date = new Date(timestamp);
+
+        // var now = moment(new Date());
+
+        // var today = moment(new Date()).startOf('day');
+
+        return moment(date).calendar();
+
+    }
+
     function objectToNarrative(object) {
 
         var appCells;
@@ -52,16 +72,78 @@ define([
         var narrativeId = ['ws', workspaceId, 'obj', objectId].join('.');
         var objectRef = [workspaceId, objectId, version].join('/');
 
+        var owner;
+
+        if (object.meta.isOwner) {
+            owner = span([
+                span({
+                    class: 'fa fa-key'
+                }),
+                ' ',
+                span({
+                    style: {
+                        fontStyle: 'italic'
+                    }
+                }, 'you')
+            ]);
+        } else {
+            owner = span([
+                span({
+                    class: 'fa fa-share-alt'
+                }),
+                ' ',
+                span({
+
+                }, object.meta.owner)
+            ]);
+        }
+
+        var permission;
+        var permissions = [];
+        if (object.meta.canShare) {
+            permissions.push(span([
+                span({
+                    class: 'fa fa-share'
+                })
+            ]));
+        } else if (object.meta.canWrite) {
+            permissions.push(span([
+                span({
+                    class: 'fa fa-pencil'
+                })
+            ]));
+        } else if (object.meta.canRead) {
+            permissions.push(span([
+                span({
+                    class: 'fa fa-eye'
+                })
+            ]));
+        } else {
+            permissions.push(span([
+                span({
+                    class: 'fa fa-ban'
+                })
+            ]));
+        }
+        permission = permissions.join(' ');
+
         return {
             narrativeId: narrativeId,
             objectRef: objectRef,
             title: object.key_props.title,
-            timestamp: new Date(object.timestamp).toLocaleString(),
+            updated: niceRelativeTimestamp(object.timestamp),
+            updatedBy: object.meta.updated.by,
             cellCount: object.data.cells ? object.data.cells.length : 0,
+            objectCount: object.workspaceInfo.object_count - 1,
             appCellCount: appCells.length,
-            owner: 'not indexable',
-            creator: object.key_props.creator || 'not indexed',
-            appCells: appCells
+            // owner: object.meta.owner,
+            creator: object.object_props.creator || '-',
+            appCells: appCells,
+            owner: owner,
+            permission: permission,
+            public: object.meta.isPublic ? span({ class: 'fa fa-check' }) : '',
+            created: niceRelativeTimestamp(object.meta.created.at),
+            createdBy: object.meta.created.by
         };
     }
 
@@ -120,6 +202,8 @@ define([
         // INCOMING PARAMS
         var runtime = params.runtime;
 
+        var query = params.query;
+
         // SEARCH INPUT (CONTROLS)
 
         // Search terms
@@ -149,6 +233,7 @@ define([
 
         // Message emitted during the search process, for display in the ui
         var message = ko.observable();
+        var error = ko.observable();
 
         // Status of the search process...
         var status = ko.observable('setup');
@@ -165,12 +250,12 @@ define([
             doSearch('freetextinput');
         });
         pageSize.subscribe(function () {
-            if (status() === 'haveresults') {
+            if (status() === 'haveresults' || status() === 'error') {
                 doSearch('pagesize');
             }
         });
         pageStart.subscribe(function () {
-            if (status() === 'haveresults') {
+            if (status() === 'haveresults' || status() === 'error') {
                 doSearch('pagestart');
             }
         });
@@ -211,7 +296,7 @@ define([
                     for e we empty the results array and proceed
 
                     for f we set the page start to 0, empty the results array, and proceed
-        
+            
                     */
         var filter = {
             object_type: null,
@@ -224,6 +309,7 @@ define([
         var currentSearch = null;
 
         var isSearching = ko.observable(false);
+        var isError = ko.observable(false);
 
         var sortKey = ko.observable();
 
@@ -257,6 +343,160 @@ define([
         });
         //}
 
+
+
+        function slatherOnTheWorkspace(objects) {
+
+            function dateString(date) {
+                return [date.getMonth() + 1, date.getDate(), date.getFullYear()].join('/');
+                // return date.toLocaleString();
+            }
+
+            function canRead(workspaceInfo) {
+                return (workspaceInfo.user_permission !== 'n' || workspaceInfo.globalread === 'r');
+            }
+
+            function canWrite(perm) {
+                switch (perm) {
+                case 'w':
+                case 'a':
+                    return true;
+                }
+                return false;
+            }
+
+            function canShare(perm) {
+                return (perm === 'a');
+            }
+
+            // function getTypeIcon(object, options) {
+            //     var typeId = object.currentObjectInfo.type;
+            //     var type = options.runtime.service('type').parseTypeId(typeId);
+            //     return options.runtime.service('type').getIcon({ type: type });
+            // }
+
+            var originalObjectSpecs = objects.map(function (object) {
+                object.meta = {
+                    ids: guidToReference(object.guid)
+                };
+                var spec = {
+                    wsid: object.meta.ids.workspaceId,
+                    objid: object.meta.ids.objectId,
+                    ver: 1
+                };
+                var ref = [spec.wsid, spec.objid, spec.ver].join('/');
+                return {
+                    spec: spec,
+                    ref: ref
+                };
+            });
+
+            var currentObjectSpecs = objects.map(function (object) {
+                var spec = {
+                    wsid: object.meta.ids.workspaceId,
+                    objid: object.meta.ids.objectId,
+                    ver: object.meta.ids.objectVersion
+                };
+                var ref = [spec.wsid, spec.objid, spec.ver].join('/');
+                return {
+                    spec: spec,
+                    ref: ref
+                };
+            });
+
+            var allObjectSpecs = {};
+            originalObjectSpecs.forEach(function (spec) {
+                allObjectSpecs[spec.ref] = spec;
+            });
+            currentObjectSpecs.forEach(function (spec) {
+                allObjectSpecs[spec.ref] = spec;
+            });
+
+            var uniqueWorkspaces = Object.keys(objects.reduce(function (acc, object) {
+                var workspaceId = object.meta.ids.workspaceId;
+                acc[String(workspaceId)] = true;
+                return acc;
+            }, {})).map(function (id) {
+                return parseInt(id);
+            });
+
+            // TODO: combine original and current objec specs -- for some objects they will
+            // be the same. This is not just for efficiency, but because the object queries
+            // with otherwise trip over each other. After the objectquery, the results can 
+            // be distributed back to the original and current object groups.
+
+            // console.log('slatering...', objects);
+
+            return query.query({
+                    workspace: {
+                        query: {
+                            objectInfo: Object.keys(allObjectSpecs).map(function (key) { return allObjectSpecs[key]; }),
+                            workspaceInfo: uniqueWorkspaces
+                        }
+                    }
+                })
+                .then(function (result) {
+                    var allObjectsInfo = result.workspace.objectInfo;
+                    var workspacesInfo = result.workspace.workspaceInfo;
+                    for (var i = 0; i < objects.length; i += 1) {
+                        var object = objects[i];
+
+                        // back to a map!
+                        var allObjectsInfoMap = {};
+                        allObjectsInfo.forEach(function (objectInfo) {
+                            allObjectsInfoMap[objectInfo.ref] = objectInfo;
+                        });
+
+                        object.originalObjectInfo = allObjectsInfoMap[originalObjectSpecs[i].ref];
+                        object.currentObjectInfo = allObjectsInfoMap[currentObjectSpecs[i].ref];
+
+                        // NB workspaceQuery returns a map of String(workspaceId) -> workspaceInfo
+                        // This is not symmetric with the input, but it is only used here, and we 
+                        // do eventually need a map, and internally workspaceQuery accumulates the
+                        // results into a map, so ...
+                        object.workspaceInfo = workspacesInfo[String(object.meta.ids.workspaceId)];
+
+                        // also patch up the narrative object...
+                        object.meta.owner = object.workspaceInfo.owner;
+                        object.meta.updated = {
+                            by: object.currentObjectInfo.saved_by,
+                            at: object.currentObjectInfo.saveDate
+                        };
+                        object.meta.created = {
+                            by: object.originalObjectInfo.saved_by,
+                            at: object.originalObjectInfo.saveDate
+                        };
+                        object.meta.isPublic = (object.workspaceInfo.globalread === 'r');
+                        object.meta.isOwner = (object.meta.owner === runtime.service('session').getUsername());
+
+                        object.meta.narrativeTitle = object.workspaceInfo.metadata.narrative_nice_name;
+
+                        // set sharing info.
+                        if (!object.meta.isOwner && !object.meta.isPublic) {
+                            object.meta.isShared = true;
+                        }
+                        object.meta.canRead = canRead(object.workspaceInfo);
+                        object.meta.canWrite = canWrite(object.workspaceInfo.user_permission);
+                        object.meta.canShare = canShare(object.workspaceInfo.user_permission);
+
+
+                    }
+                    return objects;
+                });
+        }
+
+        function guidToReference(guid) {
+            var m = guid.match(/^WS:(\d+)\/(\d+)\/(\d+)$/);
+            var objectRef = m.slice(1, 4).join('/');
+            return {
+                workspaceId: m[1],
+                objectId: m[2],
+                objectVersion: m[3],
+                ref: objectRef,
+                dataviewId: objectRef
+            };
+        }
+
         function doSearch() {
             // Make sure we have all the right conditions for a search, and if 
             // not, reset the search results.
@@ -276,7 +516,6 @@ define([
                 search: null,
                 id: new Uuid(4).format()
             };
-            console.info('new search', currentSearch);
             var thisSearch = currentSearch;
 
             status('setup');
@@ -356,6 +595,7 @@ define([
             message('Searching...');
 
             isSearching(true);
+            isError(false);
             currentSearch.search = objectSearch(runtime, param)
                 .then(function (hits) {
                     if (thisSearch.cancelled) {
@@ -370,6 +610,17 @@ define([
                     }
                     message('Found ' + hits.total + ' items');
 
+                    var start = new Date().getTime();
+                    return slatherOnTheWorkspace(hits.objects)
+                        .then(function () {
+                            var elapsed = new Date().getTime() - start;
+                            console.log('slathering took', elapsed);
+                            return hits;
+                        });
+                })
+                .then(function (hits) {
+
+                    // first level massage...
                     hits.objects.forEach(function (object, index) {
                         var narrative = objectToNarrative(object);
                         narrative.rowNumber = hits.pagination.start + index + 1;
@@ -380,7 +631,10 @@ define([
                 })
                 .catch(function (err) {
                     console.error('error', err);
+                    status('error');
                     message(err.message);
+                    error(err.message);
+                    isError(true);
                 })
                 .finally(function () {
                     if (thisSearch && thisSearch.search.isCancelled()) {
@@ -423,11 +677,13 @@ define([
 
             // Basic ui info
             message: message,
+            error: error,
 
             // machine state
             status: status,
 
             isSearching: isSearching,
+            isError: isError,
 
             // Search results
             searchResults: searchResults,
