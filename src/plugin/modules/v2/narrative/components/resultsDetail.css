@@ -1,0 +1,14 @@
+    .component_reske_search_narrative_results-detail {}
+
+.component_reske_search_narrative_results-detail table {
+    margin-bottom: 8px;
+}
+
+.component_reske_search_narrative_results-detail table td,
+.component_reske_search_narrative_results-detail table th {
+    border-bottom: 1px silver solid;
+    padding: 4px;
+}
+
+.component_reske_search_narrative_results-detail table td,
+.component_reske_search_narrative_results-detail table th {

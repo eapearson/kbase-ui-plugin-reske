@@ -10,7 +10,11 @@ define([
     var t = html.tag,
         div = t('div'),
         a = t('a'),
-        span = t('span');
+        span = t('span'),
+        table = t('table'),
+        tr = t('tr'),
+        th = t('th'),
+        td = t('td');
 
     function viewModel(params) {
         function doOpenNarrative(data) {
@@ -30,21 +34,28 @@ define([
                 name: 'title',
                 label: 'Title',
                 type: 'string',
-                width: '50%',
+                width: '35%',
                 sort: {
                     direction: 'ascending'
                 },
                 action: doOpenNarrative
             },
             {
+                name: 'created',
+                label: 'Created',
+                type: 'string',
+                width: '20%'
+            },
+            {
                 name: 'timestamp',
-                label: 'Timestamp',
+                label: 'Last updated',
                 type: 'string',
                 width: '25%',
                 sort: {
                     direction: 'descending'
                 }
             },
+
             // {
             //     name: 'cellCount',
             //     type: 'integer',
@@ -54,7 +65,7 @@ define([
                 name: 'owner',
                 label: 'Owner',
                 type: 'string',
-                width: '25%'
+                width: '15%'
             }
         ];
 
@@ -73,7 +84,9 @@ define([
         }, div({
             style: {
                 border: '1px silver solid',
-                padding: '4px'
+                padding: '4px',
+                marginTop: '10px',
+                boxShadow: '4px 4px 4px gray'
             },
         }, [
 
@@ -87,14 +100,68 @@ define([
                     click: '$component.doOpenNarrative'
                 }
             })),
-            div({
+
+            div(table({
+                xclass: 'table',
                 style: {
-                    fontStyle: 'italic'
-                },
-                dataBind: {
-                    text: 'timestamp'
+                    width: '100%',
+                    maxWidth: '30em'
                 }
-            }),
+            }, [
+                tr([
+                    th({
+                        style: {
+                            width: '10em'
+                        }
+                    }, '# cells'),
+                    td({
+                        dataBind: {
+                            text: 'cellCount'
+                        }
+                    })
+                ]),
+                tr([
+                    th('# objects'),
+                    td({
+                        dataBind: {
+                            text: 'objectCount'
+                        }
+                    })
+                ]),
+                tr([
+                    th('Modified date'),
+                    td({
+                        dataBind: {
+                            text: 'updated'
+                        }
+                    })
+                ]),
+                tr([
+                    th('Modified by'),
+                    td({
+                        dataBind: {
+                            text: 'updatedBy'
+                        }
+                    })
+                ]),
+                tr([
+                    th('Created'),
+                    td({
+                        dataBind: {
+                            text: 'created'
+                        }
+                    })
+                ]),
+                tr([
+                    th('Created by'),
+                    td({
+                        dataBind: {
+                            text: 'createdBy'
+                        }
+                    })
+                ])
+            ])),
+
             div([
                 '<!-- ko if: appCells.length > 0 -->',
                 // 'app cells: ',
@@ -136,9 +203,14 @@ define([
 
     function template() {
         return div({
-            class: 'container-fluid'
+            class: 'container-fluid component_reske_search_narrative_results-detail'
         }, [
-            buildResultsTable()
+            '<!-- ko if: search.isSearching -->',
+            html.loading(),
+            '<!-- /ko -->',
+            '<!-- ko ifnot: search.isSearching -->',
+            buildResultsTable(),
+            '<!-- /ko -->'
         ]);
     }
 

@@ -149,6 +149,7 @@ install:
             name: reske/browser
             module: components/browser
             css: true
+        # NARRATIVE
         -
             name: reske/narrative/search/ui
             module: v2/narrative/components/ui
@@ -168,7 +169,8 @@ install:
         -
             name: reske/narrative/search/results/detail
             module: v2/narrative/components/resultsDetail
-            css: true                     
+            css: true 
+        # DATA
         -
             name: reske/data/search/ui
             module: v2/data/components/ui
