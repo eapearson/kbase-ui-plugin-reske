@@ -434,7 +434,7 @@ define([
                                     textInput: 'searchInput',
                                     hasFocus: true
                                 },
-                                placeholder: 'Search KBase Data with RESKE Search!',
+                                placeholder: 'Search KBase Data',
                                 class: 'form-control'
                             }),
                             div({
