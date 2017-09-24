@@ -30,12 +30,13 @@ define([
         var runtime = params.runtime;
 
         var kbaseGenomeId = ko.observable();
-        var dnaLength = ko.observable();
-        var contigCount = ko.observable();
-        var gcContent = ko.observable();
         // var featureCounts = ko.observable();
         var featureCount = ko.observable();
         var taxonomy = ko.observableArray();
+        var source = ko.observable();
+        var sourceId = ko.observable();
+        var accession = ko.observable();
+        var dnaSize = ko.observable();
 
         var fetching = ko.observable(false);
 
@@ -76,6 +77,10 @@ define([
             return Promise.try(function () {
                     featureCount(params.item.genome.featureCount);
                     taxonomy(params.item.genome.taxonomy);
+                    // source(params.item.genome.source);
+                    // sourceId(params.item.genome.sourceId);
+                    // accession(params.item.genome.accession);
+                    dnaSize(params.item.dnaSize);
                 })
                 .finally(function () {
                     fetching(false);
@@ -92,6 +97,11 @@ define([
             // featureCounts: featureCounts,
             taxonomy: taxonomy,
             featureCount: featureCount,
+            dnaSize: dnaSize,
+            // source: source,
+            // sourceId: sourceId,
+            // accession: accession,
+
             fetching: fetching
         };
     }
@@ -156,6 +166,42 @@ define([
                     }
                 })
             ]),
+            tr([
+                th('DNA Size'),
+                td({
+                    dataBind: {
+                        typedText: {
+                            value: 'dnaSize',
+                            type: '"number"',
+                            format: '"0,0"'
+                        }
+                    }
+                })
+            ]),
+            // tr([
+            //     th('Source'),
+            //     td({
+            //         dataBind: {
+            //             text: 'source'
+            //         }
+            //     })
+            // ]),
+            // tr([
+            //     th('Source ID'),
+            //     td({
+            //         dataBind: {
+            //             text: 'sourceId'
+            //         }
+            //     })
+            // ]),
+            // tr([
+            //     th('Accession'),
+            //     td({
+            //         dataBind: {
+            //             text: 'accession'
+            //         }
+            //     })
+            // ]),
             tr([
                 th('Taxonomy'),
                 td(

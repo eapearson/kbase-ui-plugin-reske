@@ -40,7 +40,11 @@ define([
             //     formatted: common.padRight(numeral(object.data.features).format('0,0'), 2)
             // },
             scientificName: object.data.scientific_name,
-            taxonomy: taxonomy
+            taxonomy: taxonomy,
+            dnaSize: object.currentObjectInfo.metadata.size,
+            source: object.currentObjectInfo.metadata.Source,
+            sourceId: object.currentObjectInfo.metadata['Source Id'],
+            accession: object.currentObjectInfo.metadata.accession
         };
     }
 
