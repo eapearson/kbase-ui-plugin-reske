@@ -207,11 +207,13 @@ define([
 
     function guidToReference(guid) {
         var m = guid.match(/^WS:(\d+)\/(\d+)\/(\d+)$/);
+        var objectRef = m.slice(1, 4).join('/');
         return {
             workspaceId: m[1],
             objectId: m[2],
             objectVersion: m[3],
             ref: m.slice(1, 4).join('/'),
+            dataviewId: objectRef
         };
     }
 
