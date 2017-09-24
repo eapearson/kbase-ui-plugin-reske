@@ -31,7 +31,7 @@ define([
 
         function doOpenDataview() {
             var url = '#dataview/' + item.meta.ids.dataviewId;
-            window.location.assign(url);
+            window.open(url, '_blank');
         }
 
         function getProp(obj, props, defaultValue) {

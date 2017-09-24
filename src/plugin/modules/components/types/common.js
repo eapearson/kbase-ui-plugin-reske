@@ -135,13 +135,24 @@ define([
                             margin: '0 4px'
                         }
                     }));
+                } else {
+                    return span({
+                        class: '-mini-button -disabled',
+                        dataToggle: 'tooltip',
+                        dataPlacement: 'left',
+                        title: 'Data view not available for this type'
+                    }, span({
+                        class: 'fa fa-binoculars',
+                        style: {
+                            margin: '0 4px',
+                            color: 'silver'
+                        }
+                    }));
                 }
             }()),
             (function () {
-                if (options.cart === false) {
-                    return;
-                }
-                return span({
+                if (options.cart !== false) {
+                    return span({
                         class: '-mini-button',
                         dataToggle: 'tooltip',
                         dataPlacement: 'left',
@@ -167,9 +178,21 @@ define([
                             }
                         }),
                         '<!-- /ko -->'
-                    ]
-
-                );
+                    ]);
+                } else {
+                    return span({
+                        class: '-mini-button -disabled',
+                        dataToggle: 'tooltip',
+                        dataPlacement: 'left',
+                        title: 'Data cart not available for this result type',
+                    }, span({
+                        class: 'fa fa-shopping-cart',
+                        style: {
+                            margin: '0 4px',
+                            color: 'silver'
+                        }
+                    }));
+                }
             }())
         ]);
     }
@@ -300,6 +323,14 @@ define([
                 td({
                     dataBind: {
                         text: 'item.context.sourceId'
+                    }
+                })
+            ]),
+            tr([
+                th('Accession'),
+                td({
+                    dataBind: {
+                        text: 'item.context.accession'
                     }
                 })
             ]),

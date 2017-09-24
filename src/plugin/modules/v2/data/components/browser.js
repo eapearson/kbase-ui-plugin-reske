@@ -137,7 +137,12 @@ define([
         }
 
         // for now just apply one at a time.
-        var sortingRules = [];
+        var sortingRules = [{
+            is_timestamp: 1,
+            is_object_name: 0,
+            key_name: 'timestamp',
+            descending: 1
+        }];
         if (sortField !== null) {
             sortingRules = [{
                 is_timestamp: sortField.isTimestamp ? 1 : 0,
@@ -183,6 +188,7 @@ define([
         perf.search.start = new Date().getTime();
         return reske.callFunc('search_objects', [param])
             .then(function (result) {
+                console.log('GOT', result);
                 perf.results.start = new Date().getTime();
 
                 // We have the results, now we munge it around to make it more readily displayable.
@@ -538,8 +544,9 @@ define([
                                     object.context = {
                                         type: 'reference',
                                         workspaceName: object.workspaceInfo.name,
-                                        source: object.originalObjectInfo.metadata.Source,
-                                        sourceId: object.originalObjectInfo.metadata['Source ID']
+                                        source: object.currentObjectInfo.metadata.Source,
+                                        sourceId: object.currentObjectInfo.metadata['Source ID'],
+                                        accession: object.currentObjectInfo.metadata.accession
                                     };
                                     // TODO: don't reference workspaces have some metadata to describe
                                 } else {

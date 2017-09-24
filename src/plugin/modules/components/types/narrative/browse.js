@@ -141,7 +141,9 @@ define([
                 }, div({
                     xclass: '-features'
                 }, [
-                    common.buildActions()
+                    common.buildActions({
+                        cart: false
+                    })
                 ]))
             ]),
             // then detail
