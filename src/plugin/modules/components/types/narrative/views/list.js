@@ -54,7 +54,7 @@ define([
             label: 'Name',
             type: 'string',
             width: '50%',
-            action: doOpenDataview,
+            action: doOpenNarrative,
             value: ko.pureComputed(function () {
                 return item.narrative.title;
             })
