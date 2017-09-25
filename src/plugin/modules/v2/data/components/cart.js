@@ -19,6 +19,7 @@ define([
 
     var t = html.tag,
         div = t('div'),
+        a = t('a'),
         span = t('span'),
         p = t('p'),
         label = t('label'),
@@ -35,6 +36,8 @@ define([
 
     function viewModel(params) {
         var runtime = params.runtime;
+
+        var cart = params.cart;
 
         // SUPPORT FUNCTIONS
 
@@ -81,7 +84,8 @@ define([
                     }).map(function (workspaceInfo) {
                         return {
                             ref: workspaceInfo.id + '/' + workspaceInfo.metadata.narrative,
-                            title: workspaceInfo.metadata.narrative_nice_name
+                            title: workspaceInfo.metadata.narrative_nice_name,
+                            narrativeId: 'ws.' + workspaceInfo.id + '.obj.' + workspaceInfo.metadata.narrative
                         };
                     });
                 });
@@ -129,26 +133,23 @@ define([
             params.cart.removeItem(data);
         }
 
+        var writableNarrativesMap;
         var writableNarratives = ko.observableArray();
         var selectedNarrative = ko.observable();
+        var selectedNarrativeInfo = ko.pureComputed(function () {
+            if (selectedNarrative()) {
+                return writableNarrativesMap[selectedNarrative()];
+            }
+        });
 
         function updateWritableNarratives() {
-
+            writableNarrativesMap = {};
             return getWritableNarratives()
                 .then(function (narratives) {
-                    // var narratives = result.objects;
                     writableNarratives(narratives.map(function (narrative) {
-                        // // var m = /^WS:(.*)\/(.*)\/(.*)$/.exec(narrative.guid);
-                        // // var ref = m.slice(1).join('/');
-                        // // var title = narrative.key_props.title;
-                        // // writableNarratives.push({
-                        // //     value: ref,
-                        // //     label: title
-                        // // });
-                        // var selected = false;
-                        // if (selectedNarrative === narrative.ref) {
-                        //     selected = true;
-                        // }
+                        // yes, a cheat ;)
+                        // we store the 
+                        writableNarrativesMap[narrative.ref] = narrative;
                         return {
                             value: narrative.ref,
                             label: narrative.title
@@ -223,7 +224,7 @@ define([
                 newName: newName,
                 isValid: isValid,
                 error: error,
-                doCreate: doCreateNewNarrative
+                doCreate: doCreateNewNarrative,
             };
         }
 
@@ -291,9 +292,10 @@ define([
         }
 
         return {
-            cart: params.cart,
+            cart: cart,
             narratives: writableNarratives,
             selectedNarrative: selectedNarrative,
+            selectedNarrativeInfo: selectedNarrativeInfo,
             newNarrative: NewNarrative(),
             doRemove: doRemove,
             copy: Copy()
@@ -405,6 +407,43 @@ define([
         ]);
     }
 
+    function buildSelectedNarrative() {
+        return div({
+
+        }, [
+            label('Selected Narrative: '),
+            '<!-- ko if: selectedNarrativeInfo() -->',
+            div({
+
+                style: {
+                    border: '1px rgba(226,226,226,0.5) solid',
+                    padding: '6px',
+                    marginBottom: '5px'
+                }
+            }, a({
+                dataBind: {
+                    attr: {
+                        href: '"/narrative/" + selectedNarrativeInfo().narrativeId'
+                    },
+                    text: 'selectedNarrativeInfo().title'
+                },
+                target: '_blank'
+            })),
+            '<!-- /ko -->',
+            '<!-- ko ifnot: selectedNarrativeInfo() -->',
+            div({
+
+                style: {
+                    border: '1px rgba(255, 183, 117,0.5) solid',
+                    padding: '6px',
+                    marginBottom: '5px',
+                    fontStyle: 'italic'
+                }
+            }, 'A Narrative is not yet selectedt. You may copy the items in your cart after selecting or creating a Narrative above.'),
+            '<!-- /ko -->',
+        ]);
+    }
+
     function buildCopyDisplay() {
         return div([
             p([
@@ -416,19 +455,41 @@ define([
                 // }),
                 // ')'
             ]),
+
             p([
                 buildNewNarrativeForm()
             ]),
 
-            button({
+            p(button({
                 class: 'btn btn-primary',
                 dataBind: {
                     disable: '!selectedNarrative() || selectedNarrative().length === 0',
                     click: 'copy.doCopy',
                     text: 'copy.isCopying() ? "Copying..." : "Copy"'
                 }
-            }),
-            div({
+            })),
+
+
+
+            p([
+                span({
+                    dataBind: {
+                        text: 'cart.items().length'
+                    }
+                }), ' data object',
+                span({
+                    dataBind: {
+                        if: 'cart.items().length > 1'
+                    }
+                }, 's'),
+                ' into'
+            ]),
+
+            p([
+                buildSelectedNarrative()
+            ]),
+
+            p({
                 dataBind: {
                     text: 'copy.message'
                 }
