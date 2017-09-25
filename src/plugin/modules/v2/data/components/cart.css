@@ -1,0 +1,28 @@
+.data-cart th,
+.data-cart td {
+    max-width: 0;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.data-cart th:nth-child(1),
+.data-cart td:nth-child(1) {
+    width: 15%;
+}
+
+.data-cart th:nth-child(2),
+.data-cart td:nth-child(2) {
+    width: 40%;
+}
+
+.data-cart th:nth-child(3),
+.data-cart td:nth-child(3) {
+    width: 40%;
+}
+
+.data-cart th:nth-child(4),
+.data-cart td:nth-child(4) {
+    width: 5%;
+    text-align: right;
+}
