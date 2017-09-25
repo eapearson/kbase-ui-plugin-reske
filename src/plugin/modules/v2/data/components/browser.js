@@ -757,7 +757,7 @@ define([
                             }
                         }),
                         '<!-- /ko -->',
-                        '<!-- ko if: isNaN(pageEnd()) -->',
+                        '<!-- ko if: searching() -->',
                         span({
                             style: {
                                 fontSize: '50%',
