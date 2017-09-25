@@ -41,7 +41,7 @@ define([
             // },
             scientificName: object.data.scientific_name,
             taxonomy: taxonomy,
-            dnaSize: object.currentObjectInfo.metadata.size,
+            dnaSize: object.currentObjectInfo.metadata.Size,
             source: object.currentObjectInfo.metadata.Source,
             sourceId: object.currentObjectInfo.metadata['Source Id'],
             accession: object.currentObjectInfo.metadata.accession

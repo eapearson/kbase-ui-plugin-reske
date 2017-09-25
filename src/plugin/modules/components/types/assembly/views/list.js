@@ -12,13 +12,7 @@ define([
     var t = html.tag,
         div = t('div'),
         a = t('a'),
-        span = t('span'),
-        table = t('table'),
-        tr = t('tr'),
-        td = t('td'),
-        th = t('th'),
-        thead = t('thead'),
-        tbody = t('tbody');
+        span = t('span');
 
     function viewModel(params) {
 

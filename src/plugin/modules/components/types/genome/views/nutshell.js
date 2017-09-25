@@ -33,9 +33,9 @@ define([
         // var featureCounts = ko.observable();
         var featureCount = ko.observable();
         var taxonomy = ko.observableArray();
-        var source = ko.observable();
-        var sourceId = ko.observable();
-        var accession = ko.observable();
+        // var source = ko.observable();
+        // var sourceId = ko.observable();
+        // var accession = ko.observable();
         var dnaSize = ko.observable();
 
         var fetching = ko.observable(false);
@@ -80,7 +80,7 @@ define([
                     // source(params.item.genome.source);
                     // sourceId(params.item.genome.sourceId);
                     // accession(params.item.genome.accession);
-                    dnaSize(params.item.dnaSize);
+                    dnaSize(params.item.genome.dnaSize);
                 })
                 .finally(function () {
                     fetching(false);
@@ -167,13 +167,14 @@ define([
                 })
             ]),
             tr([
-                th('DNA Size'),
+                th('DNA Length'),
                 td({
                     dataBind: {
                         typedText: {
                             value: 'dnaSize',
                             type: '"number"',
-                            format: '"0,0"'
+                            format: '"0,0"',
+                            missing: '"n/a"'
                         }
                     }
                 })

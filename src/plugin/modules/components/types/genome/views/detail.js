@@ -15,7 +15,6 @@ define([
         a = t('a'),
         select = t('select'),
         option = t('option'),
-        span = t('span'),
         div = t('div'),
         table = t('table'),
         tr = t('tr'),

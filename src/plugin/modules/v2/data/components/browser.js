@@ -188,7 +188,7 @@ define([
         perf.search.start = new Date().getTime();
         return reske.callFunc('search_objects', [param])
             .then(function (result) {
-                console.log('GOT', result);
+                // console.log('GOT', result);
                 perf.results.start = new Date().getTime();
 
                 // We have the results, now we munge it around to make it more readily displayable.
@@ -757,7 +757,7 @@ define([
                             }
                         }),
                         '<!-- /ko -->',
-                        '<!-- ko if: isNaN(pageEnd()) -->',
+                        '<!-- ko if: searching() -->',
                         span({
                             style: {
                                 fontSize: '50%',

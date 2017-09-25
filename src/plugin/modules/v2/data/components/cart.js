@@ -303,8 +303,7 @@ define([
     function buildCartDisplay() {
         return div({}, [
             table({
-
-                class: 'table table-striped'
+                class: 'table table-striped data-cart'
             }, [
                 tr([
                     // th('Guid'),
@@ -332,11 +331,11 @@ define([
                     }),
                     td({
                         dataBind: {
-                            text: 'meta.narrativeTitle'
+                            text: 'context.narrativeTitle'
                         }
                     }),
                     td(button({
-                        class: 'btn btn-danger btn-sm',
+                        class: 'btn btn-danger btn-xs',
                         dataBind: {
                             click: '$component.doRemove'
                         }
