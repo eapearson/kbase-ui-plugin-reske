@@ -55,7 +55,29 @@ define([
             if (index === 0) {
                 return;
             }
-            var currentTab = tabs()[index - 1];
+            // if not the selected tab, nothing else to do.
+            if (tab !== activeTab()) {
+                return;
+            }
+
+            // If no closable tabs, we go back to the first tab.
+            var currentTab;
+            var totalTabs = tabs().length;
+            var closableTabs = tabs().reduce(function (closableCount, tab) {
+                return closableCount + (tab.closable() ? 1 : 0);
+            }, 0);
+            var nonclosableTabs = totalTabs - closableTabs;
+            if (closableTabs > 0) {
+                // avoid opening up the last unclosable tab if there are closables left.
+                if (index === nonclosableTabs) {
+                    currentTab = tabs()[index + 1];
+                } else {
+                    currentTab = tabs()[index - 1];
+                }
+            } else {
+                currentTab = tabs()[0];
+            }
+
             activateTab(currentTab);
             currentTab.active(true);
         }
