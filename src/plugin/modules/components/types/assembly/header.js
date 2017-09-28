@@ -74,7 +74,7 @@ define([
                 div({
                     dataBind: {
                         component: {
-                            name: '"reske/search/data/type/assembly/view/header"',
+                            name: '"reske-search/data/type/assembly/view/header"',
                             params: {
 
                             }

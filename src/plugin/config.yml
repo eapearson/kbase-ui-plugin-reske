@@ -18,14 +18,14 @@ install:
             module: objectSearchPanel
             id: kb_reskeSearch_objectSearchPanel
             type: factory
-        -
-            module: typeSearchPanel
-            id: kb_reskeSearch_typeSearchPanel
-            type: factory
-        -
-            module: tabtest
-            id: kb_reskeSearch_tabtest
-            type: factory
+        # -
+        #     module: typeSearchPanel
+        #     id: kb_reskeSearch_typeSearchPanel
+        #     type: factory
+        # -
+        #     module: tabtest
+        #     id: kb_reskeSearch_tabtest
+        #     type: factory
         -
             module: v2/narrative/main
             id: kb_reskeSearch_narrativeSearch
@@ -35,164 +35,175 @@ install:
             id: kb_reskeSearch_dataSearch
             type: factory    
     ko-components:
-         # NARRATIVE
+        # knockoutjs components
+        # These are loaded in the ui into a global namespace, mapping "name" to
+        # the module which defines the component.
+        # The name is an arbitrary string as far as knockout is concerned, but we
+        # create a namespace within it.
+        #  Namespace parts are separated by /
+        # The first part is the plugin id
+        # The rest of them are whatever sensible namespacing makes sense for the
+        # given plugin. It could follow the path of the component.
+        #
+        # NARRATIVE
+        #
         -
-            name: reske/narrative/browse
+            name: reske-search/narrative/browse
             module: components/types/narrative/browse
             css: true
         -
-            name: reske/narrative/header
+            name: reske-search/narrative/header
             module: components/types/narrative/header
             css: true
         -
-            name: reske/search/data/type/narrative/view/detail
+            name: reske-search/data/type/narrative/view/detail
             module: components/types/narrative/views/detail
             css: true
         -
-            name: reske/search/data/type/narrative/view/header
+            name: reske-search/data/type/narrative/view/header
             module: components/types/narrative/views/header
             css: true            
         -
-            name: reske/search/data/type/narrative/view/list
+            name: reske-search/data/type/narrative/view/list
             module: components/types/narrative/views/list
             css: true    
         -
-            name: reske/search/data/type/narrative/view/nutshell
+            name: reske-search/data/type/narrative/view/nutshell
             module: components/types/narrative/views/nutshell
             css: true    
         # GENOME
         -
-            name: reske/genome/browse
+            name: reske-search/genome/browse
             module: components/types/genome/browse
             css: true
         -
-            name: reske/genome/header
+            name: reske-search/genome/header
             module: components/types/genome/header
             css: true
         -
-            name: reske/search/data/type/genome/view/detail
+            name: reske-search/data/type/genome/view/detail
             module: components/types/genome/views/detail
             css: true
         -
-            name: reske/search/data/type/genome/view/header
+            name: reske-search/data/type/genome/view/header
             module: components/types/genome/views/header
             css: true            
         # -
-        #     name: reske/search/data/type/genome/view/summary
+        #     name: reske-search/data/type/genome/view/summary
         #     module: components/types/genome/views/summary
         #     css: true    
         -
-            name: reske/search/data/type/genome/view/list
+            name: reske-search/data/type/genome/view/list
             module: components/types/genome/views/list
             css: true    
         -
-            name: reske/search/data/type/genome/view/nutshell
+            name: reske-search/data/type/genome/view/nutshell
             module: components/types/genome/views/nutshell
             css: true    
 
         # ASSEMBLY
         -
-            name: reske/assembly/browse
+            name: reske-search/assembly/browse
             module: components/types/assembly/browse
             css: true
         -
-            name: reske/assembly/header
+            name: reske-search/assembly/header
             module: components/types/assembly/header
             css: true
         -
-            name: reske/search/data/type/assembly/view/detail
+            name: reske-search/data/type/assembly/view/detail
             module: components/types/assembly/views/detail
             css: true
         -
-            name: reske/search/data/type/assembly/view/header
+            name: reske-search/data/type/assembly/view/header
             module: components/types/assembly/views/header
             css: true            
         # -
-        #     name: reske/search/data/type/assembly/view/summary
+        #     name: reske-search/data/type/assembly/view/summary
         #     module: components/types/assembly/views/summary
         #     css: true    
         -
-            name: reske/search/data/type/assembly/view/list
+            name: reske-search/data/type/assembly/view/list
             module: components/types/assembly/views/list
             css: true    
         -
-            name: reske/search/data/type/assembly/view/nutshell
+            name: reske-search/data/type/assembly/view/nutshell
             module: components/types/assembly/views/nutshell
             css: true  
 
         # GENOME FEATURES
         -
-            name: reske/genomeFeature/browse
+            name: reske-search/genomeFeature/browse
             module: components/types/genomeFeature/browse
             css: true
         -
-            name: reske/assemblyContig/browse
+            name: reske-search/assemblyContig/browse
             module: components/types/assemblyContig/browse
             css: true
         -
-            name: reske/pairedEndLibrary/browse
+            name: reske-search/pairedEndLibrary/browse
             module: components/types/pairedEndLibrary/browse
             css: true 
         -
-            name: reske/singleEndLibrary/browse
+            name: reske-search/singleEndLibrary/browse
             module: components/types/singleEndLibrary/browse
             css: true
         -
-            name: reske/help
+            name: reske-search/help
             module: components/help
             css: true      
         -
-            name: reske/error
+            name: reske-search/error
             module: components/error
             css: true
         -
-            name: reske/browser
+            name: reske-search/browser
             module: components/browser
             css: true
         # NARRATIVE
         -
-            name: reske/narrative/search/ui
+            name: reske-search/narrative/search/ui
             module: v2/narrative/components/ui
             css: true
         -
-            name: reske/narrative/search/controls
+            name: reske-search/narrative/search/controls
             module: v2/narrative/components/controls
             css: true
         -
-            name: reske/narrative/search/browser
+            name: reske-search/narrative/search/browser
             module: v2/narrative/components/resultsBrowser
             css: true
         -
-            name: reske/narrative/search/results/list
+            name: reske-search/narrative/search/results/list
             module: v2/narrative/components/resultsList
             css: true      
         -
-            name: reske/narrative/search/results/detail
+            name: reske-search/narrative/search/results/detail
             module: v2/narrative/components/resultsDetail
             css: true 
         # DATA
         -
-            name: reske/data/search/ui
+            name: reske-search/data/search/ui
             module: v2/data/components/ui
             css: true
         -
-            name: reske/data/search/controls
+            name: reske-search/data/search/controls
             module: v2/data/components/controls
             css: true
         -
-            name: reske/data/search/results
+            name: reske-search/data/search/results
             module: v2/data/components/results
             css: true
         -
-            name: reske/data/search/summary
+            name: reske-search/data/search/summary
             module: v2/data/components/summary
             css: true
         -
-            name: reske/data/search/cart
+            name: reske-search/data/search/cart
             module: v2/data/components/cart
             css: true            
         -
-            name: reske/data/search/browser
+            name: reske-search/data/search/browser
             module: v2/data/components/browser
             css: true
         -
@@ -232,37 +243,37 @@ install:
             module: components/types/default/rows/large
             css: false
         -
-            name: reske/type-search/summary
+            name: reske-search/type-search/summary
             module: components/type-search-summary 
             css: true
         -
-            name: reske/type-search
+            name: reske-search/type-search
             module: components/type-search
             css: true
     routes:
         -
-            path: ['reske', 'object-search']
+            path: ['reske-search', 'object-search']
             queryParams:
                 search: {}
                 type: {}
             widget: kb_reskeSearch_objectSearchPanel
             authorization: true
+        # -
+        #     path: ['reske', 'search']
+        #     queryParams:
+        #         search: {}
+        #     widget: kb_reskeSearch_typeSearchPanel
+        #     authorization: true
+        # -
+        #     path: ['reske', 'tabtest']
+        #     widget: kb_reskeSearch_tabtest
+        #     authorization: true
         -
-            path: ['reske', 'search']
-            queryParams:
-                search: {}
-            widget: kb_reskeSearch_typeSearchPanel
-            authorization: true
-        -
-            path: ['reske', 'tabtest']
-            widget: kb_reskeSearch_tabtest
-            authorization: true
-        -
-            path: ['reske', 'search', 'narrative']
+            path: ['reske-search', 'narrative']
             widget: kb_reskeSearch_narrativeSearch
             authorization: true            
         -
-            path: ['reske', 'search', 'data']
+            path: ['reske-search', 'data']
             widget: kb_reskeSearch_dataSearch
             authorization: true            
         # -
@@ -275,26 +286,26 @@ install:
         #     authorization: true
     menu:
         -
-            name: reske-search
+            name: reske-object-search
             definition:
-                path: reske/object-search
-                label: RESKE Object Search
+                path: reske-search/object-search
+                label: Global Search
                 icon: search-plus
-        -
-            name: reske-type-search
-            definition:
-                path: reske/search
-                label: RESKE Search
-                icon: search-plus
+        # -
+        #     name: reske-type-search
+        #     definition:
+        #         path: reske-search/search
+        #         label: RESKE Search
+        #         icon: search-plus
         -
             name: reske-narrative-search
             definition:
-                path: reske/search/narrative
-                label: RESKE Narrative Search
+                path: reske-search/narrative
+                label: Narratives
                 icon: file-o
         -
             name: reske-data-search
             definition:
-                path: reske/search/data
-                label: RESKE Data Search
-                icon: file-o                
+                path: reske-search/data
+                label: Data Search
+                icon: file-o

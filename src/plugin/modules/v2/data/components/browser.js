@@ -207,7 +207,7 @@ define([
 
                     // to allow for template switching - browse/detail.
                     // TODO: not used ?? !!
-                    object.template = 'reske/' + type + '/browse-row';
+                    object.template = 'reske-search/' + type + '/browse-row';
 
                     object.datestring = dateString(new Date(object.timestamp));
 
@@ -588,7 +588,7 @@ define([
                             label: 'Search Error',
                             closable: true,
                             component: {
-                                name: 'reske/error',
+                                name: 'reske-search/error',
                                 params: {
                                     title: 'Search Error',
                                     message: err.message
@@ -853,7 +853,7 @@ define([
             div({
                 dataBind: {
                     component: {
-                        name: '"reske/" + $component.typeDef.uiId + "/header"',
+                        name: '"reske-search/" + $component.typeDef.uiId + "/header"',
                         params: {
                             searchResults: 'searchResults',
                             runtime: 'runtime'
@@ -871,7 +871,7 @@ define([
                         // NB we use the "uiId" here rather than type. This lets us
                         // a. abstract away from the type name requirements to ui name requirements 
 
-                        name: '"reske/" + $component.typeDef.uiId + "/browse"',
+                        name: '"reske-search/" + $component.typeDef.uiId + "/browse"',
                         params: {
                             QE: '$component.QE',
                             item: '$data',

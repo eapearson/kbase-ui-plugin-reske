@@ -26,7 +26,7 @@ define([
                 div({
                     dataBind: {
                         component: {
-                            name: '"reske/narrative/search/controls"',
+                            name: '"reske-search/narrative/search/controls"',
                             params: {
                                 searchVM: 'searchVM'
                             }
@@ -38,7 +38,7 @@ define([
                 div({
                     dataBind: {
                         component: {
-                            name: '"reske/narrative/search/browser"',
+                            name: '"reske-search/narrative/search/browser"',
                             params: {
                                 searchVM: 'searchVM'
                             }

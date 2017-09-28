@@ -74,7 +74,7 @@ define([
                 div({
                     dataBind: {
                         component: {
-                            name: '"reske/search/data/type/genome/view/header"',
+                            name: '"reske-search/data/type/genome/view/header"',
                             params: {
 
                             }

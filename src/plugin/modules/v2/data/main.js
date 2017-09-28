@@ -28,7 +28,7 @@ define([
                 div({
                     dataBind: {
                         component: {
-                            name: '"reske/data/search/ui"',
+                            name: '"reske-search/data/search/ui"',
                             params: {
                                 search: 'searchVM'
                             }
