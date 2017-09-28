@@ -25,7 +25,7 @@ define([
             container.innerHTML = div({
                 dataBind: {
                     component: {
-                        name: '"reske/narrative/search/ui"',
+                        name: '"reske-search/narrative/search/ui"',
                         params: {
                             searchVM: 'searchVM'
                         }

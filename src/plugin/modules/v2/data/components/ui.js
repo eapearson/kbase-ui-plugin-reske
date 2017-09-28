@@ -28,7 +28,7 @@ define([
                 div({
                     dataBind: {
                         component: {
-                            name: '"reske/data/search/controls"',
+                            name: '"reske-search/data/search/controls"',
                             params: {
                                 search: 'search'
                             }

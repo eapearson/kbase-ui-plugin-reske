@@ -33,7 +33,7 @@ define([
                         div({
                             dataBind: {
                                 component: {
-                                    name: '"reske/error"',
+                                    name: '"reske-search/error"',
                                     params: {
                                         title: '"Search Error"',
                                         error: 'error'
@@ -52,7 +52,7 @@ define([
             node.innerHTML = div({
                 dataBind: {
                     component: {
-                        name: '"reske/type-search"',
+                        name: '"reske-search/type-search"',
                         params: {
                             runtime: 'runtime',
                             search: 'search',

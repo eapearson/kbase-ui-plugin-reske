@@ -283,7 +283,7 @@ define([
             div({
                 dataBind: {
                     component: {
-                        name: '"reske/narrative/search/results/" + view()',
+                        name: '"reske-search/narrative/search/results/" + view()',
                         params: {
                             search: 'search'
                         }

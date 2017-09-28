@@ -111,7 +111,7 @@ define([
                     div({
                         dataBind: {
                             component: {
-                                name: '"reske/search/data/type/assembly/view/list"',
+                                name: '"reske-search/data/type/assembly/view/list"',
                                 params: {
                                     item: 'item'
                                 }
@@ -165,7 +165,7 @@ define([
                     div({
                         dataBind: {
                             component: {
-                                name: '"reske/search/data/type/assembly/view/detail"',
+                                name: '"reske-search/data/type/assembly/view/detail"',
                                 params: {
                                     item: 'item',
                                     runtime: 'runtime'

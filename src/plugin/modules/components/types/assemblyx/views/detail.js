@@ -135,7 +135,7 @@ define([
                 }, div({
                     dataBind: {
                         component: {
-                            name: '"reske/search/data/type/genome/view/nutshell"',
+                            name: '"reske-search/data/type/genome/view/nutshell"',
                             params: {
                                 runtime: 'runtime',
                                 item: 'item'

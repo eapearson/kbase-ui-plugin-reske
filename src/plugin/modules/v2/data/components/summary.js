@@ -290,7 +290,7 @@ define([
                 closable: true,
                 active: true,
                 component: {
-                    name: 'reske/data/search/browser',
+                    name: 'reske-search/data/search/browser',
                     params: {
                         // hostedVM: 'hostedVM',
                         // tabVM: {

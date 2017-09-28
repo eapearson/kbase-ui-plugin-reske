@@ -345,7 +345,7 @@ define([
                 label: 'Help',
                 closable: true,
                 component: {
-                    name: 'reske/help',
+                    name: 'reske-search/help',
                     // NB these params are bound here, not in the tabset.
                     params: {
                         title: 'Some Title',
@@ -364,7 +364,7 @@ define([
                 search: searchInput(),
                 type: data.type
             };
-            var url = '/#reske/object-search?' + Object.keys(query).map(function (key) {
+            var url = '/#reske-search/object-search?' + Object.keys(query).map(function (key) {
                 return [key, query[key]].map(encodeURIComponent).join('=');
             }).join('&');
             window.location = url;
@@ -379,7 +379,7 @@ define([
                 tab: {
                     label: 'Search across all types',
                     component: {
-                        name: 'reske/type-search/summary',
+                        name: 'reske-search/type-search/summary',
                         // NB these params are bound here, not in the tabset.
                         params: {
 

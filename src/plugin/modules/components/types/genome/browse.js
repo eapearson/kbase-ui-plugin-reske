@@ -111,7 +111,7 @@ define([
                     div({
                         dataBind: {
                             component: {
-                                name: '"reske/search/data/type/genome/view/list"',
+                                name: '"reske-search/data/type/genome/view/list"',
                                 params: {
                                     item: 'item'
                                 }
@@ -165,7 +165,7 @@ define([
                     div({
                         dataBind: {
                             component: {
-                                name: '"reske/search/data/type/genome/view/detail"',
+                                name: '"reske-search/data/type/genome/view/detail"',
                                 params: {
                                     item: 'item',
                                     runtime: 'runtime'
