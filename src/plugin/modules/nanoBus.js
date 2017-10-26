@@ -1,6 +1,4 @@
-define([
-
-], function () {
+define([], function () {
     function NanoBus() {
         var queue = [];
         var runInterval = 0;
