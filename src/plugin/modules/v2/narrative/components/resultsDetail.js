@@ -22,52 +22,48 @@ define([
             window.open(url + '/narrative/' + data.narrativeId, '_blank');
         }
         var columns = [{
-                name: 'rowNumber',
-                label: '#',
-                type: 'integer',
-                width: '5%',
-                sort: {
-                    direction: 'ascending'
-                }
-            },
-            {
-                name: 'title',
-                label: 'Title',
-                type: 'string',
-                width: '35%',
-                sort: {
-                    direction: 'ascending'
-                },
-                action: doOpenNarrative
-            },
-            {
-                name: 'created',
-                label: 'Created',
-                type: 'string',
-                width: '20%'
-            },
-            {
-                name: 'timestamp',
-                label: 'Last updated',
-                type: 'string',
-                width: '25%',
-                sort: {
-                    direction: 'descending'
-                }
-            },
-
-            // {
-            //     name: 'cellCount',
-            //     type: 'integer',
-            //     width: '25%'
-            // },
-            {
-                name: 'owner',
-                label: 'Owner',
-                type: 'string',
-                width: '15%'
+            name: 'rowNumber',
+            label: '#',
+            type: 'integer',
+            width: '5%',
+            sort: {
+                direction: 'ascending'
             }
-        ];
+        }, {
+            name: 'title',
+            label: 'Title',
+            type: 'string',
+            width: '35%',
+            sort: {
+                direction: 'ascending'
+            },
+            action: doOpenNarrative
+        }, {
+            name: 'created',
+            label: 'Created',
+            type: 'string',
+            width: '20%'
+        }, {
+            name: 'timestamp',
+            label: 'Last updated',
+            type: 'string',
+            width: '25%',
+            sort: {
+                direction: 'descending'
+            }
+        },
+
+        // {
+        //     name: 'cellCount',
+        //     type: 'integer',
+        //     width: '25%'
+        // },
+        {
+            name: 'owner',
+            label: 'Owner',
+            type: 'string',
+            width: '15%'
+        }];
 
         return {
             search: params.search,
