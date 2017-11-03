@@ -443,7 +443,7 @@ define([
                 }, [buildSortControl('owner'), 'Owner']),
                 div({
                     class: [styles.classes.headerCell, styles.classes.shareLevelCell]
-                }, [buildSortControl('shareLevel'), 'Sharing'])
+                }, 'Shared')
             ]),
             div({
                 class: styles.classes.body
