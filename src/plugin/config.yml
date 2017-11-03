@@ -287,5 +287,5 @@ install:
             name: reske-uber-search
             definition:
                 path: reske-search/search
-                label: Search 2
+                label: Simple Search Prototype
                 icon: search
