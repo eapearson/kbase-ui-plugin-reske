@@ -1,11 +1,11 @@
 define([
-    './interfaces/type/narrative',
-    './interfaces/type/genome',
-    './interfaces/type/genomeFeature',
-    './interfaces/type/assembly',
-    './interfaces/type/assemblyContig',
-    './interfaces/type/pairedEndLibrary',
-    './interfaces/type/singleEndLibrary'
+    '../interfaces/type/narrative',
+    '../interfaces/type/genome',
+    '../interfaces/type/genomeFeature',
+    '../interfaces/type/assembly',
+    '../interfaces/type/assemblyContig',
+    '../interfaces/type/pairedEndLibrary',
+    '../interfaces/type/singleEndLibrary'
 ], function (
     narrative,
     genome,
@@ -332,7 +332,8 @@ define([
         resultId: 'PairedEndLibrary',
         label: 'Paired End Library',
         methods: pairedEndLibrary,
-        typeKeys: ['insert_size_mean', 'lib1', 'sequencing_tech'],
+        typeKeys: [], // ['insert_size_mean', 'lib1', 'sequencing_tech'],
+        typeKeyProps: ['files', 'gc_content', 'insert_size', 'phred_type', 'quality', 'read_count', 'read_length', 'technology'],
         searchKeys: [{
             key: 'technology',
             label: 'Sequencing Technology',
@@ -396,6 +397,8 @@ define([
         resultId: 'SingleEndLibrary',
         label: 'Single End Library',
         methods: singleEndLibrary,
+        typeKeys: [], // ['lib1', 'lib2', 'sequencing_tech'],
+        typeKeyProps: ['files', 'gc_content', 'insert_size', 'phred_type', 'quality', 'read_count', 'read_length', 'technology'],
         searchKeys: [{
             key: 'technology',
             label: 'Sequencing Technology',
@@ -488,6 +491,27 @@ define([
                     key = key.substr(0, -1);
                 }
                 var found = (key in value.data);
+                if (!found && optional) {
+                    return true;
+                }
+                return found;
+            })) {
+                return type.id;
+            }
+        }
+        // Try again with typeKeys -- these should be more reliable but they are not
+        // yet set up for all types.
+        for (i = 0; i < objectTypes.length; i += 1) {
+            type = objectTypes[i];
+            // loop through each key and see if in the current values data property.
+            keys = type.typeKeyProps;
+            if (keys.every(function (key) {
+                var optional = false;
+                if (key.substr(-1) === '?') {
+                    optional = true;
+                    key = key.substr(0, -1);
+                }
+                var found = (key in value.key_props);
                 if (!found && optional) {
                     return true;
                 }

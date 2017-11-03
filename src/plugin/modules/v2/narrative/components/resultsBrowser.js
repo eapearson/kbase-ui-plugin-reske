@@ -18,12 +18,12 @@ define([
 
         // View (which way to view the results)
         var views = [{
-                name: 'list',
-                label: 'List'
-            }, {
-                name: 'detail',
-                label: 'Detail'
-            }];
+            name: 'list',
+            label: 'List'
+        }, {
+            name: 'detail',
+            label: 'Detail'
+        }];
 
         var view = ko.observable('list');
 

@@ -40,11 +40,22 @@ define([
             // Otherwise bundle up the object id specs for one request.
             return workspace.callFunc('get_object_info3', [{
                 objects: objectsNeeded.map(function (obj) { return obj.spec; }),
+                ignoreErrors: 1,
                 includeMetadata: 1
             }]).spread(function (result) {
                 result.infos.forEach(function (info, index) {
-                    var object = serviceUtils.objectInfoToObject(info);
                     var ref = objectsNeeded[index].ref;
+                    var object;
+                    if (info === null) {
+                        // object was deleted or user no longer has access to it, 
+                        // in either case, mark it as not found.
+                        object = {
+                            ref: ref,
+                            notfound: true
+                        };
+                    } else {
+                        object = serviceUtils.objectInfoToObject(info);
+                    }
                     // TODO: resolve this - duplicates appearing.
                     if (objectCache.has(ref)) {
                         console.warn('Duplicate object detected: ' + ref);

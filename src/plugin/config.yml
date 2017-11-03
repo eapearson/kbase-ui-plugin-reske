@@ -26,6 +26,11 @@ install:
             module: v2/data/main
             id: kb_reskeSearch_dataSearch
             type: factory
+        -
+            module: v3/panel
+            id: kb_reskeSearch_uberSearch
+            type: factory
+            css: true
     ko-components:
         # knockoutjs components
         # These are loaded in the ui into a global namespace, mapping "name" to
@@ -222,6 +227,23 @@ install:
             name: reske-search/type-search
             module: components/type-search
             css: true
+        # V3
+        -
+            name: reske-search/v3/main
+            module: v3/components/main
+        -
+            name: reske-search/v3/search
+            module: v3/components/search
+        -
+            name: reske-search/v3/browser
+            module: v3/components/browser
+        -
+            name: reske-search/v3/search-result
+            module: v3/components/search-result
+        -
+            name: reske-search/v3/type-filter-control
+            module: v3/components/typeFilterControl
+
     routes:
         -
             path: ['reske-search', 'object-search']
@@ -237,6 +259,10 @@ install:
         -
             path: ['reske-search', 'data']
             widget: kb_reskeSearch_dataSearch
+            authorization: true
+        -
+            path: ['reske-search', 'search']
+            widget: kb_reskeSearch_uberSearch
             authorization: true
     menu:
         -
@@ -257,3 +283,9 @@ install:
                 path: reske-search/data
                 label: Data Search
                 icon: file-o
+        -
+            name: reske-uber-search
+            definition:
+                path: reske-search/search
+                label: Search 2
+                icon: search
