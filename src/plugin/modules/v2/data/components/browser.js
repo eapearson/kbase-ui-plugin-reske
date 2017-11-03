@@ -186,6 +186,8 @@ define([
         });
 
         perf.search.start = new Date().getTime();
+
+        console.log('SEARCH OBJECTS', param);
         return reske.callFunc('search_objects', [param])
             .then(function (result) {
                 // console.log('GOT', result);

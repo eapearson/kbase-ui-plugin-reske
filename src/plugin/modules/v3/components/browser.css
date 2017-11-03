@@ -1,0 +1,29 @@
+/* layout */
+.component_jgi-search_browser {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.component_jgi-search_browser .controls {
+    flex: 0 0 50px;
+}
+
+.component_jgi-search_browser .items {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* bootstrap override */
+
+.component_jgi-search .btn-toolbar {
+    border-bottom: 1px silver solid;
+}
+
+/*style: {*/
+    /*padding: '4px',*/
+    /*marginTop: '10px',*/
+    /*marginBottom: '6px'*/
+
+}
